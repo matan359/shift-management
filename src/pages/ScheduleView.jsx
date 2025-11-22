@@ -117,7 +117,18 @@ export default function ScheduleView() {
   function formatShiftDisplay(shift) {
     const employeeName = getEmployeeName(shift.employeeId)
     const hours = shift.hours || calculateHours(shift.startTime, shift.endTime)
-    return hours ? `${employeeName} (${hours}ש')` : employeeName
+    const timeRange = shift.startTime && shift.endTime 
+      ? `${shift.startTime}-${shift.endTime}` 
+      : ''
+    
+    if (hours && timeRange) {
+      return `${employeeName}\n${timeRange}\n(${hours}ש')`
+    } else if (hours) {
+      return `${employeeName} (${hours}ש')`
+    } else if (timeRange) {
+      return `${employeeName}\n${timeRange}`
+    }
+    return employeeName
   }
 
   function calculateHours(startTime, endTime) {
@@ -311,15 +322,19 @@ export default function ScheduleView() {
                           className={`${getCellClassName(day, category, 'בוקר', isEmpty)} touch-manipulation`}
                         >
                           {shift ? (
-                            <div className="flex items-center justify-between group">
-                              <span className="font-medium text-gray-800 text-xs sm:text-sm">{formatShiftDisplay(shift)}</span>
+                            <div className="flex flex-col items-start justify-between group min-h-[60px]">
+                              <div className="flex-1 w-full">
+                                <div className="font-medium text-gray-800 text-xs sm:text-sm whitespace-pre-line leading-tight">
+                                  {formatShiftDisplay(shift)}
+                                </div>
+                              </div>
                               {isManager && (
                                 <button
                                   onClick={(e) => {
                                     e.stopPropagation()
                                     setEditingCell(shift)
                                   }}
-                                  className="opacity-0 group-hover:opacity-100 sm:opacity-0 transition-opacity p-1 hover:bg-blue-200 rounded touch-manipulation"
+                                  className="opacity-0 group-hover:opacity-100 sm:opacity-0 transition-opacity p-1 hover:bg-blue-200 rounded touch-manipulation mt-1 self-end"
                                 >
                                   <Edit2 className="w-3 h-3 sm:w-4 sm:h-4 text-blue-600" />
                                 </button>

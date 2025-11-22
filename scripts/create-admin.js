@@ -19,9 +19,10 @@ const auth = getAuth(app)
 const db = getFirestore(app)
 
 // פרטי משתמש admin - שנה את זה!
-const adminEmail = 'admin@example.com'
-const adminPassword = 'admin123456'
+const adminEmail = 'matanyou7@gmail.com'
+const adminPassword = '456123'
 const adminName = 'מנהל ראשי'
+const adminPhone = '050-0000000' // עדכן לפי הצורך
 
 async function createAdmin() {
   try {
@@ -47,7 +48,7 @@ async function createAdmin() {
     const adminData = {
       fullName: adminName,
       email: adminEmail,
-      phoneNumber: '',
+      phoneNumber: adminPhone,
       role: 'manager',
       defaultShiftStart: '08:00',
       minShiftsPerWeek: 6,
