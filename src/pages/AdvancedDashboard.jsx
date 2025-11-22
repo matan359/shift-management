@@ -112,15 +112,15 @@ export default function AdvancedDashboard() {
 
   return (
     <div className="animate-fadeIn">
-      <div className="mb-8">
-        <h2 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
+      <div className="mb-6 sm:mb-8 px-2 sm:px-0">
+        <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
           דשבורד מתקדם
         </h2>
-        <p className="text-gray-600">סקירה כללית של המערכת</p>
+        <p className="text-sm sm:text-base text-gray-600">סקירה כללית של המערכת</p>
       </div>
 
       {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
         <StatCard
           title="סה״כ עובדים"
           value={stats.totalEmployees}
@@ -166,16 +166,16 @@ export default function AdvancedDashboard() {
       </div>
 
       {/* Charts and Activity */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
         {/* Weekly Hours Chart */}
-        <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
+        <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 border border-gray-200">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-xl font-semibold text-gray-800 flex items-center">
-              <BarChart3 className="w-5 h-5 ml-2 text-blue-600" />
+            <h3 className="text-lg sm:text-xl font-semibold text-gray-800 flex items-center">
+              <BarChart3 className="w-4 h-4 sm:w-5 sm:h-5 ml-2 text-blue-600" />
               שעות שבועיות
             </h3>
           </div>
-          <div className="h-64 flex items-end justify-between space-x-2 space-x-reverse">
+          <div className="h-48 sm:h-64 flex items-end justify-between space-x-1 sm:space-x-2 space-x-reverse">
             {[40, 35, 45, 38, 42, 40, 35].map((height, index) => (
               <div key={index} className="flex-1 flex flex-col items-center">
                 <div
@@ -191,14 +191,14 @@ export default function AdvancedDashboard() {
         </div>
 
         {/* Recent Activity */}
-        <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
+        <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 border border-gray-200">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-xl font-semibold text-gray-800 flex items-center">
-              <Activity className="w-5 h-5 ml-2 text-green-600" />
+            <h3 className="text-lg sm:text-xl font-semibold text-gray-800 flex items-center">
+              <Activity className="w-4 h-4 sm:w-5 sm:h-5 ml-2 text-green-600" />
               פעילות אחרונה
             </h3>
           </div>
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             {recentActivity.map((activity, index) => {
               const Icon = activity.icon
               return (
@@ -221,9 +221,9 @@ export default function AdvancedDashboard() {
       </div>
 
       {/* Quick Actions */}
-      <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-6 border border-blue-200">
-        <h3 className="text-xl font-semibold text-gray-800 mb-4">פעולות מהירות</h3>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-4 sm:p-6 border border-blue-200">
+        <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-4">פעולות מהירות</h3>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
           <QuickActionButton
             icon={Users}
             label="ניהול עובדים"
@@ -265,19 +265,19 @@ function StatCard({ title, value, icon: Icon, color, trend }) {
   }
 
   return (
-    <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200 transform transition-all duration-300 hover:scale-105 hover:shadow-xl">
-      <div className="flex items-center justify-between mb-4">
-        <div className={`p-3 bg-gradient-to-br ${colorClasses[color]} rounded-lg`}>
-          <Icon className="w-6 h-6 text-white" />
+    <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 border border-gray-200 transform transition-all duration-300 hover:scale-105 hover:shadow-xl">
+      <div className="flex items-center justify-between mb-3 sm:mb-4">
+        <div className={`p-2 sm:p-3 bg-gradient-to-br ${colorClasses[color]} rounded-lg`}>
+          <Icon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
         </div>
         {trend && (
-          <span className="text-sm font-semibold text-green-600 bg-green-100 px-2 py-1 rounded">
+          <span className="text-xs sm:text-sm font-semibold text-green-600 bg-green-100 px-2 py-1 rounded">
             {trend}
           </span>
         )}
       </div>
-      <h3 className="text-sm font-medium text-gray-600 mb-1">{title}</h3>
-      <p className="text-3xl font-bold text-gray-800">{value}</p>
+      <h3 className="text-xs sm:text-sm font-medium text-gray-600 mb-1">{title}</h3>
+      <p className="text-2xl sm:text-3xl font-bold text-gray-800">{value}</p>
     </div>
   )
 }
@@ -293,10 +293,10 @@ function QuickActionButton({ icon: Icon, label, color, href }) {
   return (
     <a
       href={href}
-      className={`${colorClasses[color]} p-4 rounded-lg text-center transition-all duration-200 transform hover:scale-105`}
+      className={`${colorClasses[color]} p-3 sm:p-4 rounded-lg text-center transition-all duration-200 transform hover:scale-105 active:scale-95`}
     >
-      <Icon className="w-6 h-6 mx-auto mb-2" />
-      <p className="text-sm font-medium">{label}</p>
+      <Icon className="w-5 h-5 sm:w-6 sm:h-6 mx-auto mb-1 sm:mb-2" />
+      <p className="text-xs sm:text-sm font-medium">{label}</p>
     </a>
   )
 }
