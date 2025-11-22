@@ -59,11 +59,20 @@ export default function WhatsAppConnection() {
       })
       
       if (!response.ok) {
-        throw new Error(`Server error: ${response.status}`)
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.message || `Server error: ${response.status}`)
       }
       
       const data = await response.json()
-      setStatus(data.status)
+      
+      // Handle error messages from server
+      if (data.error && data.status === 'disconnected') {
+        setError(data.message || data.error)
+        setStatus('disconnected')
+        return
+      }
+      
+      setStatus(data.status || 'disconnected')
 
       if (data.status === 'qr') {
         await loadQRCode()

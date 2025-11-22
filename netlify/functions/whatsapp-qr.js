@@ -21,14 +21,31 @@ exports.handler = async (event, context) => {
 
   try {
     // Get WhatsApp server URL from environment variable
-    const WHATSAPP_SERVER_URL = process.env.WHATSAPP_SERVER_URL || 'https://your-whatsapp-server.railway.app'
+    const WHATSAPP_SERVER_URL = process.env.WHATSAPP_SERVER_URL
+    
+    if (!WHATSAPP_SERVER_URL || WHATSAPP_SERVER_URL === 'https://your-whatsapp-server.railway.app') {
+      return {
+        statusCode: 200,
+        headers,
+        body: JSON.stringify({ 
+          status: 'disconnected',
+          error: 'Server not configured',
+          message: 'WhatsApp server URL not configured. Please set WHATSAPP_SERVER_URL in Netlify environment variables.'
+        })
+      }
+    }
     
     const response = await fetch(`${WHATSAPP_SERVER_URL}/api/whatsapp/qr`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json'
-      }
+      },
+      timeout: 10000
     })
+
+    if (!response.ok) {
+      throw new Error(`Server responded with status ${response.status}`)
+    }
 
     const data = await response.json()
 
@@ -40,11 +57,12 @@ exports.handler = async (event, context) => {
   } catch (error) {
     console.error('Error proxying WhatsApp QR:', error)
     return {
-      statusCode: 500,
+      statusCode: 200, // Return 200 so frontend can handle it
       headers,
       body: JSON.stringify({ 
+        status: 'disconnected',
         error: 'Failed to get QR code',
-        status: 'disconnected'
+        message: error.message || 'Please ensure the WhatsApp server is running on Railway.'
       })
     }
   }
