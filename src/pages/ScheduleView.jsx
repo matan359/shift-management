@@ -220,7 +220,7 @@ export default function ScheduleView() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-4 md:p-8">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-2 sm:p-4 md:p-8">
       <div className="max-w-7xl mx-auto">
         {/* Header with animations */}
         <div className="mb-8 bg-white rounded-2xl shadow-xl p-6 transform transition-all duration-300 hover:shadow-2xl">
