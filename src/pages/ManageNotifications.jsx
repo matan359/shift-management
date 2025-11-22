@@ -1,23 +1,11 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
-import { Bell, Send, Clock, CheckCircle, XCircle } from 'lucide-react'
+import { Bell, Send, Clock, CheckCircle, XCircle, ExternalLink } from 'lucide-react'
 import { getFirebaseDb, getAppId } from '../api/firebase'
 import { collection, onSnapshot, query, where, getDocs } from 'firebase/firestore'
 import { format, parseISO } from 'date-fns'
 import { he } from 'date-fns/locale'
-
-// Use Netlify Functions in production, local server in development
-const getAPIUrl = () => {
-  if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-    return 'http://localhost:3001'
-  }
-  if (window.location.hostname.includes('netlify.app') || window.location.hostname.includes('netlify.com')) {
-    return '' // Use relative path for Netlify Functions
-  }
-  return import.meta.env.VITE_API_URL || 'https://your-whatsapp-server.railway.app'
-}
-
-const API_URL = getAPIUrl()
+import { openWhatsAppChat, sendBulkWhatsAppMessages, createWhatsAppLink } from '../utils/whatsappLink'
 
 export default function ManageNotifications() {
   const { user, db } = useAuth()
