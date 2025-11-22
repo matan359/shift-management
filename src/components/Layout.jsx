@@ -168,7 +168,7 @@ export default function Layout({ children }) {
       </nav>
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-8 animate-fadeIn">
+      <main className="container mx-auto px-2 sm:px-4 py-4 sm:py-8 animate-fadeIn">
         {children}
       </main>
     </div>
