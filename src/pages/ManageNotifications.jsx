@@ -266,22 +266,21 @@ export default function ManageNotifications() {
 
       {/* Results */}
       {results.length > 0 && (
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h3 className="text-xl font-semibold text-gray-800 mb-4">תוצאות שליחה</h3>
+        <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
+          <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-4">חלונות שנפתחו</h3>
           <div className="space-y-2">
             {results.map((result, index) => (
-              <div key={index} className="flex items-center space-x-2 space-x-reverse">
-                {result.sent ? (
-                  <CheckCircle className="w-5 h-5 text-green-600" />
-                ) : (
-                  <XCircle className="w-5 h-5 text-red-600" />
-                )}
-                <span className={result.sent ? 'text-green-700' : 'text-red-700'}>
-                  {result.employee}: {result.sent ? 'נשלח בהצלחה' : 'נכשל'}
+              <div key={index} className="flex items-center space-x-2 space-x-reverse p-2 bg-gray-50 rounded-lg">
+                <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
+                <span className="text-sm text-gray-700">
+                  {result.employeeName || 'עובד'}: חלון WhatsApp נפתח
                 </span>
               </div>
             ))}
           </div>
+          <p className="text-xs text-gray-500 mt-3">
+            💡 כל חלון WhatsApp Web נפתח עם הודעה מוכנה - פשוט לחץ "שלח" בכל חלון
+          </p>
         </div>
       )}
     </div>
