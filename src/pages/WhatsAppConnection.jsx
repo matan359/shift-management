@@ -2,11 +2,24 @@ import { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { Smartphone, CheckCircle, XCircle, RefreshCw, QrCode, Loader2, AlertCircle } from 'lucide-react'
 
-// Use environment variable or try to detect the API URL
-const API_URL = import.meta.env.VITE_API_URL || 
-  (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
-    ? 'http://localhost:3001' 
-    : 'https://your-whatsapp-server.railway.app') // Change this to your WhatsApp server URL
+// Use Netlify Functions in production, local server in development
+const getAPIUrl = () => {
+  // In development, use local server
+  if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+    return 'http://localhost:3001'
+  }
+  
+  // In production (Netlify), use Netlify Functions
+  // Netlify Functions are available at /.netlify/functions/
+  if (window.location.hostname.includes('netlify.app') || window.location.hostname.includes('netlify.com')) {
+    return '' // Use relative path for Netlify Functions
+  }
+  
+  // Fallback to environment variable or external server
+  return import.meta.env.VITE_API_URL || 'https://your-whatsapp-server.railway.app'
+}
+
+const API_URL = getAPIUrl()
 
 export default function WhatsAppConnection() {
   const [status, setStatus] = useState('disconnected')
@@ -33,7 +46,12 @@ export default function WhatsAppConnection() {
   async function checkStatus() {
     try {
       setError(null)
-      const response = await fetch(`${API_URL}/api/whatsapp/status`, {
+      // Use Netlify Functions in production
+      const url = API_URL 
+        ? `${API_URL}/api/whatsapp/status`
+        : '/.netlify/functions/whatsapp-status'
+      
+      const response = await fetch(url, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json'
@@ -68,7 +86,12 @@ export default function WhatsAppConnection() {
   async function loadQRCode() {
     try {
       setError(null)
-      const response = await fetch(`${API_URL}/api/whatsapp/qr`, {
+      // Use Netlify Functions in production
+      const url = API_URL 
+        ? `${API_URL}/api/whatsapp/qr`
+        : '/.netlify/functions/whatsapp-qr'
+      
+      const response = await fetch(url, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json'
