@@ -10,6 +10,10 @@ export default function SwapShifts() {
   const { user, db } = useAuth()
   const [myShifts, setMyShifts] = useState([])
   const [swapRequests, setSwapRequests] = useState([])
+  const [employees, setEmployees] = useState([])
+  const [showSwapModal, setShowSwapModal] = useState(false)
+  const [selectedShift, setSelectedShift] = useState(null)
+  const [selectedEmployee, setSelectedEmployee] = useState('')
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
