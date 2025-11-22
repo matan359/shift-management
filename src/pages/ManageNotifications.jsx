@@ -111,61 +111,41 @@ export default function ManageNotifications() {
   async function sendAllNotifications() {
     if (!db || !user) return
 
+    const recipients = todayShifts.map(shift => {
+      const employee = employees.find(emp => emp.id === shift.employeeId)
+      if (employee && employee.phoneNumber) {
+        const message = formatShiftMessage(employee, shift, tasks)
+        return { phoneNumber: employee.phoneNumber, message, employeeName: employee.fullName }
+      }
+      return null
+    }).filter(r => r !== null)
+
+    if (recipients.length === 0) {
+      alert('אין עובדים עם מספרי טלפון למשמרות היום')
+      return
+    }
+
+    // בדיקה אם המשתמש רוצה לשלוח
+    const confirmMessage = `האם לפתוח ${recipients.length} חלונות WhatsApp לשליחת הודעות?\n\nשים לב: ייתכן שדפדפן יבקש אישור לפתיחת חלונות מרובים.`
+    if (!confirm(confirmMessage)) {
+      return
+    }
+
     setSending(true)
     setResults([])
 
     try {
-      // Check WhatsApp connection status
-      const statusResponse = await fetch(`${API_URL}/api/whatsapp/status`)
-      const statusData = await statusResponse.json()
+      // פתיחת חלונות WhatsApp Web - פתרון פשוט ומהיר!
+      await sendBulkWhatsAppMessages(recipients, 500) // השהיה של 500ms בין הודעות
       
-      if (statusData.status !== 'ready') {
-        alert('WhatsApp לא מחובר. אנא התחבר תחילה בדף "התחברות WhatsApp"')
-        setSending(false)
-        return
-      }
-
-      // Prepare messages for all employees with shifts today
-      const recipients = todayShifts.map(shift => {
-        const employee = employees.find(emp => emp.id === shift.employeeId)
-        if (!employee || !employee.phoneNumber) {
-          return null
-        }
-        
-        const message = formatShiftMessage(employee, shift, tasks)
-        return {
-          phoneNumber: employee.phoneNumber,
-          message: message
-        }
-      }).filter(r => r !== null)
-
-      if (recipients.length === 0) {
-        alert('אין עובדים עם מספרי טלפון למשמרות היום')
-        setSending(false)
-        return
-      }
-
-      // Send bulk messages
-      const url = API_URL 
-        ? `${API_URL}/api/whatsapp/send-bulk`
-        : '/.netlify/functions/whatsapp-send-bulk'
+      setResults(recipients.map(r => ({ 
+        phoneNumber: r.phoneNumber, 
+        success: true,
+        employeeName: r.employeeName,
+        sent: true
+      })))
       
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ recipients })
-      })
-
-      const data = await response.json()
-      
-      if (data.success) {
-        setResults(data.results)
-        alert(`נשלחו ${data.sent} הודעות, ${data.failed} נכשלו`)
-      } else {
-        alert('שגיאה בשליחת ההודעות')
-      }
+      alert(`נפתחו ${recipients.length} חלונות WhatsApp לשליחת הודעות!\n\nשים לב: ייתכן שדפדפן יבקש אישור לפתיחת חלונות מרובים.`)
     } catch (error) {
       console.error('Error sending notifications:', error)
       alert('שגיאה בשליחת ההודעות: ' + error.message)
@@ -174,7 +154,7 @@ export default function ManageNotifications() {
     }
   }
 
-  async function sendToEmployee(shift) {
+  function sendToEmployee(shift) {
     if (!db || !user) return
 
     const employee = employees.find(emp => emp.id === shift.employeeId)
@@ -183,48 +163,10 @@ export default function ManageNotifications() {
       return
     }
 
-    setSending(true)
-    try {
-      // Check WhatsApp connection
-      const statusResponse = await fetch(`${API_URL}/api/whatsapp/status`)
-      const statusData = await statusResponse.json()
-      
-      if (statusData.status !== 'ready') {
-        alert('WhatsApp לא מחובר. אנא התחבר תחילה.')
-        setSending(false)
-        return
-      }
-
-      const message = formatShiftMessage(employee, shift, tasks)
-      
-      const url = API_URL 
-        ? `${API_URL}/api/whatsapp/send`
-        : '/.netlify/functions/whatsapp-send'
-      
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          phoneNumber: employee.phoneNumber,
-          message: message
-        })
-      })
-
-      const data = await response.json()
-      
-      if (data.success) {
-        alert(`הודעה נשלחה ל-${employee.fullName}`)
-      } else {
-        alert('שגיאה בשליחת ההודעה: ' + (data.error || 'Unknown error'))
-      }
-    } catch (error) {
-      console.error('Error sending message:', error)
-      alert('שגיאה בשליחת ההודעה: ' + error.message)
-    } finally {
-      setSending(false)
-    }
+    const message = formatShiftMessage(employee, shift, tasks)
+    
+    // פתיחת חלון WhatsApp Web - פתרון פשוט ומהיר!
+    openWhatsAppChat(employee.phoneNumber, message)
   }
 
   function getEmployeeName(employeeId) {
@@ -242,28 +184,28 @@ export default function ManageNotifications() {
         <button
           onClick={sendAllNotifications}
           disabled={sending || todayShifts.length === 0}
-          className="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-6 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2 space-x-reverse"
+          className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold py-3 px-6 rounded-xl transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg disabled:transform-none flex items-center space-x-2 space-x-reverse touch-manipulation active:scale-95"
         >
           <Send className="w-5 h-5" />
-          <span>{sending ? 'שולח...' : 'שלח לכולם'}</span>
+          <span>{sending ? 'פותח חלונות...' : 'שלח הכל דרך WhatsApp'}</span>
         </button>
       </div>
 
-      {/* WhatsApp Connection Info */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-        <h3 className="font-semibold text-blue-800 mb-2">התחברות WhatsApp:</h3>
-        <p className="text-sm text-blue-700 mb-2">
-          כדי לשלוח הודעות, צריך להתחבר ל-WhatsApp שלך דרך QR Code.
-        </p>
-        <a 
-          href="/whatsapp-connection" 
-          className="text-blue-600 hover:text-blue-800 underline font-semibold"
-        >
-          לך לדף התחברות WhatsApp →
-        </a>
-        <p className="text-xs text-blue-600 mt-2">
-          הערה: ודא שהשרת רץ על פורט 3001. ההתחברות נשמרת אוטומטית.
-        </p>
+      {/* WhatsApp Info */}
+      <div className="bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 rounded-xl p-4 sm:p-6 mb-6">
+        <div className="flex items-start space-x-3 space-x-reverse">
+          <CheckCircle className="w-6 h-6 text-green-600 flex-shrink-0 mt-1" />
+          <div>
+            <h3 className="font-semibold text-green-800 mb-2 text-base sm:text-lg">פתרון WhatsApp פשוט ומהיר! 🚀</h3>
+            <p className="text-sm text-green-700 mb-2">
+              כל לחיצה על "פתח WhatsApp" פותחת חלון WhatsApp Web עם הודעה מוכנה. 
+              פשוט לחץ "שלח" ב-WhatsApp Web - זה הכל!
+            </p>
+            <p className="text-xs text-green-600 mt-2">
+              💡 אין צורך בשרת חיצוני או QR Code - עובד מיד!
+            </p>
+          </div>
+        </div>
       </div>
 
       {/* Today's Shifts */}
@@ -292,11 +234,11 @@ export default function ManageNotifications() {
                   </div>
                   <button
                     onClick={() => sendToEmployee(shift)}
-                    disabled={sending || !employee?.phoneNumber}
-                    className="bg-blue-600 hover:bg-blue-700 text-white text-sm py-2 px-4 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2 space-x-reverse"
+                    disabled={!employee?.phoneNumber}
+                    className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white text-sm py-2 px-4 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2 space-x-reverse touch-manipulation active:scale-95 shadow-md"
                   >
-                    <Send className="w-4 h-4" />
-                    <span>שלח הודעה</span>
+                    <ExternalLink className="w-4 h-4" />
+                    <span>פתח WhatsApp</span>
                   </button>
                 </div>
               )
