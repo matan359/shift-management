@@ -25,7 +25,7 @@ export default function CreateFirstAdmin() {
     setLoading(true)
 
     try {
-      if (!db || !auth || !auth.currentUser) {
+      if (!db || !auth) {
         throw new Error('Firebase לא מאותחל. אנא רענן את הדף.')
       }
 

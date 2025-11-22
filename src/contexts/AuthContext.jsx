@@ -35,6 +35,11 @@ export function AuthProvider({ children }) {
     async function initialize() {
       try {
         const { auth: authInstance, db: dbInstance } = await initFirebase()
+        
+        if (!authInstance || !dbInstance) {
+          throw new Error('Firebase initialization failed')
+        }
+        
         setAuth(authInstance)
         setDb(dbInstance)
 
@@ -58,11 +63,19 @@ export function AuthProvider({ children }) {
           setLoading(false)
         })
 
+        // Set loading to false immediately if no user is logged in
+        // (onAuthStateChanged will fire immediately with null if no user)
+        if (!authInstance.currentUser) {
+          setLoading(false)
+        }
+
         return () => unsubscribe()
       } catch (error) {
         console.error('Initialization error:', error)
         // Set loading to false even on error so app can render
         setUser(null)
+        setAuth(null)
+        setDb(null)
         setLoading(false)
       }
     }
