@@ -371,7 +371,7 @@ export default function ScheduleView() {
                 {/* Evening section */}
                 {EVENING_CATEGORIES.map((category) => (
                   <tr key={`evening-${category}`} className="hover:bg-orange-50 transition-colors">
-                    <td className="bg-gradient-to-r from-orange-100 to-orange-200 font-bold px-6 py-4 border-r border-gray-300 text-sm shadow-inner">
+                    <td className="bg-gradient-to-r from-orange-100 to-orange-200 font-bold px-3 sm:px-6 py-3 sm:py-4 border-r border-gray-300 text-xs sm:text-sm shadow-inner">
                       {category}
                     </td>
                     {weekDays.map((day, dayIndex) => {
@@ -381,27 +381,31 @@ export default function ScheduleView() {
                         <td
                           key={`evening-${category}-${dayIndex}`}
                           onClick={() => handleCellClick(day, category, 'ערב')}
-                          className={getCellClassName(day, category, 'ערב', isEmpty)}
+                          className={`${getCellClassName(day, category, 'ערב', isEmpty)} touch-manipulation`}
                         >
                           {shift ? (
-                            <div className="flex items-center justify-between group">
-                              <span className="font-medium text-gray-800">{formatShiftDisplay(shift)}</span>
+                            <div className="flex flex-col items-start justify-between group min-h-[60px]">
+                              <div className="flex-1 w-full">
+                                <div className="font-medium text-gray-800 text-xs sm:text-sm whitespace-pre-line leading-tight">
+                                  {formatShiftDisplay(shift)}
+                                </div>
+                              </div>
                               {isManager && (
                                 <button
                                   onClick={(e) => {
                                     e.stopPropagation()
                                     setEditingCell(shift)
                                   }}
-                                  className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-orange-200 rounded"
+                                  className="opacity-0 group-hover:opacity-100 sm:opacity-0 transition-opacity p-1 hover:bg-orange-200 rounded touch-manipulation mt-1 self-end"
                                 >
-                                  <Edit2 className="w-4 h-4 text-orange-600" />
+                                  <Edit2 className="w-3 h-3 sm:w-4 sm:h-4 text-orange-600" />
                                 </button>
                               )}
                             </div>
                           ) : (
                             isManager && (
                               <div className="flex items-center justify-center text-gray-400">
-                                <Plus className="w-5 h-5" />
+                                <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
                               </div>
                             )
                           )}
