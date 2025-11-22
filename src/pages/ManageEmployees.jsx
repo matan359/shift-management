@@ -187,7 +187,8 @@ export default function ManageEmployees() {
       </div>
 
       <div className="bg-white rounded-lg shadow-md overflow-hidden">
-        <table className="w-full">
+        <div className="overflow-x-auto -mx-2 sm:mx-0">
+          <table className="w-full min-w-[800px]">
           <thead className="bg-gray-100">
             <tr>
               <th className="px-6 py-3 text-right text-sm font-semibold text-gray-700">שם מלא</th>
@@ -203,39 +204,39 @@ export default function ManageEmployees() {
           <tbody className="divide-y divide-gray-200">
             {employees.map((employee) => (
               <tr key={employee.id} className="hover:bg-gray-50">
-                <td className="px-6 py-4 text-sm font-medium text-gray-900">{employee.fullName}</td>
-                <td className="px-6 py-4 text-sm text-gray-600">{employee.email || '-'}</td>
-                <td className="px-6 py-4 text-sm text-gray-600">{employee.phoneNumber || '-'}</td>
-                <td className="px-6 py-4 text-sm text-gray-600">
+                <td className="px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm font-medium text-gray-900">{employee.fullName}</td>
+                <td className="px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm text-gray-600 break-all">{employee.email || '-'}</td>
+                <td className="px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm text-gray-600">{employee.phoneNumber || '-'}</td>
+                <td className="px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm text-gray-600">
                   <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
                     employee.role === 'manager' ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'
                   }`}>
                     {employee.role === 'manager' ? 'מנהל' : 'עובד'}
                   </span>
                 </td>
-                <td className="px-6 py-4 text-sm text-gray-600">{employee.category || '-'}</td>
-                <td className="px-6 py-4 text-sm text-gray-600">{employee.defaultShiftStart || '-'}</td>
-                <td className="px-6 py-4 text-sm text-gray-600">{employee.minShiftsPerWeek || 6}</td>
-                <td className="px-6 py-4 text-sm">
+                <td className="px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm text-gray-600">{employee.category || '-'}</td>
+                <td className="px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm text-gray-600">{employee.defaultShiftStart || '-'}</td>
+                <td className="px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm text-gray-600">{employee.minShiftsPerWeek || 6}</td>
+                <td className="px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm">
                   <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
                     employee.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                   }`}>
                     {employee.isActive ? 'פעיל' : 'לא פעיל'}
                   </span>
                 </td>
-                <td className="px-6 py-4 text-sm">
+                <td className="px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm">
                   <div className="flex items-center space-x-2 space-x-reverse">
                     <button
                       onClick={() => openEditModal(employee)}
-                      className="text-blue-600 hover:text-blue-900"
+                      className="text-blue-600 hover:text-blue-900 touch-manipulation p-1 active:scale-95"
                     >
-                      <Edit className="w-4 h-4" />
+                      <Edit className="w-4 h-4 sm:w-5 sm:h-5" />
                     </button>
                     <button
                       onClick={() => handleDelete(employee.id)}
-                      className="text-red-600 hover:text-red-900"
+                      className="text-red-600 hover:text-red-900 touch-manipulation p-1 active:scale-95"
                     >
-                      <Trash2 className="w-4 h-4" />
+                      <Trash2 className="w-4 h-4 sm:w-5 sm:h-5" />
                     </button>
                   </div>
                 </td>
@@ -243,14 +244,15 @@ export default function ManageEmployees() {
             ))}
           </tbody>
         </table>
+        </div>
       </div>
 
       {/* Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-4 sm:p-6 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-2xl font-bold text-gray-800">
+              <h3 className="text-xl sm:text-2xl font-bold text-gray-800">
                 {editingEmployee ? 'ערוך עובד' : 'הוסף עובד חדש'}
               </h3>
               <button onClick={() => setShowModal(false)} className="text-gray-500 hover:text-gray-700">

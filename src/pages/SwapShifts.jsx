@@ -205,15 +205,15 @@ export default function SwapShifts() {
 
   return (
     <div>
-      <div className="mb-6">
-        <h2 className="text-3xl font-bold text-gray-800 mb-2">החלפת משמרות</h2>
-        <p className="text-gray-600">בקש להחליף משמרת או אישר בקשות החלפה</p>
+      <div className="mb-4 sm:mb-6 px-2 sm:px-0">
+        <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-2">החלפת משמרות</h2>
+        <p className="text-sm sm:text-base text-gray-600">בקש להחליף משמרת או אישר בקשות החלפה</p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 px-2 sm:px-0">
         {/* My Shifts */}
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h3 className="text-xl font-semibold text-gray-800 mb-4">המשמרות שלי</h3>
+        <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
+          <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-4">המשמרות שלי</h3>
           {myShifts.length === 0 ? (
             <p className="text-gray-500">אין משמרות קרובות</p>
           ) : (
@@ -233,10 +233,11 @@ export default function SwapShifts() {
                     <button
                       onClick={() => openSwapModal(shift)}
                       disabled={loading}
-                      className="bg-blue-600 hover:bg-blue-700 text-white text-sm py-2 px-4 rounded-lg transition disabled:opacity-50"
+                      className="bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm py-2 px-3 sm:px-4 rounded-lg transition disabled:opacity-50 touch-manipulation active:scale-95"
                     >
                       <RefreshCw className="w-4 h-4 inline ml-1" />
-                      בקש החלפה
+                      <span className="hidden sm:inline">בקש החלפה</span>
+                      <span className="sm:hidden">החלף</span>
                     </button>
                   </div>
                 </div>
@@ -246,8 +247,8 @@ export default function SwapShifts() {
         </div>
 
         {/* Swap Requests */}
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h3 className="text-xl font-semibold text-gray-800 mb-4">בקשות החלפה</h3>
+        <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
+          <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-4">בקשות החלפה</h3>
           {swapRequests.length === 0 ? (
             <p className="text-gray-500">אין בקשות החלפה</p>
           ) : (
@@ -311,9 +312,9 @@ export default function SwapShifts() {
       {/* Swap Modal */}
       {showSwapModal && selectedShift && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-4 sm:p-6 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-2xl font-bold text-gray-800">בקש החלפת משמרת</h3>
+              <h3 className="text-xl sm:text-2xl font-bold text-gray-800">בקש החלפת משמרת</h3>
               <button onClick={() => setShowSwapModal(false)} className="text-gray-500 hover:text-gray-700">
                 <X className="w-6 h-6" />
               </button>
@@ -344,17 +345,17 @@ export default function SwapShifts() {
               </select>
             </div>
 
-            <div className="flex space-x-4 space-x-reverse">
+            <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 space-x-0 sm:space-x-4 space-x-reverse gap-2 sm:gap-0">
               <button
                 onClick={requestSwap}
                 disabled={loading || !selectedEmployee}
-                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition disabled:opacity-50"
+                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 sm:py-2 px-4 rounded-lg transition disabled:opacity-50 touch-manipulation active:scale-95"
               >
                 שלח בקשה
               </button>
               <button
                 onClick={() => setShowSwapModal(false)}
-                className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded-lg transition"
+                className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-3 sm:py-2 px-4 rounded-lg transition touch-manipulation active:scale-95"
               >
                 ביטול
               </button>
