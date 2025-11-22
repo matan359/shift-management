@@ -1,0 +1,59 @@
+═══════════════════════════════════════════════════════════════
+  מדריך העלאה ל-Netlify - שלבים פשוטים
+═══════════════════════════════════════════════════════════════
+
+שלב 1: דחיפה ל-GitHub
+───────────────────────
+
+1. לך ל-github.com והתחבר
+2. לחץ על "+" → "New repository"
+3. שם: shift-management
+4. אל תסמן "Initialize with README"
+5. לחץ "Create repository"
+
+6. בטרמינל שלך, הרץ:
+   
+   git add .
+   git commit -m "Initial commit"
+   git remote add origin https://github.com/YOUR_USERNAME/shift-management.git
+   git branch -M main
+   git push -u origin main
+
+   (החלף YOUR_USERNAME עם שם המשתמש שלך ב-GitHub)
+
+
+שלב 2: העלאה ל-Netlify
+────────────────────────
+
+1. לך ל-netlify.com והתחבר
+2. לחץ "Add new site" → "Import an existing project"
+3. בחר "GitHub" והרשאה
+4. בחר את הפרויקט shift-management
+5. הגדר:
+   - Build command: npm run build
+   - Publish directory: dist
+6. לחץ "Deploy site"
+
+7. הוסף משתני סביבה (Site settings → Environment variables):
+   VITE_FIREBASE_API_KEY = AIzaSyBJMOoT-m-TyiSVzCJcin60A5pog464NeU
+   VITE_FIREBASE_AUTH_DOMAIN = shif-2430b.firebaseapp.com
+   VITE_FIREBASE_PROJECT_ID = shif-2430b
+   VITE_FIREBASE_STORAGE_BUCKET = shif-2430b.firebasestorage.app
+   VITE_FIREBASE_MESSAGING_SENDER_ID = 904069677490
+   VITE_FIREBASE_APP_ID = 1:904069677490:web:3bb0123baaad6e620424ab
+
+8. לחץ "Redeploy" כדי שהשינויים ייכנסו לתוקף
+
+
+שלב 3: בדיקות
+──────────────
+
+✅ בדוק שהאפליקציה נטענת
+✅ בדוק כניסה/יציאה
+✅ בדוק קריאות ל-Firebase
+
+
+═══════════════════════════════════════════════════════════════
+  האפליקציה תהיה זמינה ב: https://your-app-name.netlify.app
+═══════════════════════════════════════════════════════════════
+
