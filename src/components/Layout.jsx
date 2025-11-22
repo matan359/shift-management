@@ -35,6 +35,9 @@ export default function Layout({ children }) {
             <div className="hidden md:flex items-center space-x-6 space-x-reverse">
               {isManager && (
                 <>
+                  <Link to="/advanced-dashboard" className="hover:text-blue-200 transition">
+                    דשבורד
+                  </Link>
                   <Link to="/manager" className="hover:text-blue-200 transition">
                     לוח בקרה
                   </Link>

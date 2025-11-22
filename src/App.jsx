@@ -15,6 +15,8 @@ import WhatsAppConnection from './pages/WhatsAppConnection'
 import SystemAnnouncements from './pages/SystemAnnouncements'
 import SpecialDaysAlerts from './pages/SpecialDaysAlerts'
 import ShiftNotes from './pages/ShiftNotes'
+import AdvancedDashboard from './pages/AdvancedDashboard'
+import AttendanceTracking from './pages/AttendanceTracking'
 import Layout from './components/Layout'
 
 function PrivateRoute({ children, requiredRole }) {
@@ -167,6 +169,22 @@ function AppRoutes() {
         <PrivateRoute>
           <Layout>
             <ShiftNotes />
+          </Layout>
+        </PrivateRoute>
+      } />
+
+      <Route path="/advanced-dashboard" element={
+        <PrivateRoute requiredRole="manager">
+          <Layout>
+            <AdvancedDashboard />
+          </Layout>
+        </PrivateRoute>
+      } />
+
+      <Route path="/attendance" element={
+        <PrivateRoute>
+          <Layout>
+            <AttendanceTracking />
           </Layout>
         </PrivateRoute>
       } />
