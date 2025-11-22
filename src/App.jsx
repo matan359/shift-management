@@ -56,6 +56,7 @@ function AppRoutes() {
   return (
     <Routes>
       <Route path="/login" element={!user || user.role === 'anonymous' ? <Login /> : <Navigate to={user.role === 'manager' ? '/manager' : '/worker'} />} />
+      <Route path="/register" element={!user || user.role === 'anonymous' ? <Register /> : <Navigate to={user.role === 'manager' ? '/manager' : '/worker'} />} />
       
       <Route path="/" element={
         <PrivateRoute>

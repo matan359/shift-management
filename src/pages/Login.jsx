@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { Lock, Mail, AlertCircle } from 'lucide-react'
 
@@ -39,8 +39,8 @@ export default function Login() {
         </div>
 
         {error && (
-          <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg flex items-center space-x-2 space-x-reverse">
-            <AlertCircle className="w-5 h-5" />
+          <div className="mb-4 p-3 bg-red-100 border-2 border-red-400 text-red-700 rounded-lg flex items-center space-x-2 space-x-reverse">
+            <AlertCircle className="w-5 h-5 flex-shrink-0" />
             <span>{error}</span>
           </div>
         )}
@@ -84,6 +84,15 @@ export default function Login() {
             {loading ? 'מתחבר...' : 'התחבר'}
           </button>
         </form>
+
+        <div className="mt-6 text-center">
+          <p className="text-sm text-gray-600">
+            אין לך חשבון?{' '}
+            <Link to="/register" className="text-blue-600 hover:text-blue-800 font-semibold underline">
+              הירשם כאן
+            </Link>
+          </p>
+        </div>
       </div>
     </div>
   )

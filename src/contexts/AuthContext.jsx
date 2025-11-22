@@ -6,6 +6,7 @@ import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   onAuthStateChanged,
+  sendEmailVerification,
   signOut as firebaseSignOut 
 } from 'firebase/auth'
 import { 
@@ -148,10 +149,17 @@ export function AuthProvider({ children }) {
         throw new Error('חשבון זה אינו פעיל')
       }
 
+      // Check if email is verified (optional - can be enforced)
+      if (firebaseUser.emailVerified === false && userData.role === 'worker') {
+        // Allow login but show warning - or enforce verification
+        console.warn('Email not verified for worker')
+      }
+
       // Store user data in context (loadUserData will be called by onAuthStateChanged)
       setUser({
         id: userDoc.id,
         uid: firebaseUser.uid,
+        emailVerified: firebaseUser.emailVerified,
         ...userData
       })
 
