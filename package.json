@@ -8,7 +8,8 @@
     "preview": "vite preview",
     "deploy": "npm run build && firebase deploy --only hosting",
     "server": "cd server && npm start",
-    "server:dev": "cd server && npm run dev"
+    "server:dev": "cd server && npm run dev",
+    "create-admin": "node scripts/create-admin.js"
   },
   "dependencies": {
     "react": "^18.2.0",

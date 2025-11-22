@@ -14,7 +14,6 @@ import WhatsAppConnection from './pages/WhatsAppConnection'
 import SystemAnnouncements from './pages/SystemAnnouncements'
 import SpecialDaysAlerts from './pages/SpecialDaysAlerts'
 import ShiftNotes from './pages/ShiftNotes'
-import CreateFirstAdmin from './pages/CreateFirstAdmin'
 import Layout from './components/Layout'
 
 function PrivateRoute({ children, requiredRole }) {
@@ -169,8 +168,6 @@ function AppRoutes() {
           </Layout>
         </PrivateRoute>
       } />
-
-      <Route path="/create-admin" element={<CreateFirstAdmin />} />
     </Routes>
   )
 }

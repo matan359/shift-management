@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
-import { Lock, User, AlertCircle } from 'lucide-react'
+import { Lock, Mail, AlertCircle } from 'lucide-react'
 
 export default function Login() {
   const [email, setEmail] = useState('')
@@ -45,16 +45,10 @@ export default function Login() {
           </div>
         )}
 
-        <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-          <p className="text-sm text-blue-800">
-            <strong>משתמש ראשון?</strong> <a href="/create-admin" className="underline">צור משתמש מנהל</a>
-          </p>
-        </div>
-
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              <User className="w-4 h-4 inline ml-1" />
+              <Mail className="w-4 h-4 inline ml-1" />
               אימייל
             </label>
             <input
