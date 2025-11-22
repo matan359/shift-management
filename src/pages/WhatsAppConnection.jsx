@@ -154,17 +154,17 @@ export default function WhatsAppConnection() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-4 md:p-8">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-2 sm:p-4 md:p-8">
       <div className="max-w-4xl mx-auto">
-        <div className="mb-8 bg-white rounded-2xl shadow-xl p-6 transform transition-all duration-300">
-          <h2 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
+        <div className="mb-4 sm:mb-8 bg-white rounded-2xl shadow-xl p-4 sm:p-6 transform transition-all duration-300">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
             התחברות WhatsApp
           </h2>
-          <p className="text-gray-600">התחבר ל-WhatsApp שלך כדי לשלוח הודעות לעובדים</p>
+          <p className="text-sm sm:text-base text-gray-600">התחבר ל-WhatsApp שלך כדי לשלוח הודעות לעובדים</p>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-2xl p-6 mb-6">
-          <div className="flex items-center justify-between mb-6">
+        <div className="bg-white rounded-2xl shadow-2xl p-4 sm:p-6 mb-4 sm:mb-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 sm:mb-6 gap-4">
             <div className="flex items-center space-x-3 space-x-reverse">
               <div className="p-3 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl">
                 <Smartphone className="w-8 h-8 text-white" />

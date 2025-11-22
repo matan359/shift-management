@@ -24,11 +24,11 @@ export default function Layout({ children }) {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
       {/* Navigation Bar */}
       <nav className="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 text-white shadow-2xl sticky top-0 z-50 backdrop-blur-lg bg-opacity-90">
-        <div className="container mx-auto px-4 py-3">
+        <div className="container mx-auto px-2 sm:px-4 py-2 sm:py-3">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4 space-x-reverse">
-              <Calendar className="w-6 h-6" />
-              <h1 className="text-xl font-bold">מערכת ניהול משמרות</h1>
+            <div className="flex items-center space-x-2 sm:space-x-4 space-x-reverse">
+              <Calendar className="w-5 h-5 sm:w-6 sm:h-6" />
+              <h1 className="text-base sm:text-xl font-bold">מערכת ניהול משמרות</h1>
             </div>
 
             {/* Desktop Menu */}

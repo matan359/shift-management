@@ -240,22 +240,23 @@ export default function ScheduleView() {
             <div className="flex items-center gap-3">
               <button
                 onClick={() => setCurrentWeek(addWeeks(currentWeek, -1))}
-                className="p-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-xl transition-all duration-200 transform hover:scale-110 shadow-lg"
+                className="p-2 sm:p-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-xl transition-all duration-200 transform active:scale-95 shadow-lg touch-manipulation"
               >
-                <ChevronLeft className="w-5 h-5" />
+                <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
               </button>
-              <div className="text-lg font-bold text-gray-800 bg-gray-100 px-4 py-2 rounded-xl">
-                {format(startOfWeek(currentWeek, { locale: he }), 'dd/MM/yyyy', { locale: he })} - {format(endOfWeek(currentWeek, { locale: he }), 'dd/MM/yyyy', { locale: he })}
+              <div className="text-sm sm:text-lg font-bold text-gray-800 bg-gray-100 px-2 sm:px-4 py-2 rounded-xl text-center">
+                <span className="hidden sm:inline">{format(startOfWeek(currentWeek, { locale: he }), 'dd/MM/yyyy', { locale: he })} - {format(endOfWeek(currentWeek, { locale: he }), 'dd/MM/yyyy', { locale: he })}</span>
+                <span className="sm:hidden">{format(startOfWeek(currentWeek, { locale: he }), 'dd/MM', { locale: he })}</span>
               </div>
               <button
                 onClick={() => setCurrentWeek(addWeeks(currentWeek, 1))}
-                className="p-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-xl transition-all duration-200 transform hover:scale-110 shadow-lg"
+                className="p-2 sm:p-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-xl transition-all duration-200 transform active:scale-95 shadow-lg touch-manipulation"
               >
-                <ChevronRight className="w-5 h-5" />
+                <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
               </button>
               <button
                 onClick={() => setCurrentWeek(new Date())}
-                className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-xl transition-all duration-200 transform hover:scale-105 shadow-lg font-semibold"
+                className="px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-xl transition-all duration-200 transform active:scale-95 shadow-lg font-semibold text-sm sm:text-base touch-manipulation"
               >
                 היום
               </button>
@@ -297,7 +298,7 @@ export default function ScheduleView() {
                 {/* Morning section */}
                 {MORNING_CATEGORIES.map((category, catIndex) => (
                   <tr key={`morning-${category}`} className="hover:bg-blue-50 transition-colors">
-                    <td className="bg-gradient-to-r from-blue-100 to-blue-200 font-bold px-6 py-4 border-r border-gray-300 text-sm shadow-inner">
+                    <td className="bg-gradient-to-r from-blue-100 to-blue-200 font-bold px-3 sm:px-6 py-3 sm:py-4 border-r border-gray-300 text-xs sm:text-sm shadow-inner">
                       {category}
                     </td>
                     {weekDays.map((day, dayIndex) => {
@@ -307,27 +308,27 @@ export default function ScheduleView() {
                         <td
                           key={`morning-${category}-${dayIndex}`}
                           onClick={() => handleCellClick(day, category, 'בוקר')}
-                          className={getCellClassName(day, category, 'בוקר', isEmpty)}
+                          className={`${getCellClassName(day, category, 'בוקר', isEmpty)} touch-manipulation`}
                         >
                           {shift ? (
                             <div className="flex items-center justify-between group">
-                              <span className="font-medium text-gray-800">{formatShiftDisplay(shift)}</span>
+                              <span className="font-medium text-gray-800 text-xs sm:text-sm">{formatShiftDisplay(shift)}</span>
                               {isManager && (
                                 <button
                                   onClick={(e) => {
                                     e.stopPropagation()
                                     setEditingCell(shift)
                                   }}
-                                  className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-blue-200 rounded"
+                                  className="opacity-0 group-hover:opacity-100 sm:opacity-0 transition-opacity p-1 hover:bg-blue-200 rounded touch-manipulation"
                                 >
-                                  <Edit2 className="w-4 h-4 text-blue-600" />
+                                  <Edit2 className="w-3 h-3 sm:w-4 sm:h-4 text-blue-600" />
                                 </button>
                               )}
                             </div>
                           ) : (
                             isManager && (
                               <div className="flex items-center justify-center text-gray-400">
-                                <Plus className="w-5 h-5" />
+                                <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
                               </div>
                             )
                           )}
@@ -344,10 +345,10 @@ export default function ScheduleView() {
 
                 {/* Evening header */}
                 <tr>
-                  <th className="bg-gradient-to-r from-orange-500 via-orange-600 to-orange-700 text-white px-6 py-4 text-sm font-bold border-r border-orange-400 shadow-lg" colSpan={8}>
-                    <div className="flex items-center gap-2">
-                      <Clock className="w-5 h-5" />
-                      ערב
+                  <th className="bg-gradient-to-r from-orange-500 via-orange-600 to-orange-700 text-white px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm font-bold border-r border-orange-400 shadow-lg" colSpan={8}>
+                    <div className="flex items-center gap-1 sm:gap-2">
+                      <Clock className="w-4 h-4 sm:w-5 sm:h-5" />
+                      <span>ערב</span>
                     </div>
                   </th>
                 </tr>

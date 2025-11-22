@@ -68,65 +68,65 @@ export default function ManagerDashboard() {
 
   return (
     <div>
-      <div className="mb-6">
-        <h2 className="text-3xl font-bold text-gray-800 mb-2">לוח בקרה - מנהל</h2>
-        <p className="text-gray-600">סקירה כללית של המערכת</p>
+      <div className="mb-4 sm:mb-6 px-2 sm:px-0">
+        <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-2">לוח בקרה - מנהל</h2>
+        <p className="text-sm sm:text-base text-gray-600">סקירה כללית של המערכת</p>
       </div>
 
       {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <div className="bg-white rounded-lg shadow-md p-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8 px-2 sm:px-0">
+        <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-gray-600 text-sm">סה"כ עובדים</p>
-              <p className="text-3xl font-bold text-gray-800">{loading ? '...' : stats.totalEmployees}</p>
+              <p className="text-gray-600 text-xs sm:text-sm">סה"כ עובדים</p>
+              <p className="text-2xl sm:text-3xl font-bold text-gray-800">{loading ? '...' : stats.totalEmployees}</p>
             </div>
-            <Users className="w-12 h-12 text-blue-600" />
+            <Users className="w-8 h-8 sm:w-12 sm:h-12 text-blue-600" />
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-gray-600 text-sm">משמרות פעילות</p>
-              <p className="text-3xl font-bold text-gray-800">{loading ? '...' : stats.activeShifts}</p>
+              <p className="text-gray-600 text-xs sm:text-sm">משמרות פעילות</p>
+              <p className="text-2xl sm:text-3xl font-bold text-gray-800">{loading ? '...' : stats.activeShifts}</p>
             </div>
-            <Calendar className="w-12 h-12 text-green-600" />
+            <Calendar className="w-8 h-8 sm:w-12 sm:h-12 text-green-600" />
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-gray-600 text-sm">בקשות ממתינות</p>
-              <p className="text-3xl font-bold text-gray-800">{loading ? '...' : stats.pendingRequests}</p>
+              <p className="text-gray-600 text-xs sm:text-sm">בקשות ממתינות</p>
+              <p className="text-2xl sm:text-3xl font-bold text-gray-800">{loading ? '...' : stats.pendingRequests}</p>
             </div>
-            <AlertTriangle className="w-12 h-12 text-yellow-600" />
+            <AlertTriangle className="w-8 h-8 sm:w-12 sm:h-12 text-yellow-600" />
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-gray-600 text-sm">אירועים קרובים</p>
-              <p className="text-3xl font-bold text-gray-800">{loading ? '...' : stats.upcomingEvents}</p>
+              <p className="text-gray-600 text-xs sm:text-sm">אירועים קרובים</p>
+              <p className="text-2xl sm:text-3xl font-bold text-gray-800">{loading ? '...' : stats.upcomingEvents}</p>
             </div>
-            <Calendar className="w-12 h-12 text-purple-600" />
+            <Calendar className="w-8 h-8 sm:w-12 sm:h-12 text-purple-600" />
           </div>
         </div>
       </div>
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 px-2 sm:px-0">
         <Link
           to="/schedule"
-          className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition cursor-pointer"
+          className="bg-white rounded-lg shadow-md p-4 sm:p-6 hover:shadow-lg transition cursor-pointer touch-manipulation"
         >
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-xl font-semibold text-gray-800">לוח משמרות</h3>
-            <Calendar className="w-8 h-8 text-blue-600" />
+          <div className="flex items-center justify-between mb-3 sm:mb-4">
+            <h3 className="text-lg sm:text-xl font-semibold text-gray-800">לוח משמרות</h3>
+            <Calendar className="w-6 h-6 sm:w-8 sm:h-8 text-blue-600" />
           </div>
-          <p className="text-gray-600">צפה ונהל את לוח המשמרות השבועי</p>
+          <p className="text-sm sm:text-base text-gray-600">צפה ונהל את לוח המשמרות השבועי</p>
         </Link>
 
         <Link
