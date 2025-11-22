@@ -146,7 +146,11 @@ export default function ManageNotifications() {
       }
 
       // Send bulk messages
-      const response = await fetch(`${API_URL}/api/whatsapp/send-bulk`, {
+      const url = API_URL 
+        ? `${API_URL}/api/whatsapp/send-bulk`
+        : '/.netlify/functions/whatsapp-send-bulk'
+      
+      const response = await fetch(url, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -193,7 +197,11 @@ export default function ManageNotifications() {
 
       const message = formatShiftMessage(employee, shift, tasks)
       
-      const response = await fetch(`${API_URL}/api/whatsapp/send`, {
+      const url = API_URL 
+        ? `${API_URL}/api/whatsapp/send`
+        : '/.netlify/functions/whatsapp-send'
+      
+      const response = await fetch(url, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

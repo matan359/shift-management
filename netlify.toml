@@ -10,3 +10,12 @@
 [build.environment]
   NODE_VERSION = "18"
 
+# Netlify Functions configuration
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
+
+# Environment variables for WhatsApp server
+# Add these in Netlify Dashboard > Site settings > Environment variables
+# WHATSAPP_SERVER_URL = "https://your-whatsapp-server.railway.app"
+

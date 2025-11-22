@@ -255,8 +255,11 @@ app.post('/api/whatsapp/disconnect', async (req, res) => {
 // Initialize WhatsApp on server start
 initializeWhatsApp()
 
-app.listen(PORT, () => {
-  console.log(`WhatsApp Server running on http://localhost:${PORT}`)
+// Listen on all interfaces (important for Railway/Render)
+const HOST = process.env.HOST || '0.0.0.0'
+app.listen(PORT, HOST, () => {
+  console.log(`WhatsApp Server running on http://${HOST}:${PORT}`)
   console.log('Waiting for QR code...')
+  console.log(`Environment: ${process.env.NODE_ENV || 'development'}`)
 })
 
