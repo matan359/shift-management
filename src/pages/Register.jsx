@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
-import { Lock, Mail, User, AlertCircle, CheckCircle } from 'lucide-react'
+import { Lock, Mail, User, AlertCircle, CheckCircle, Phone } from 'lucide-react'
 import { createUserWithEmailAndPassword, sendEmailVerification } from 'firebase/auth'
 import { getFirebaseDb, getAppId } from '../api/firebase'
 import { collection, addDoc, query, where, getDocs } from 'firebase/firestore'
@@ -35,6 +35,12 @@ export default function Register() {
 
     if (formData.password.length < 6) {
       setError('הסיסמה חייבת להכיל לפחות 6 תווים')
+      setLoading(false)
+      return
+    }
+
+    if (!formData.phoneNumber || formData.phoneNumber.trim() === '') {
+      setError('מספר טלפון הוא שדה חובה')
       setLoading(false)
       return
     }
