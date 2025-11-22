@@ -88,7 +88,7 @@ export default function Login() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center p-4">
-      <div className="max-w-md w-full bg-white rounded-2xl shadow-2xl p-8 transform transition-all duration-300 hover:scale-105 animate-slideUp">
+      <div className="max-w-md w-full bg-white rounded-2xl shadow-2xl p-6 sm:p-8 transform transition-all duration-300 hover:scale-105 animate-slideUp">
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-600 rounded-full mb-4">
             <Lock className="w-8 h-8 text-white" />
