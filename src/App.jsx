@@ -12,6 +12,7 @@ import ManageEvents from './pages/ManageEvents'
 import ManageTasks from './pages/ManageTasks'
 import ManageNotifications from './pages/ManageNotifications'
 import WhatsAppConnection from './pages/WhatsAppConnection'
+import WhatsAppConnectionSimple from './pages/WhatsAppConnectionSimple'
 import SystemAnnouncements from './pages/SystemAnnouncements'
 import SpecialDaysAlerts from './pages/SpecialDaysAlerts'
 import ShiftNotes from './pages/ShiftNotes'
@@ -144,7 +145,7 @@ function AppRoutes() {
       <Route path="/whatsapp-connection" element={
         <PrivateRoute requiredRole="manager">
           <Layout>
-            <WhatsAppConnection />
+            <WhatsAppConnectionSimple />
           </Layout>
         </PrivateRoute>
       } />
