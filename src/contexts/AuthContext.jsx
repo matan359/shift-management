@@ -3,6 +3,9 @@ import {
   getAuth, 
   signInAnonymously, 
   signInWithCustomToken,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  onAuthStateChanged,
   signOut as firebaseSignOut 
 } from 'firebase/auth'
 import { 
@@ -35,29 +38,31 @@ export function AuthProvider({ children }) {
         setAuth(authInstance)
         setDb(dbInstance)
 
-        // Try to restore user session
-        const currentUser = authInstance.currentUser
-        if (currentUser) {
-          try {
-            await loadUserData(currentUser.uid, dbInstance)
-          } catch (userError) {
-            console.error('Error loading user data:', userError)
-            // Set anonymous user if can't load user data
-            setUser({
-              uid: currentUser.uid,
-              role: 'anonymous'
-            })
+        // Listen to auth state changes
+        const unsubscribe = onAuthStateChanged(authInstance, async (firebaseUser) => {
+          if (firebaseUser) {
+            try {
+              await loadUserData(firebaseUser.uid, dbInstance)
+            } catch (userError) {
+              console.error('Error loading user data:', userError)
+              // Set anonymous user if can't load user data
+              setUser({
+                uid: firebaseUser.uid,
+                role: 'anonymous'
+              })
+            }
+          } else {
+            // No user, set to null so login screen shows
+            setUser(null)
           }
-        } else {
-          // No user, set to null so login screen shows
-          setUser(null)
-        }
+          setLoading(false)
+        })
+
+        return () => unsubscribe()
       } catch (error) {
         console.error('Initialization error:', error)
         // Set loading to false even on error so app can render
         setUser(null)
-      } finally {
-        // Always set loading to false
         setLoading(false)
       }
     }
@@ -67,11 +72,11 @@ export function AuthProvider({ children }) {
 
   async function loadUserData(uid, dbInstance) {
     try {
-      // Try to find user in employees collection
+      // Find user in employees collection by Firebase Auth UID
       const appId = getAppId()
-      const employeesRef = collection(dbInstance, `artifacts/${appId}/users/${uid}/employees`)
-      // Note: This is a simplified lookup - in production, you'd have a better user mapping
-      const employeesSnapshot = await getDocs(employeesRef)
+      const employeesRef = collection(dbInstance, `artifacts/${appId}/employees`)
+      const employeesQuery = query(employeesRef, where('firebaseUid', '==', uid))
+      const employeesSnapshot = await getDocs(employeesQuery)
 
       if (!employeesSnapshot.empty) {
         const userDoc = employeesSnapshot.docs[0]
@@ -100,51 +105,54 @@ export function AuthProvider({ children }) {
     }
   }
 
-  async function login(username, password) {
+  async function login(email, password) {
     if (!db || !auth) {
       throw new Error('Firebase not initialized')
     }
 
     try {
-      // Search for user in employees collection
+      // Sign in with Firebase Authentication
+      const userCredential = await signInWithEmailAndPassword(auth, email, password)
+      const firebaseUser = userCredential.user
+
+      // Load user data from Firestore
       const appId = getAppId()
-      const userId = auth.currentUser?.uid
-      if (!userId) throw new Error('User not authenticated')
-      
-      const employeesRef = collection(db, `artifacts/${appId}/users/${userId}/employees`)
-      const employeesQuery = query(employeesRef, where('username', '==', username))
+      const employeesRef = collection(db, `artifacts/${appId}/employees`)
+      const employeesQuery = query(employeesRef, where('firebaseUid', '==', firebaseUser.uid))
       const snapshot = await getDocs(employeesQuery)
 
       if (snapshot.empty) {
-        throw new Error('שם משתמש או סיסמה שגויים')
+        // User exists in Firebase Auth but not in Firestore - sign out
+        await firebaseSignOut(auth)
+        throw new Error('משתמש לא נמצא במערכת. אנא פנה למנהל.')
       }
 
       const userDoc = snapshot.docs[0]
       const userData = userDoc.data()
 
-      // Simple password check (in production, use proper hashing)
-      if (userData.passwordHash !== password) {
-        throw new Error('שם משתמש או סיסמה שגויים')
-      }
-
       if (!userData.isActive) {
+        await firebaseSignOut(auth)
         throw new Error('חשבון זה אינו פעיל')
       }
 
-      // Sign in anonymously and store user data
-      await signInAnonymously(auth)
-      const currentUser = auth.currentUser
-
-      // Store user data in context
+      // Store user data in context (loadUserData will be called by onAuthStateChanged)
       setUser({
         id: userDoc.id,
-        uid: currentUser.uid,
+        uid: firebaseUser.uid,
         ...userData
       })
 
       return userData
     } catch (error) {
       console.error('Login error:', error)
+      // Translate Firebase errors to Hebrew
+      if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
+        throw new Error('אימייל או סיסמה שגויים')
+      } else if (error.code === 'auth/invalid-email') {
+        throw new Error('אימייל לא תקין')
+      } else if (error.code === 'auth/too-many-requests') {
+        throw new Error('יותר מדי ניסיונות. אנא נסה שוב מאוחר יותר.')
+      }
       throw error
     }
   }

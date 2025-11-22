@@ -33,7 +33,7 @@ export default function ManagerDashboard() {
       if (!userId) return
 
       // Count employees
-      const employeesRef = collection(dbInstance, `artifacts/${appId}/users/${userId}/employees`)
+      const employeesRef = collection(dbInstance, `artifacts/${appId}/employees`)
       const employeesSnapshot = await getDocs(employeesRef)
       const totalEmployees = employeesSnapshot.size
 

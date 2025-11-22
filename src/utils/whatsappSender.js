@@ -180,7 +180,7 @@ export async function scheduleDailyMessages(db, appId, userId) {
     const shiftsSnapshot = await getDocs(shiftsQuery)
     
     // Get all employees
-    const employeesRef = collection(db, `artifacts/${appId}/users/${userId}/employees`)
+    const employeesRef = collection(db, `artifacts/${appId}/employees`)
     const employeesSnapshot = await getDocs(employeesRef)
     const employees = employeesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
     

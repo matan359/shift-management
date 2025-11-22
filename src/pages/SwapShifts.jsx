@@ -28,7 +28,7 @@ export default function SwapShifts() {
       const appId = getAppId()
       const userId = user.uid
 
-      const employeesRef = collection(dbInstance, `artifacts/${appId}/users/${userId}/employees`)
+      const employeesRef = collection(dbInstance, `artifacts/${appId}/employees`)
       const snapshot = await getDocs(employeesRef)
       const employeesData = snapshot.docs
         .map(doc => ({ id: doc.id, ...doc.data() }))

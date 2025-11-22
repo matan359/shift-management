@@ -7,7 +7,7 @@ export async function autoScheduleShifts(db, appId, userId, weekStart, weekEnd) 
   try {
     // Load all required data
     const [employees, shiftRequests, events, existingShifts] = await Promise.all([
-      loadEmployees(db, appId, userId),
+      loadEmployees(db, appId),
       loadShiftRequests(db, appId, userId, weekStart, weekEnd),
       loadEvents(db, appId, userId, weekStart, weekEnd),
       loadExistingShifts(db, appId, userId, weekStart, weekEnd)
@@ -64,8 +64,8 @@ export async function autoScheduleShifts(db, appId, userId, weekStart, weekEnd) 
 
 import { collection, query, where, getDocs } from 'firebase/firestore'
 
-async function loadEmployees(db, appId, userId) {
-  const employeesRef = collection(db, `artifacts/${appId}/users/${userId}/employees`)
+async function loadEmployees(db, appId) {
+  const employeesRef = collection(db, `artifacts/${appId}/employees`)
   const snapshot = await getDocs(employeesRef)
   return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
     .filter(emp => emp.isActive !== false)

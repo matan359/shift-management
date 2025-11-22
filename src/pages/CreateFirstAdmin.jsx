@@ -1,17 +1,18 @@
 import { useState } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { useNavigate } from 'react-router-dom'
-import { UserPlus, Lock, User } from 'lucide-react'
+import { UserPlus, Lock, User, Mail } from 'lucide-react'
 import { getFirebaseDb, getAppId } from '../api/firebase'
-import { collection, addDoc } from 'firebase/firestore'
+import { collection, addDoc, getDocs } from 'firebase/firestore'
+import { createUserWithEmailAndPassword } from 'firebase/auth'
 
 export default function CreateFirstAdmin() {
   const { user, db, auth } = useAuth()
   const navigate = useNavigate()
   const [formData, setFormData] = useState({
     fullName: 'מנהל ראשי',
-    username: 'admin',
-    password: 'admin123',
+    email: '',
+    password: '',
     phoneNumber: ''
   })
   const [loading, setLoading] = useState(false)
@@ -30,28 +31,30 @@ export default function CreateFirstAdmin() {
 
       const dbInstance = db || getFirebaseDb()
       const appId = getAppId()
-      const userId = auth.currentUser.uid
 
       // Check if employees already exist
-      const { getDocs, collection: col } = await import('firebase/firestore')
-      const employeesRef = col(dbInstance, `artifacts/${appId}/users/${userId}/employees`)
+      const employeesRef = collection(dbInstance, `artifacts/${appId}/employees`)
       const snapshot = await getDocs(employeesRef)
 
       if (!snapshot.empty) {
         throw new Error('כבר קיימים משתמשים במערכת. השתמש בדף הכניסה הרגיל.')
       }
 
-      // Create admin user
+      // Create user in Firebase Authentication
+      const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password)
+      const firebaseUser = userCredential.user
+
+      // Create admin user in Firestore
       const adminData = {
         fullName: formData.fullName,
-        username: formData.username,
-        passwordHash: formData.password, // In production, hash this!
+        email: formData.email,
         phoneNumber: formData.phoneNumber,
         role: 'manager',
         defaultShiftStart: '08:00',
         minShiftsPerWeek: 6,
         isActive: true,
-        __uid: userId
+        firebaseUid: firebaseUser.uid,
+        createdAt: new Date().toISOString()
       }
 
       await addDoc(employeesRef, adminData)
@@ -74,7 +77,7 @@ export default function CreateFirstAdmin() {
         <div className="max-w-md w-full bg-white rounded-lg shadow-xl p-8 text-center">
           <div className="text-green-600 text-6xl mb-4">✓</div>
           <h2 className="text-2xl font-bold text-gray-800 mb-4">משתמש מנהל נוצר בהצלחה!</h2>
-          <p className="text-gray-600 mb-2">שם משתמש: <strong>{formData.username}</strong></p>
+          <p className="text-gray-600 mb-2">אימייל: <strong>{formData.email}</strong></p>
           <p className="text-gray-600 mb-4">סיסמה: <strong>{formData.password}</strong></p>
           <p className="text-sm text-gray-500">מעביר אותך לדף הכניסה...</p>
         </div>
@@ -116,15 +119,16 @@ export default function CreateFirstAdmin() {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              <User className="w-4 h-4 inline ml-1" />
-              שם משתמש
+              <Mail className="w-4 h-4 inline ml-1" />
+              אימייל
             </label>
             <input
-              type="text"
-              value={formData.username}
-              onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+              type="email"
+              value={formData.email}
+              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               required
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="admin@example.com"
             />
           </div>
 

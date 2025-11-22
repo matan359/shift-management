@@ -1,17 +1,18 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
-import { Users, Plus, Edit, Trash2, Save, X } from 'lucide-react'
+import { Users, Plus, Edit, Trash2, Save, X, Mail, Lock } from 'lucide-react'
 import { getFirebaseDb, getAppId } from '../api/firebase'
 import { collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot } from 'firebase/firestore'
+import { createUserWithEmailAndPassword, deleteUser } from 'firebase/auth'
 
 export default function ManageEmployees() {
-  const { user, db } = useAuth()
+  const { user, db, auth } = useAuth()
   const [employees, setEmployees] = useState([])
   const [showModal, setShowModal] = useState(false)
   const [editingEmployee, setEditingEmployee] = useState(null)
   const [formData, setFormData] = useState({
     fullName: '',
-    username: '',
+    email: '',
     password: '',
     phoneNumber: '',
     role: 'worker',
@@ -25,9 +26,8 @@ export default function ManageEmployees() {
 
     const dbInstance = db || getFirebaseDb()
     const appId = getAppId()
-    const userId = user.uid
 
-    const employeesRef = collection(dbInstance, `artifacts/${appId}/users/${userId}/employees`)
+    const employeesRef = collection(dbInstance, `artifacts/${appId}/employees`)
     
     const unsubscribe = onSnapshot(employeesRef, (snapshot) => {
       const employeesData = snapshot.docs.map(doc => ({
@@ -35,6 +35,9 @@ export default function ManageEmployees() {
         ...doc.data()
       }))
       setEmployees(employeesData)
+    }, (error) => {
+      console.error('Error loading employees:', error)
+      alert('שגיאה בטעינת העובדים: ' + error.message)
     })
 
     return () => unsubscribe()
@@ -44,7 +47,7 @@ export default function ManageEmployees() {
     setEditingEmployee(null)
     setFormData({
       fullName: '',
-      username: '',
+      email: '',
       password: '',
       phoneNumber: '',
       role: 'worker',
@@ -60,7 +63,7 @@ export default function ManageEmployees() {
     setEditingEmployee(employee)
     setFormData({
       fullName: employee.fullName || '',
-      username: employee.username || '',
+      email: employee.email || '',
       password: '',
       phoneNumber: employee.phoneNumber || '',
       role: employee.role || 'worker',
@@ -74,33 +77,61 @@ export default function ManageEmployees() {
 
   async function handleSubmit(e) {
     e.preventDefault()
-    if (!db || !user) return
+    if (!db || !user || !auth) {
+      alert('Firebase לא מאותחל או משתמש לא מחובר')
+      return
+    }
 
     try {
       const dbInstance = db || getFirebaseDb()
       const appId = getAppId()
-      const userId = user.uid
-
-      const employeeData = {
-        ...formData,
-        passwordHash: formData.password || undefined, // In production, hash this
-        __uid: userId // Store user ID for auth lookup
-      }
 
       if (editingEmployee) {
-        // Update existing
-        const employeeRef = doc(dbInstance, `artifacts/${appId}/users/${userId}/employees/${editingEmployee.id}`)
+        // Update existing employee
+        const { password, ...restFormData } = formData
+        const employeeData = {
+          ...restFormData,
+          updatedAt: new Date().toISOString()
+        }
+
+        // Remove undefined fields
+        Object.keys(employeeData).forEach(key => {
+          if (employeeData[key] === undefined) {
+            delete employeeData[key]
+          }
+        })
+
+        const employeeRef = doc(dbInstance, `artifacts/${appId}/employees/${editingEmployee.id}`)
         await updateDoc(employeeRef, employeeData)
+        alert('העובד עודכן בהצלחה!')
       } else {
-        // Create new
-        const employeesRef = collection(dbInstance, `artifacts/${appId}/users/${userId}/employees`)
+        // Create new employee
+        if (!formData.email || !formData.password) {
+          alert('נא למלא אימייל וסיסמה')
+          return
+        }
+
+        // Create user in Firebase Authentication
+        const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password)
+        const firebaseUser = userCredential.user
+
+        // Create employee in Firestore
+        const { password, ...restFormData } = formData
+        const employeeData = {
+          ...restFormData,
+          firebaseUid: firebaseUser.uid,
+          createdAt: new Date().toISOString()
+        }
+
+        const employeesRef = collection(dbInstance, `artifacts/${appId}/employees`)
         await addDoc(employeesRef, employeeData)
+        alert('העובד נוצר בהצלחה!')
       }
 
       setShowModal(false)
       setFormData({
         fullName: '',
-        username: '',
+        email: '',
         password: '',
         phoneNumber: '',
         role: 'worker',
@@ -110,7 +141,15 @@ export default function ManageEmployees() {
       })
     } catch (error) {
       console.error('Error saving employee:', error)
-      alert('שגיאה בשמירת העובד')
+      let errorMessage = 'שגיאה בשמירת העובד'
+      if (error.code === 'auth/email-already-in-use') {
+        errorMessage = 'אימייל זה כבר קיים במערכת'
+      } else if (error.code === 'auth/invalid-email') {
+        errorMessage = 'אימייל לא תקין'
+      } else if (error.code === 'auth/weak-password') {
+        errorMessage = 'הסיסמה חלשה מדי (מינימום 6 תווים)'
+      }
+      alert(errorMessage + ': ' + error.message)
     }
   }
 
@@ -121,13 +160,13 @@ export default function ManageEmployees() {
     try {
       const dbInstance = db || getFirebaseDb()
       const appId = getAppId()
-      const userId = user.uid
 
-      const employeeRef = doc(dbInstance, `artifacts/${appId}/users/${userId}/employees/${employeeId}`)
+      const employeeRef = doc(dbInstance, `artifacts/${appId}/employees/${employeeId}`)
       await deleteDoc(employeeRef)
+      alert('העובד נמחק בהצלחה!')
     } catch (error) {
       console.error('Error deleting employee:', error)
-      alert('שגיאה במחיקת העובד')
+      alert('שגיאה במחיקת העובד: ' + error.message)
     }
   }
 
@@ -152,7 +191,7 @@ export default function ManageEmployees() {
           <thead className="bg-gray-100">
             <tr>
               <th className="px-6 py-3 text-right text-sm font-semibold text-gray-700">שם מלא</th>
-              <th className="px-6 py-3 text-right text-sm font-semibold text-gray-700">שם משתמש</th>
+              <th className="px-6 py-3 text-right text-sm font-semibold text-gray-700">אימייל</th>
               <th className="px-6 py-3 text-right text-sm font-semibold text-gray-700">טלפון</th>
               <th className="px-6 py-3 text-right text-sm font-semibold text-gray-700">תפקיד</th>
               <th className="px-6 py-3 text-right text-sm font-semibold text-gray-700">שעת התחלה</th>
@@ -165,7 +204,7 @@ export default function ManageEmployees() {
             {employees.map((employee) => (
               <tr key={employee.id} className="hover:bg-gray-50">
                 <td className="px-6 py-4 text-sm font-medium text-gray-900">{employee.fullName}</td>
-                <td className="px-6 py-4 text-sm text-gray-600">{employee.username}</td>
+                <td className="px-6 py-4 text-sm text-gray-600">{employee.email || '-'}</td>
                 <td className="px-6 py-4 text-sm text-gray-600">{employee.phoneNumber || '-'}</td>
                 <td className="px-6 py-4 text-sm text-gray-600">
                   <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
@@ -232,28 +271,41 @@ export default function ManageEmployees() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">שם משתמש</label>
-                <input
-                  type="text"
-                  value={formData.username}
-                  onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                  required
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-
-              <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  סיסמה {editingEmployee && '(השאר ריק אם לא לשנות)'}
+                  <Mail className="w-4 h-4 inline ml-1" />
+                  אימייל
                 </label>
                 <input
-                  type="password"
-                  value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  type="email"
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                   required={!editingEmployee}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  disabled={!!editingEmployee}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
+                  placeholder="employee@example.com"
                 />
+                {editingEmployee && (
+                  <p className="text-xs text-gray-500 mt-1">לא ניתן לשנות אימייל</p>
+                )}
               </div>
+
+              {!editingEmployee && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <Lock className="w-4 h-4 inline ml-1" />
+                    סיסמה
+                  </label>
+                  <input
+                    type="password"
+                    value={formData.password}
+                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                    required
+                    minLength={6}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    placeholder="מינימום 6 תווים"
+                  />
+                </div>
+              )}
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">מספר טלפון</label>

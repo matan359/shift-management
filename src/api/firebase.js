@@ -29,18 +29,8 @@ export async function initFirebase() {
     auth = getAuth(app)
     db = getFirestore(app)
 
-    // Authenticate user
-    try {
-      if (__initial_auth_token) {
-        await signInWithCustomToken(auth, __initial_auth_token)
-      } else {
-        await signInAnonymously(auth)
-      }
-      console.log('Firebase initialized, User ID:', auth.currentUser?.uid)
-    } catch (authError) {
-      console.error('Firebase auth error:', authError)
-      // Continue even if auth fails - user can login manually
-    }
+    // Don't sign in automatically - let user login with email/password
+    console.log('Firebase initialized')
 
     return { app, auth, db, appId: __app_id, userId: auth.currentUser?.uid }
   } catch (error) {
