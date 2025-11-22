@@ -256,10 +256,14 @@ app.post('/api/whatsapp/disconnect', async (req, res) => {
 initializeWhatsApp()
 
 // Listen on all interfaces (important for Railway/Render)
+// Railway uses PORT environment variable, default to 3001 for local
 const HOST = process.env.HOST || '0.0.0.0'
-app.listen(PORT, HOST, () => {
-  console.log(`WhatsApp Server running on http://${HOST}:${PORT}`)
+const SERVER_PORT = process.env.PORT || PORT || 3001
+
+app.listen(SERVER_PORT, HOST, () => {
+  console.log(`WhatsApp Server running on http://${HOST}:${SERVER_PORT}`)
   console.log('Waiting for QR code...')
   console.log(`Environment: ${process.env.NODE_ENV || 'development'}`)
+  console.log(`Port: ${SERVER_PORT}`)
 })
 
