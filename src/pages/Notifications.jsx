@@ -103,72 +103,32 @@ export default function Notifications() {
   async function checkWhatsAppStatus() {
     try {
       setCheckingStatus(true)
-      const url = API_URL 
-        ? `${API_URL}/api/whatsapp/status`
-        : '/.netlify/functions/whatsapp-status'
+      // Always use Netlify Functions - no external server needed
+      const url = '/.netlify/functions/whatsapp-status'
       
       const response = await fetch(url)
       const data = await response.json()
       
-      if (data.error && data.status === 'disconnected') {
-        setWhatsappStatus('disconnected')
-        setQrCode(null)
-        // Try to initialize connection if server is available
-        if (data.error !== 'Server not configured') {
-          await initializeConnection()
-        }
-        return
-      }
+      setWhatsappStatus(data.status || 'ready')
       
-      setWhatsappStatus(data.status || 'disconnected')
-      
-      // Load QR code if needed
-      if (data.status === 'qr') {
-        await loadQRCode()
-      } else if (data.status === 'ready') {
-        setQrCode(null)
-      } else if (data.status === 'disconnected') {
-        // Try to initialize connection
-        await initializeConnection()
-      }
+      // No QR code needed for WhatsApp Web Link API
+      setQrCode(null)
     } catch (error) {
       console.error('Error checking WhatsApp status:', error)
-      setWhatsappStatus('disconnected')
+      setWhatsappStatus('ready') // Default to ready since we use Web Link API
     } finally {
       setCheckingStatus(false)
     }
   }
 
   async function initializeConnection() {
-    try {
-      // Try to trigger initialization on server
-      const url = API_URL 
-        ? `${API_URL}/api/whatsapp/init`
-        : '/.netlify/functions/whatsapp-init'
-      
-      await fetch(url, { method: 'POST' })
-      // Wait a bit and check status again
-      setTimeout(checkWhatsAppStatus, 2000)
-    } catch (error) {
-      console.error('Error initializing connection:', error)
-    }
+    // No initialization needed for WhatsApp Web Link API
+    setWhatsappStatus('ready')
   }
 
   async function loadQRCode() {
-    try {
-      const url = API_URL 
-        ? `${API_URL}/api/whatsapp/qr`
-        : '/.netlify/functions/whatsapp-qr'
-      
-      const response = await fetch(url)
-      const data = await response.json()
-      
-      if (data.qr) {
-        setQrCode(data.qr)
-      }
-    } catch (error) {
-      console.error('Error loading QR code:', error)
-    }
+    // No QR code needed for WhatsApp Web Link API
+    setQrCode(null)
   }
 
   async function loadTodayShifts() {
@@ -299,10 +259,8 @@ export default function Notifications() {
         return
       }
 
-      // Send bulk messages via API
-      const sendUrl = API_URL 
-        ? `${API_URL}/api/whatsapp/send-bulk`
-        : '/.netlify/functions/whatsapp-send-bulk'
+      // Send bulk messages via Netlify Functions
+      const sendUrl = '/.netlify/functions/whatsapp-send-bulk'
       
       const response = await fetch(sendUrl, {
         method: 'POST',
@@ -315,24 +273,41 @@ export default function Notifications() {
       const data = await response.json()
       
       if (data.success) {
+        // Open WhatsApp links in new tabs
+        const successfulLinks = data.results.filter(r => r.success && r.whatsappLink)
+        
+        // Open first few links (browsers may block too many popups)
+        const linksToOpen = successfulLinks.slice(0, 5)
+        linksToOpen.forEach((result, index) => {
+          setTimeout(() => {
+            window.open(result.whatsappLink, '_blank', 'noopener,noreferrer')
+          }, index * 500) // Delay between opens
+        })
+        
         setResults(data.results.map(r => ({
           phoneNumber: r.phoneNumber,
           success: r.success,
-          employeeName: recipients.find(rec => rec.phoneNumber === r.phoneNumber)?.employeeName || 'עובד',
+          employeeName: recipients.find(rec => {
+            // Find by original phone number
+            const originalPhone = rec.phoneNumber.replace(/[^0-9]/g, '')
+            const formattedPhone = r.phoneNumber.replace(/[^0-9]/g, '')
+            return originalPhone === formattedPhone || formattedPhone.includes(originalPhone.slice(-9))
+          })?.employeeName || 'עובד',
           sent: r.success,
-          error: r.error
+          error: r.error,
+          whatsappLink: r.whatsappLink
         })))
         
         const sentCount = data.sent || data.results.filter(r => r.success).length
         const failedCount = data.failed || data.results.filter(r => !r.success).length
         
         if (failedCount === 0) {
-          alert(`✅ נשלחו ${sentCount} הודעות בהצלחה!`)
+          alert(`✅ נפתחו ${sentCount} חלונות WhatsApp!\n\nפשוט לחץ "שלח" בכל חלון.`)
         } else {
-          alert(`נשלחו ${sentCount} הודעות, ${failedCount} נכשלו. בדוק את התוצאות למטה.`)
+          alert(`נפתחו ${sentCount} חלונות WhatsApp, ${failedCount} נכשלו.\n\nפשוט לחץ "שלח" בכל חלון.`)
         }
       } else {
-        alert('שגיאה בשליחת ההודעות: ' + (data.error || 'Unknown error'))
+        alert('שגיאה ביצירת קישורי WhatsApp: ' + (data.error || 'Unknown error'))
       }
     } catch (error) {
       console.error('Error sending notifications:', error)
@@ -361,10 +336,8 @@ export default function Notifications() {
     try {
       const message = formatShiftMessage(employee, shift, tasks)
       
-      // Send message via API
-      const sendUrl = API_URL 
-        ? `${API_URL}/api/whatsapp/send`
-        : '/.netlify/functions/whatsapp-send'
+      // Send message via Netlify Functions
+      const sendUrl = '/.netlify/functions/whatsapp-send'
       
       const response = await fetch(sendUrl, {
         method: 'POST',
@@ -379,10 +352,12 @@ export default function Notifications() {
 
       const data = await response.json()
       
-      if (data.success) {
-        alert(`✅ הודעה נשלחה בהצלחה ל-${employee.fullName}!`)
+      if (data.success && data.whatsappLink) {
+        // Open WhatsApp link
+        window.open(data.whatsappLink, '_blank', 'noopener,noreferrer')
+        alert(`✅ נפתח חלון WhatsApp ל-${employee.fullName}!\n\nפשוט לחץ "שלח" בחלון.`)
       } else {
-        alert('שגיאה בשליחת ההודעה: ' + (data.error || 'Unknown error'))
+        alert('שגיאה ביצירת קישור WhatsApp: ' + (data.error || 'Unknown error'))
       }
     } catch (error) {
       console.error('Error sending message:', error)
@@ -436,9 +411,9 @@ export default function Notifications() {
               <div className="flex items-center gap-3">
                 <CheckCircle className="w-8 h-8 text-green-600 flex-shrink-0" />
                 <div>
-                  <h3 className="text-lg font-bold text-green-800 mb-1">✅ מחובר ומוכן!</h3>
+                  <h3 className="text-lg font-bold text-green-800 mb-1">✅ מוכן לשליחה!</h3>
                   <p className="text-sm text-green-700">
-                    WhatsApp מחובר. אפשר לשלוח הודעות עכשיו!
+                    המערכת מוכנה לשלוח הודעות דרך WhatsApp Web Link. כל לחיצה תפתח חלון WhatsApp עם הודעה מוכנה.
                   </p>
                 </div>
               </div>
@@ -471,56 +446,14 @@ export default function Notifications() {
               </div>
             </div>
           ) : (
-            <div className="bg-red-50 border-2 border-red-300 rounded-xl p-4 sm:p-6">
-              <div className="space-y-4">
-                <div className="flex items-center gap-3">
-                  <XCircle className="w-8 h-8 text-red-600 flex-shrink-0" />
-                  <div>
-                    <h3 className="text-lg font-bold text-red-800 mb-1">❌ לא מחובר</h3>
-                    <p className="text-sm text-red-700">
-                      WhatsApp לא מחובר. עקוב אחר ההוראות למטה.
-                    </p>
-                  </div>
-                </div>
-                
-                {/* Instructions */}
-                <div className="bg-white rounded-lg p-4 border border-red-200">
-                  <h4 className="font-bold text-gray-800 mb-3 text-base">איך להתחבר:</h4>
-                  <div className="space-y-3 text-sm text-gray-700">
-                    <div className="flex items-start gap-2">
-                      <span className="font-bold text-blue-600">1.</span>
-                      <div>
-                        <p className="font-semibold">ודא שהשרת רץ:</p>
-                        <p className="text-xs text-gray-600 mt-1">
-                          אם אתה בפיתוח מקומי: פתח טרמינל בתיקיית <code className="bg-gray-100 px-1 rounded">server</code> והרץ <code className="bg-gray-100 px-1 rounded">npm start</code>
-                        </p>
-                        <p className="text-xs text-gray-600 mt-1">
-                          אם אתה ב-production: ודא שהשרת רץ ב-Railway ושה-<code className="bg-gray-100 px-1 rounded">WHATSAPP_SERVER_URL</code> מוגדר ב-Netlify
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-start gap-2">
-                      <span className="font-bold text-blue-600">2.</span>
-                      <div>
-                        <p className="font-semibold">לחץ על "התחל חיבור":</p>
-                        <button
-                          onClick={initializeConnection}
-                          className="mt-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition text-sm font-semibold"
-                        >
-                          התחל חיבור
-                        </button>
-                      </div>
-                    </div>
-                    <div className="flex items-start gap-2">
-                      <span className="font-bold text-blue-600">3.</span>
-                      <div>
-                        <p className="font-semibold">סרוק QR Code:</p>
-                        <p className="text-xs text-gray-600 mt-1">
-                          כשה-QR Code יופיע, פתח WhatsApp בטלפון → הגדרות → מכשירים מקושרים → קשר מכשיר → סרוק
-                        </p>
-                      </div>
-                    </div>
-                  </div>
+            <div className="bg-green-50 border-2 border-green-300 rounded-xl p-4 sm:p-6">
+              <div className="flex items-center gap-3">
+                <CheckCircle className="w-8 h-8 text-green-600 flex-shrink-0" />
+                <div>
+                  <h3 className="text-lg font-bold text-green-800 mb-1">✅ מוכן לשליחה!</h3>
+                  <p className="text-sm text-green-700">
+                    המערכת מוכנה לשלוח הודעות דרך WhatsApp Web Link. כל לחיצה תפתח חלון WhatsApp עם הודעה מוכנה.
+                  </p>
                 </div>
               </div>
             </div>
