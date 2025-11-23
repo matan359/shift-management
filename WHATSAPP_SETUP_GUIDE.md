@@ -18,9 +18,10 @@
 3. בחר את ה-repository שלך
 
 ### 1.3 הגדר את השרת
-1. Railway יזהה אוטומטית את תיקיית `server`
-2. אם לא, לחץ על **Settings** → **Root Directory** → הגדר ל-`server`
-3. Railway יתקין את התלויות ויריץ את השרת אוטומטית
+1. **חשוב!** לאחר יצירת הפרויקט, לחץ על **Settings** → **Root Directory**
+2. הגדר את **Root Directory** ל-`server` (זה אומר ל-Railway לבנות רק את תיקיית server)
+3. שמור את השינויים
+4. Railway יתקין את התלויות ויריץ את השרת אוטומטית
 
 ### 1.4 קבל את ה-URL
 1. לאחר הפריסה, Railway ייתן לך URL (לדוגמה: `https://your-app.railway.app`)
