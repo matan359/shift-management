@@ -1,6 +1,5 @@
 // Netlify Function - WhatsApp Status
-// מאחר שאנחנו משתמשים ב-WhatsApp Web Link API, אין צורך בחיבור אמיתי
-// הסטטוס תמיד "ready" כי אנחנו רק יוצרים קישורים
+// Proxy to WhatsApp Web.js server
 
 exports.handler = async (event, context) => {
   // CORS headers
@@ -20,14 +19,28 @@ exports.handler = async (event, context) => {
     }
   }
 
-  // WhatsApp Web Link API תמיד מוכן - אין צורך בחיבור
-  return {
-    statusCode: 200,
-    headers,
-    body: JSON.stringify({
-      status: 'ready',
-      isReady: true,
-      message: 'WhatsApp Web Link API is ready - no connection needed'
-    })
+  const serverUrl = process.env.WHATSAPP_SERVER_URL || 'http://localhost:3001'
+  
+  try {
+    const response = await fetch(`${serverUrl}/api/whatsapp/status`)
+    const data = await response.json()
+    
+    return {
+      statusCode: 200,
+      headers,
+      body: JSON.stringify(data)
+    }
+  } catch (error) {
+    console.error('Error checking WhatsApp status:', error)
+    return {
+      statusCode: 500,
+      headers,
+      body: JSON.stringify({
+        status: 'error',
+        isReady: false,
+        message: 'Failed to connect to WhatsApp server. Make sure the server is running.',
+        error: error.message
+      })
+    }
   }
 }

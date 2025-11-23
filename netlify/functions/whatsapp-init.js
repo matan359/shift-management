@@ -1,5 +1,5 @@
 // Netlify Function - Initialize WhatsApp
-// מאחר שאנחנו משתמשים ב-WhatsApp Web Link API, אין צורך באתחול
+// Proxy to WhatsApp Web.js server to initialize connection
 
 exports.handler = async (event, context) => {
   // CORS headers
@@ -19,14 +19,33 @@ exports.handler = async (event, context) => {
     }
   }
 
-  // WhatsApp Web Link API is always ready
-  return {
-    statusCode: 200,
-    headers,
-    body: JSON.stringify({
-      success: true,
-      status: 'ready',
-      message: 'WhatsApp Web Link API is ready - no initialization needed'
+  const serverUrl = process.env.WHATSAPP_SERVER_URL || 'http://localhost:3001'
+  
+  try {
+    const response = await fetch(`${serverUrl}/api/whatsapp/init`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      }
     })
+    const data = await response.json()
+    
+    return {
+      statusCode: 200,
+      headers,
+      body: JSON.stringify(data)
+    }
+  } catch (error) {
+    console.error('Error initializing WhatsApp:', error)
+    return {
+      statusCode: 500,
+      headers,
+      body: JSON.stringify({
+        success: false,
+        status: 'error',
+        message: 'Failed to initialize WhatsApp server.',
+        error: error.message
+      })
+    }
   }
 }
