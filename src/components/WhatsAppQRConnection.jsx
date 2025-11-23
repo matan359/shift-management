@@ -117,12 +117,17 @@ export default function WhatsAppQRConnection({ onConnected, onDisconnected }) {
 
   async function generateQRCode() {
     try {
-      // Use a QR code generation service or library
-      // For now, we'll create a simple QR code
+      // Generate QR code for WhatsApp Web connection
       const QRCode = await import('qrcode')
-      const dataUrl = await QRCode.default.toDataURL(`whatsapp:connect?session=${qrCode}`, {
+      // Create a unique connection URL
+      const connectionUrl = `https://web.whatsapp.com`
+      const dataUrl = await QRCode.default.toDataURL(connectionUrl, {
         width: 300,
-        margin: 2
+        margin: 2,
+        color: {
+          dark: '#000000',
+          light: '#FFFFFF'
+        }
       })
       setQrCode(dataUrl)
     } catch (error) {

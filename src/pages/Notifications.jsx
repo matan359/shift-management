@@ -265,8 +265,8 @@ export default function Notifications() {
     if (!db || !user) return
 
     // Check WhatsApp connection status
-    if (whatsappStatus !== 'ready') {
-      alert('⚠️ WhatsApp Cloud API לא מוגדר!\n\nאנא הגדר את WHATSAPP_ACCESS_TOKEN ו-WHATSAPP_PHONE_NUMBER_ID ב-Netlify Environment Variables.\n\nראה מדריך: WHATSAPP_CLOUD_API_SETUP.md')
+    if (!whatsappConnected || whatsappStatus !== 'ready') {
+      alert('⚠️ WhatsApp לא מחובר!\n\nאנא חבר את WhatsApp תחילה על ידי סריקת ה-QR Code.')
       return
     }
 
@@ -360,8 +360,8 @@ export default function Notifications() {
     if (!db || !user) return
 
     // Check WhatsApp connection status
-    if (whatsappStatus !== 'ready') {
-      alert('⚠️ WhatsApp Cloud API לא מוגדר!\n\nאנא הגדר את WHATSAPP_ACCESS_TOKEN ו-WHATSAPP_PHONE_NUMBER_ID ב-Netlify Environment Variables.\n\nראה מדריך: WHATSAPP_CLOUD_API_SETUP.md')
+    if (!whatsappConnected || whatsappStatus !== 'ready') {
+      alert('⚠️ WhatsApp לא מחובר!\n\nאנא חבר את WhatsApp תחילה על ידי סריקת ה-QR Code.')
       return
     }
 
