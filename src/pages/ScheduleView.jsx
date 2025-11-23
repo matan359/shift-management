@@ -4,6 +4,7 @@ import { Calendar, ChevronLeft, ChevronRight, AlertTriangle, Edit2, X, Save, Plu
 import { getFirebaseDb, getAppId } from '../api/firebase'
 import { collection, onSnapshot, doc, addDoc, updateDoc, deleteDoc } from 'firebase/firestore'
 import { getSpecialDayInfo } from '../utils/holidayDetector'
+import { formatHebrewDateShort } from '../utils/hebrewDate'
 import { startOfWeek, endOfWeek, eachDayOfInterval, format, addWeeks, parseISO, isWithinInterval } from 'date-fns'
 import { he } from 'date-fns/locale'
 
@@ -302,6 +303,7 @@ export default function ScheduleView() {
                         <div className="flex flex-col items-center gap-1">
                           <span>{DAYS[index]}</span>
                           <span className="text-xs opacity-90">{format(day, 'dd/MM', { locale: he })}</span>
+                          <span className="text-xs opacity-75 text-yellow-200">{formatHebrewDateShort(day)}</span>
                         </div>
                       </th>
                     )

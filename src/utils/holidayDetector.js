@@ -1,8 +1,10 @@
 // Holiday and Special Day Detector
-// Detects ראש חודש (Rosh Chodesh), holidays, and special days
+// Detects ראש חודש (Rosh Chodesh), holidays, and special days using Hebrew calendar
 
-import { format, getDate, getMonth } from 'date-fns'
+import { format } from 'date-fns'
 import { he } from 'date-fns/locale'
+import { HDate } from '@hebcal/core'
+import { isHebrewRoshChodesh } from './hebrewDate'
 
 // Jewish holidays (simplified - you can expand this)
 const JEWISH_HOLIDAYS = {
@@ -17,12 +19,8 @@ const JEWISH_HOLIDAYS = {
 }
 
 // Check if date is ראש חודש (first day of Hebrew month)
-// This is a simplified version - for accurate Hebrew calendar, use a library like hebcal
 export function isRoshChodesh(date) {
-  // Hebrew months have varying lengths, but generally:
-  // Check if it's around the 1st of the month
-  const day = getDate(date)
-  return day === 1 || day === 2 // ראש חודש can be 1st or 2nd
+  return isHebrewRoshChodesh(date)
 }
 
 // Check if date is a holiday

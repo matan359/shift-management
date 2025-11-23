@@ -4,6 +4,7 @@ import { Calendar, AlertTriangle, Info } from 'lucide-react'
 import { getSpecialDaysInRange, getSpecialDayInfo } from '../utils/holidayDetector'
 import { startOfWeek, endOfWeek, addWeeks, format, parseISO } from 'date-fns'
 import { he } from 'date-fns/locale'
+import { formatHebrewDateShort } from '../utils/hebrewDate'
 
 export default function SpecialDaysAlerts() {
   const { user, db } = useAuth()
@@ -105,9 +106,14 @@ export default function SpecialDaysAlerts() {
                 <div className="flex-1">
                   <div className="flex items-center justify-between mb-2">
                     <h3 className="text-xl font-bold text-gray-800">{alert.name}</h3>
-                    <span className="text-sm text-gray-600">
-                      {format(parseISO(alert.date), 'dd/MM/yyyy', { locale: he })}
-                    </span>
+                    <div className="flex flex-col items-end gap-1">
+                      <span className="text-sm text-gray-600">
+                        {format(parseISO(alert.date), 'dd/MM/yyyy', { locale: he })}
+                      </span>
+                      <span className="text-xs text-gray-500">
+                        {formatHebrewDateShort(parseISO(alert.date))}
+                      </span>
+                    </div>
                   </div>
                   <p className="text-gray-700 mb-2">{alert.message}</p>
                   <div className="flex items-center space-x-2 space-x-reverse mt-3">
@@ -126,7 +132,7 @@ export default function SpecialDaysAlerts() {
       <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
         <h4 className="font-semibold text-blue-800 mb-2">איך זה עובד:</h4>
         <ul className="text-sm text-blue-700 space-y-1 list-disc list-inside">
-          <li>המערכת מזהה אוטומטית ראש חודש (יום 1-2 בכל חודש)</li>
+          <li>המערכת מזהה אוטומטית ראש חודש עברי (יום א' בחודש העברי)</li>
           <li>המערכת מזהה חגים יהודיים מרכזיים</li>
           <li>כל יום מיוחד מציג התראה עם כמות כוח אדם נוסף מומלצת</li>
           <li>התראות מופיעות עד 4 שבועות מראש</li>
