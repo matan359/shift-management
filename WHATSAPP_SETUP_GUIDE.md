@@ -16,12 +16,20 @@
 1. לחץ על **"New Project"**
 2. בחר **"Deploy from GitHub repo"**
 3. בחר את ה-repository שלך
+4. Railway יתחיל לבנות את הפרויקט
 
-### 1.3 הגדר את השרת
-1. **חשוב!** לאחר יצירת הפרויקט, לחץ על **Settings** → **Root Directory**
-2. הגדר את **Root Directory** ל-`server` (זה אומר ל-Railway לבנות רק את תיקיית server)
-3. שמור את השינויים
-4. Railway יתקין את התלויות ויריץ את השרת אוטומטית
+### 1.3 ⚠️ חשוב מאוד - הגדר Root Directory!
+**Railway ינסה לבנות את כל הפרויקט!** צריך להגיד לו לבנות רק את תיקיית `server`:
+
+1. ב-Railway Dashboard, לחץ על השרת שיצרת
+2. לחץ על **"Settings"** (הגלגל שיניים)
+3. גלול למטה ל-**"Root Directory"**
+4. לחץ על **"Edit"**
+5. הזן: `server` (רק המילה server, בלי סלאשים)
+6. לחץ **"Save"**
+7. Railway יתחיל לבנות מחדש - הפעם רק את תיקיית `server` ✅
+
+**אם לא תעשה את זה, Railway ינסה לבנות את כל האתר ויכשל!**
 
 ### 1.4 קבל את ה-URL
 1. לאחר הפריסה, Railway ייתן לך URL (לדוגמה: `https://your-app.railway.app`)
