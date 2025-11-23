@@ -10,7 +10,7 @@ import ScheduleView from './pages/ScheduleView'
 import ManageEmployees from './pages/ManageEmployees'
 import ManageEvents from './pages/ManageEvents'
 import ManageTasks from './pages/ManageTasks'
-import ManageNotifications from './pages/ManageNotifications'
+import Notifications from './pages/Notifications'
 import WhatsAppConnection from './pages/WhatsAppConnection'
 import SystemAnnouncements from './pages/SystemAnnouncements'
 import SpecialDaysAlerts from './pages/SpecialDaysAlerts'
@@ -136,7 +136,7 @@ function AppRoutes() {
       <Route path="/notifications" element={
         <PrivateRoute requiredRole="manager">
           <Layout>
-            <ManageNotifications />
+            <Notifications />
           </Layout>
         </PrivateRoute>
       } />
