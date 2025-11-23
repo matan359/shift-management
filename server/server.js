@@ -124,9 +124,15 @@ app.post('/api/whatsapp/init', (req, res) => {
 app.get('/api/whatsapp/qr', async (req, res) => {
   if (clientStatus === 'qr' && qrCode) {
     try {
-      // Generate QR code as data URL
+      // If we already have the data URL, return it
+      if (qrCodeDataUrl) {
+        return res.json({ qr: qrCodeDataUrl, status: 'qr' })
+      }
+      
+      // Otherwise, generate it
       const QRCode = await import('qrcode')
       const url = await QRCode.default.toDataURL(qrCode)
+      qrCodeDataUrl = url // Cache it
       res.json({ qr: url, status: 'qr' })
     } catch (err) {
       console.error('Error generating QR code:', err)
