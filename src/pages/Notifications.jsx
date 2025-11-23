@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
-import { Bell, Send, Clock, Smartphone, CheckCircle, XCircle } from 'lucide-react'
-import WhatsAppQRConnection from '../components/WhatsAppQRConnection'
+import { Bell, Send, Clock, Smartphone, CheckCircle, XCircle, Loader2 } from 'lucide-react'
 import { getFirebaseDb, getAppId } from '../api/firebase'
 import { collection, query, where, getDocs } from 'firebase/firestore'
 import { format } from 'date-fns'
@@ -20,9 +19,9 @@ export default function Notifications() {
   const [savedLinks, setSavedLinks] = useState([]) // קישורים שנשמרו משליחה אוטומטית
   const [showSavedLinks, setShowSavedLinks] = useState(false) // האם להציג קישורים שנשמרו
   
-  // WhatsApp QR Connection state
-  const [whatsappStatus, setWhatsappStatus] = useState('disconnected') // disconnected, connecting, qr, ready
-  const [whatsappConnected, setWhatsappConnected] = useState(false)
+  // WhatsApp Twilio API status
+  const [whatsappStatus, setWhatsappStatus] = useState('checking') // checking, ready, not_configured
+  const [checkingStatus, setCheckingStatus] = useState(false)
 
   useEffect(() => {
     if (!db || !user) return
@@ -33,22 +32,27 @@ export default function Notifications() {
     loadAutoSendSettings()
     loadSavedLinks()
     
-    // Check if WhatsApp was previously connected
-    const connected = localStorage.getItem('whatsapp_connected') === 'true'
-    if (connected) {
-      setWhatsappStatus('ready')
-      setWhatsappConnected(true)
-    }
+    // Check Twilio status
+    checkWhatsAppStatus()
+    const statusInterval = setInterval(checkWhatsAppStatus, 10000) // Check every 10 seconds
+    
+    return () => clearInterval(statusInterval)
   }, [db, user])
 
-  function handleWhatsAppConnected() {
-    setWhatsappStatus('ready')
-    setWhatsappConnected(true)
-  }
-
-  function handleWhatsAppDisconnected() {
-    setWhatsappStatus('disconnected')
-    setWhatsappConnected(false)
+  async function checkWhatsAppStatus() {
+    setCheckingStatus(true)
+    try {
+      const statusUrl = '/.netlify/functions/whatsapp-status'
+      const response = await fetch(statusUrl)
+      const data = await response.json()
+      
+      setWhatsappStatus(data.status || 'not_configured')
+    } catch (error) {
+      console.error('Error checking WhatsApp status:', error)
+      setWhatsappStatus('not_configured')
+    } finally {
+      setCheckingStatus(false)
+    }
   }
 
   async function loadSavedLinks() {
@@ -248,9 +252,9 @@ export default function Notifications() {
   async function sendAllNotifications() {
     if (!db || !user) return
 
-    // Check WhatsApp connection status
-    if (!whatsappConnected || whatsappStatus !== 'ready') {
-      alert('⚠️ WhatsApp לא מחובר!\n\nאנא חבר את WhatsApp תחילה על ידי סריקת ה-QR Code.')
+    // Check WhatsApp status
+    if (whatsappStatus !== 'ready') {
+      alert('⚠️ Twilio WhatsApp API לא מוגדר!\n\nאנא הגדר את TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, ו-TWILIO_WHATSAPP_NUMBER ב-Netlify Environment Variables.\n\nראה מדריך: TWILIO_SETUP.md')
       return
     }
 
@@ -287,51 +291,38 @@ export default function Notifications() {
         return
       }
 
-      // Send messages via WhatsApp Web Link (opens WhatsApp Web with pre-filled messages)
-      let successCount = 0
-      const results = []
+      // Send messages via Twilio WhatsApp API (automatic sending in background)
+      const sendUrl = '/.netlify/functions/whatsapp-send-bulk'
+      
+      const response = await fetch(sendUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ recipients })
+      })
 
-      for (const recipient of recipients) {
-        try {
-          // Format phone number
-          let formattedNumber = recipient.phoneNumber.replace(/[^0-9]/g, '')
-          
-          if (formattedNumber.startsWith('0')) {
-            formattedNumber = '972' + formattedNumber.substring(1)
-          } else if (!formattedNumber.startsWith('972')) {
-            formattedNumber = '972' + formattedNumber
-          }
-
-          // Create WhatsApp Web Link
-          const encodedMessage = encodeURIComponent(recipient.message)
-          const whatsappLink = `https://web.whatsapp.com/send?phone=${formattedNumber}&text=${encodedMessage}`
-          
-          // Open in new window
-          window.open(whatsappLink, '_blank', 'noopener,noreferrer')
-          
-          results.push({
-            phoneNumber: formattedNumber,
-            success: true,
-            employeeName: recipient.employeeName,
-            whatsappLink: whatsappLink
-          })
-          successCount++
-          
-          // Small delay between opening windows
-          await new Promise(resolve => setTimeout(resolve, 500))
-        } catch (error) {
-          console.error(`Error creating link for ${recipient.phoneNumber}:`, error)
-          results.push({
-            phoneNumber: recipient.phoneNumber,
-            success: false,
-            employeeName: recipient.employeeName,
-            error: error.message
-          })
-        }
+      const data = await response.json()
+      
+      if (data.success) {
+        setResults(data.results.map(r => ({
+          phoneNumber: r.phoneNumber,
+          success: r.success,
+          employeeName: recipients.find(rec => {
+            const originalPhone = rec.phoneNumber.replace(/[^0-9]/g, '')
+            const formattedPhone = r.phoneNumber.replace(/[^0-9]/g, '')
+            return originalPhone === formattedPhone || formattedPhone.includes(originalPhone.slice(-9))
+          })?.employeeName || 'עובד',
+          sent: r.success,
+          error: r.error,
+          messageId: r.messageId
+        })))
+        
+        const successCount = data.results.filter(r => r.success).length
+        alert(`✅ נשלחו ${successCount} מתוך ${data.results.length} הודעות בהצלחה!\n\nההודעות נשלחו אוטומטית ברקע - בלי לפתוח חלונות!`)
+      } else {
+        alert('שגיאה בשליחת ההודעות: ' + (data.error || 'Unknown error'))
       }
-
-      setResults(results)
-      alert(`✅ נפתחו ${successCount} חלונות WhatsApp!\n\nפשוט לחץ "שלח" בכל חלון.`)
     } catch (error) {
       console.error('Error sending notifications:', error)
       alert('שגיאה בשליחת ההודעות: ' + error.message)
@@ -343,9 +334,9 @@ export default function Notifications() {
   async function sendToEmployee(shift) {
     if (!db || !user) return
 
-    // Check WhatsApp connection status
-    if (!whatsappConnected || whatsappStatus !== 'ready') {
-      alert('⚠️ WhatsApp לא מחובר!\n\nאנא חבר את WhatsApp תחילה על ידי סריקת ה-QR Code.')
+    // Check WhatsApp status
+    if (whatsappStatus !== 'ready') {
+      alert('⚠️ Twilio WhatsApp API לא מוגדר!\n\nאנא הגדר את TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, ו-TWILIO_WHATSAPP_NUMBER ב-Netlify Environment Variables.\n\nראה מדריך: TWILIO_SETUP.md')
       return
     }
 
@@ -359,23 +350,27 @@ export default function Notifications() {
     try {
       const message = formatShiftMessage(employee, shift, tasks)
       
-      // Format phone number
-      let formattedNumber = employee.phoneNumber.replace(/[^0-9]/g, '')
+      // Send message via Twilio WhatsApp API (automatic sending in background)
+      const sendUrl = '/.netlify/functions/whatsapp-send'
       
-      if (formattedNumber.startsWith('0')) {
-        formattedNumber = '972' + formattedNumber.substring(1)
-      } else if (!formattedNumber.startsWith('972')) {
-        formattedNumber = '972' + formattedNumber
-      }
+      const response = await fetch(sendUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          phoneNumber: employee.phoneNumber,
+          message: message
+        })
+      })
 
-      // Create WhatsApp Web Link
-      const encodedMessage = encodeURIComponent(message)
-      const whatsappLink = `https://web.whatsapp.com/send?phone=${formattedNumber}&text=${encodedMessage}`
+      const data = await response.json()
       
-      // Open in new window
-      window.open(whatsappLink, '_blank', 'noopener,noreferrer')
-      
-      alert(`✅ נפתח חלון WhatsApp עם הודעה מוכנה ל-${employee.fullName}!\n\nפשוט לחץ "שלח" בחלון WhatsApp.`)
+      if (data.success) {
+        alert(`✅ הודעה נשלחה בהצלחה ל-${employee.fullName}!\n\nההודעה נשלחה אוטומטית ברקע - בלי לפתוח חלונות!`)
+      } else {
+        alert('שגיאה בשליחת ההודעה: ' + (data.error || 'Unknown error'))
+      }
     } catch (error) {
       console.error('Error sending message:', error)
       alert('שגיאה בשליחת ההודעה: ' + error.message)
@@ -427,12 +422,79 @@ export default function Notifications() {
           </div>
         )}
 
-        {/* WhatsApp QR Connection */}
-        <div className="mb-6">
-          <WhatsAppQRConnection 
-            onConnected={handleWhatsAppConnected}
-            onDisconnected={handleWhatsAppDisconnected}
-          />
+        {/* WhatsApp Status */}
+        <div className="mb-6 bg-white rounded-2xl shadow-xl p-4 sm:p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+              <Smartphone className="w-6 h-6 text-green-600" />
+              סטטוס WhatsApp (Twilio)
+            </h2>
+            <button
+              onClick={checkWhatsAppStatus}
+              disabled={checkingStatus}
+              className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 text-sm"
+            >
+              {checkingStatus ? (
+                <>
+                  <span>בודק...</span>
+                </>
+              ) : (
+                <>
+                  <span>רענן</span>
+                </>
+              )}
+            </button>
+          </div>
+
+          <div className="space-y-4">
+            {/* Status Display */}
+            <div className="flex items-center gap-3">
+              {whatsappStatus === 'ready' ? (
+                <>
+                  <CheckCircle className="w-6 h-6 text-green-600" />
+                  <span className="text-green-700 font-semibold">✅ מוכן לשליחה אוטומטית</span>
+                </>
+              ) : whatsappStatus === 'checking' ? (
+                <>
+                  <span className="text-blue-700 font-semibold">🔄 בודק...</span>
+                </>
+              ) : (
+                <>
+                  <XCircle className="w-6 h-6 text-red-600" />
+                  <span className="text-red-700 font-semibold">❌ לא מוגדר</span>
+                </>
+              )}
+            </div>
+
+            {/* Not Configured Message */}
+            {whatsappStatus === 'not_configured' && (
+              <div className="p-4 bg-yellow-50 rounded-xl border-2 border-yellow-300">
+                <p className="text-sm text-yellow-800 font-semibold mb-2">
+                  ⚠️ Twilio WhatsApp API לא מוגדר
+                </p>
+                <p className="text-xs text-yellow-700 mb-3">
+                  כדי לשלוח הודעות אוטומטיות, צריך להגדיר את Twilio WhatsApp API.
+                </p>
+                <a
+                  href="https://github.com/matan359/shift-management/blob/main/TWILIO_SETUP.md"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg transition text-sm font-semibold"
+                >
+                  <span>מדריך הגדרה</span>
+                </a>
+              </div>
+            )}
+
+            {/* Ready Status Info */}
+            {whatsappStatus === 'ready' && (
+              <div className="p-4 bg-green-50 rounded-xl border-2 border-green-300">
+                <p className="text-sm text-green-700 text-center font-semibold">
+                  ✅ Twilio WhatsApp API מוגדר ומוכן! כעת תוכל לשלוח הודעות אוטומטיות - הכל עובד ברקע, בלי לפתוח חלונות!
+                </p>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Send All Button */}
