@@ -56,11 +56,7 @@ export default function Layout({ children }) {
                   </Link>
                   <Link to="/notifications" className="hover:text-blue-200 transition">
                     <Bell className="w-4 h-4 inline ml-1" />
-                    התראות
-                  </Link>
-                  <Link to="/whatsapp-connection" className="hover:text-blue-200 transition">
-                    <Smartphone className="w-4 h-4 inline ml-1" />
-                    WhatsApp
+                    התראות WhatsApp
                   </Link>
                   <Link to="/announcements" className="hover:text-blue-200 transition">
                     הודעות
@@ -132,10 +128,7 @@ export default function Layout({ children }) {
                     משימות
                   </Link>
                   <Link to="/notifications" className="block py-2 hover:text-blue-200" onClick={() => setMobileMenuOpen(false)}>
-                    התראות
-                  </Link>
-                  <Link to="/whatsapp-connection" className="block py-2 hover:text-blue-200" onClick={() => setMobileMenuOpen(false)}>
-                    WhatsApp
+                    התראות WhatsApp
                   </Link>
                 </>
               )}
