@@ -1,5 +1,5 @@
 // Netlify Function - WhatsApp QR Code
-// No QR code needed for WhatsApp Web Link API
+// Proxy to WhatsApp Web.js server to get QR code
 
 exports.handler = async (event, context) => {
   // CORS headers
@@ -19,13 +19,27 @@ exports.handler = async (event, context) => {
     }
   }
 
-  // No QR code needed
-  return {
-    statusCode: 200,
-    headers,
-    body: JSON.stringify({
-      status: 'ready',
-      message: 'No QR code needed - using WhatsApp Web Link API'
-    })
+  const serverUrl = process.env.WHATSAPP_SERVER_URL || 'http://localhost:3001'
+  
+  try {
+    const response = await fetch(`${serverUrl}/api/whatsapp/qr`)
+    const data = await response.json()
+    
+    return {
+      statusCode: 200,
+      headers,
+      body: JSON.stringify(data)
+    }
+  } catch (error) {
+    console.error('Error getting QR code:', error)
+    return {
+      statusCode: 500,
+      headers,
+      body: JSON.stringify({
+        status: 'error',
+        message: 'Failed to get QR code from WhatsApp server.',
+        error: error.message
+      })
+    }
   }
 }

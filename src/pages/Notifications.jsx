@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
-import { Bell, Send, Clock, CheckCircle, XCircle, AlertCircle, Smartphone, X } from 'lucide-react'
+import { Bell, Send, Clock, CheckCircle, XCircle, AlertCircle, Smartphone, QrCode, Loader2, X } from 'lucide-react'
 import { getFirebaseDb, getAppId } from '../api/firebase'
 import { collection, query, where, getDocs } from 'firebase/firestore'
 import { format } from 'date-fns'
@@ -35,10 +35,11 @@ export default function Notifications() {
   const [whatsAppLinks, setWhatsAppLinks] = useState([]) // קישורי WhatsApp להצגה ב-modal
   const [currentLinkIndex, setCurrentLinkIndex] = useState(0) // אינדקס הקישור הנוכחי
   
-  // WhatsApp Web Link API is always ready - no connection needed
-  const [whatsappStatus] = useState('ready') // Always ready
-  const [qrCode] = useState(null) // No QR code needed
-  const [checkingStatus] = useState(false) // No checking needed
+  // WhatsApp Web.js connection state
+  const [whatsappStatus, setWhatsappStatus] = useState('disconnected') // disconnected, connecting, qr, ready
+  const [qrCode, setQrCode] = useState(null) // QR Code data URL
+  const [checkingStatus, setCheckingStatus] = useState(false) // האם בודקים סטטוס
+  const [initializing, setInitializing] = useState(false) // האם מאתחלים חיבור
 
   useEffect(() => {
     if (!db || !user) return
@@ -48,7 +49,75 @@ export default function Notifications() {
     loadTodayTasks()
     loadAutoSendSettings()
     loadSavedLinks()
+    
+    // Check WhatsApp status on mount and periodically
+    checkWhatsAppStatus()
+    const statusInterval = setInterval(checkWhatsAppStatus, 5000) // Check every 5 seconds
+    
+    return () => clearInterval(statusInterval)
   }, [db, user])
+
+  async function checkWhatsAppStatus() {
+    setCheckingStatus(true)
+    try {
+      const statusUrl = API_URL ? `${API_URL}/.netlify/functions/whatsapp-status` : '/.netlify/functions/whatsapp-status'
+      const response = await fetch(statusUrl)
+      const data = await response.json()
+      
+      setWhatsappStatus(data.status || 'disconnected')
+      
+      // If status is 'qr', fetch QR code
+      if (data.status === 'qr') {
+        await fetchQRCode()
+      } else if (data.status === 'ready') {
+        setQrCode(null) // Clear QR code when ready
+      }
+    } catch (error) {
+      console.error('Error checking WhatsApp status:', error)
+      setWhatsappStatus('disconnected')
+    } finally {
+      setCheckingStatus(false)
+    }
+  }
+
+  async function fetchQRCode() {
+    try {
+      const qrUrl = API_URL ? `${API_URL}/.netlify/functions/whatsapp-qr` : '/.netlify/functions/whatsapp-qr'
+      const response = await fetch(qrUrl)
+      const data = await response.json()
+      
+      if (data.qr) {
+        setQrCode(data.qr)
+      }
+    } catch (error) {
+      console.error('Error fetching QR code:', error)
+    }
+  }
+
+  async function initializeWhatsApp() {
+    setInitializing(true)
+    try {
+      const initUrl = API_URL ? `${API_URL}/.netlify/functions/whatsapp-init` : '/.netlify/functions/whatsapp-init'
+      const response = await fetch(initUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      const data = await response.json()
+      
+      if (data.success || data.status === 'connecting') {
+        setWhatsappStatus('connecting')
+        // Start checking for QR code
+        setTimeout(checkWhatsAppStatus, 2000)
+      }
+    } catch (error) {
+      console.error('Error initializing WhatsApp:', error)
+      alert('שגיאה באתחול WhatsApp: ' + error.message)
+    } finally {
+      setInitializing(false)
+    }
+  }
 
   async function loadSavedLinks() {
     if (!db || !user) return
@@ -247,6 +316,12 @@ export default function Notifications() {
   async function sendAllNotifications() {
     if (!db || !user) return
 
+    // Check WhatsApp connection status
+    if (whatsappStatus !== 'ready') {
+      alert('⚠️ WhatsApp לא מחובר!\n\nאנא חבר את WhatsApp תחילה על ידי סריקת ה-QR Code.')
+      return
+    }
+
     // Check if any employees selected
     if (selectedEmployees.size === 0) {
       alert('⚠️ לא נבחרו עובדים לשליחה!\n\nאנא בחר עובדים מהרשימה למטה.')
@@ -280,7 +355,7 @@ export default function Notifications() {
         return
       }
 
-      // Create WhatsApp links via Netlify Functions
+      // Send bulk messages via Netlify Functions (proxies to WhatsApp Web.js server)
       const sendUrl = API_URL ? `${API_URL}/.netlify/functions/whatsapp-send-bulk` : '/.netlify/functions/whatsapp-send-bulk'
       
       const response = await fetch(sendUrl, {
@@ -294,26 +369,6 @@ export default function Notifications() {
       const data = await response.json()
       
       if (data.success) {
-        // Collect all successful links
-        const successfulLinks = data.results
-          .filter(r => r.success && r.whatsappLink)
-          .map(r => ({
-            link: r.whatsappLink,
-            employeeName: recipients.find(rec => {
-              const originalPhone = rec.phoneNumber.replace(/[^0-9]/g, '')
-              const formattedPhone = r.phoneNumber.replace(/[^0-9]/g, '')
-              return originalPhone === formattedPhone || formattedPhone.includes(originalPhone.slice(-9))
-            })?.employeeName || 'עובד',
-            phoneNumber: r.phoneNumber
-          }))
-        
-        if (successfulLinks.length > 0) {
-          // Show modal with all links
-          setWhatsAppLinks(successfulLinks)
-          setCurrentLinkIndex(0)
-          setShowWhatsAppModal(true)
-        }
-        
         setResults(data.results.map(r => ({
           phoneNumber: r.phoneNumber,
           success: r.success,
@@ -324,14 +379,17 @@ export default function Notifications() {
           })?.employeeName || 'עובד',
           sent: r.success,
           error: r.error,
-          whatsappLink: r.whatsappLink
+          messageId: r.messageId
         })))
+        
+        const successCount = data.results.filter(r => r.success).length
+        alert(`✅ נשלחו ${successCount} מתוך ${data.results.length} הודעות בהצלחה!`)
       } else {
-        alert('שגיאה ביצירת קישורי WhatsApp: ' + (data.error || 'Unknown error'))
+        alert('שגיאה בשליחת ההודעות: ' + (data.error || 'Unknown error'))
       }
     } catch (error) {
       console.error('Error sending notifications:', error)
-      alert('שגיאה בשליחת ההודעות: ' + error.message)
+      alert('שגיאה בשליחת ההודעות: ' + error.message + '\n\nודא שהשרת רץ ושה-WhatsApp מחובר.')
     } finally {
       setSending(false)
     }
@@ -339,6 +397,12 @@ export default function Notifications() {
 
   async function sendToEmployee(shift) {
     if (!db || !user) return
+
+    // Check WhatsApp connection status
+    if (whatsappStatus !== 'ready') {
+      alert('⚠️ WhatsApp לא מחובר!\n\nאנא חבר את WhatsApp תחילה על ידי סריקת ה-QR Code.')
+      return
+    }
 
     const employee = employees.find(emp => emp.id === shift.employeeId)
     if (!employee || !employee.phoneNumber) {
@@ -350,7 +414,7 @@ export default function Notifications() {
     try {
       const message = formatShiftMessage(employee, shift, tasks)
       
-      // Create WhatsApp link via Netlify Functions
+      // Send message via Netlify Functions (proxies to WhatsApp Web.js server)
       const sendUrl = API_URL ? `${API_URL}/.netlify/functions/whatsapp-send` : '/.netlify/functions/whatsapp-send'
       
       const response = await fetch(sendUrl, {
@@ -366,17 +430,10 @@ export default function Notifications() {
 
       const data = await response.json()
       
-      if (data.success && data.whatsappLink) {
-        // Show in modal
-        setWhatsAppLinks([{
-          link: data.whatsappLink,
-          employeeName: employee.fullName,
-          phoneNumber: data.phoneNumber
-        }])
-        setCurrentLinkIndex(0)
-        setShowWhatsAppModal(true)
+      if (data.success) {
+        alert(`✅ הודעה נשלחה בהצלחה ל-${employee.fullName}!`)
       } else {
-        alert('שגיאה ביצירת קישור WhatsApp: ' + (data.error || 'Unknown error'))
+        alert('שגיאה בשליחת ההודעה: ' + (data.error || 'Unknown error'))
       }
     } catch (error) {
       console.error('Error sending message:', error)
@@ -429,27 +486,115 @@ export default function Notifications() {
           </div>
         )}
 
-        {/* WhatsApp Info - Simple Explanation */}
-        <div className="mb-6 bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-300 rounded-xl p-4 sm:p-6">
-          <div className="flex items-start gap-3">
-            <CheckCircle className="w-8 h-8 text-green-600 flex-shrink-0 mt-1" />
-            <div>
-              <h2 className="text-xl font-bold text-green-800 mb-2 flex items-center gap-2">
-                <Smartphone className="w-6 h-6" />
-                איך לשלוח הודעות WhatsApp
-              </h2>
-              <div className="space-y-2 text-sm text-green-700">
-                <p className="font-semibold">זה פשוט מאוד:</p>
-                <ol className="list-decimal list-inside space-y-1 text-right">
-                  <li>לחץ על "שלח הכל" או "שלח הודעה" ליד כל עובד</li>
-                  <li>ייפתח חלון WhatsApp עם הודעה מוכנה</li>
-                  <li>פשוט לחץ "שלח" בחלון WhatsApp - זה הכל! ✅</li>
-                </ol>
-                <p className="text-xs text-green-600 mt-3">
-                  💡 אין צורך בחיבור או QR Code - הכל עובד מיד!
+        {/* WhatsApp Connection Status */}
+        <div className="mb-6 bg-white rounded-2xl shadow-xl p-4 sm:p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+              <Smartphone className="w-6 h-6 text-green-600" />
+              סטטוס חיבור WhatsApp
+            </h2>
+            <button
+              onClick={checkWhatsAppStatus}
+              disabled={checkingStatus}
+              className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 text-sm"
+            >
+              {checkingStatus ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span>בודק...</span>
+                </>
+              ) : (
+                <>
+                  <span>רענן</span>
+                </>
+              )}
+            </button>
+          </div>
+
+          <div className="space-y-4">
+            {/* Status Display */}
+            <div className="flex items-center gap-3">
+              {whatsappStatus === 'ready' ? (
+                <>
+                  <CheckCircle className="w-6 h-6 text-green-600" />
+                  <span className="text-green-700 font-semibold">✅ מחובר ומוכן</span>
+                </>
+              ) : whatsappStatus === 'qr' ? (
+                <>
+                  <QrCode className="w-6 h-6 text-yellow-600" />
+                  <span className="text-yellow-700 font-semibold">📱 סרוק QR Code</span>
+                </>
+              ) : whatsappStatus === 'connecting' ? (
+                <>
+                  <Loader2 className="w-6 h-6 text-blue-600 animate-spin" />
+                  <span className="text-blue-700 font-semibold">🔄 מתחבר...</span>
+                </>
+              ) : (
+                <>
+                  <XCircle className="w-6 h-6 text-red-600" />
+                  <span className="text-red-700 font-semibold">❌ לא מחובר</span>
+                </>
+              )}
+            </div>
+
+            {/* QR Code Display */}
+            {whatsappStatus === 'qr' && qrCode && (
+              <div className="flex flex-col items-center gap-4 p-4 bg-gray-50 rounded-xl">
+                <p className="text-sm text-gray-700 text-center">
+                  סרוק את ה-QR Code עם WhatsApp בטלפון שלך:
+                </p>
+                <div className="bg-white p-4 rounded-lg shadow-lg">
+                  <img src={qrCode} alt="WhatsApp QR Code" className="w-64 h-64" />
+                </div>
+                <p className="text-xs text-gray-600 text-center">
+                  פתח WhatsApp → הגדרות → מכשירים מקושרים → קשר מכשיר
                 </p>
               </div>
-            </div>
+            )}
+
+            {/* Initialize Button */}
+            {whatsappStatus === 'disconnected' && (
+              <div className="flex flex-col items-center gap-4 p-4 bg-yellow-50 rounded-xl">
+                <p className="text-sm text-gray-700 text-center">
+                  WhatsApp לא מחובר. לחץ על הכפתור למטה כדי להתחיל את החיבור.
+                </p>
+                <button
+                  onClick={initializeWhatsApp}
+                  disabled={initializing}
+                  className="px-6 py-3 bg-green-500 hover:bg-green-600 text-white rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 font-semibold"
+                >
+                  {initializing ? (
+                    <>
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                      <span>מאתחל...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Smartphone className="w-5 h-5" />
+                      <span>התחל חיבור WhatsApp</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            )}
+
+            {/* Connection Instructions */}
+            {whatsappStatus === 'connecting' && (
+              <div className="p-4 bg-blue-50 rounded-xl">
+                <p className="text-sm text-blue-700 text-center">
+                  ממתין ל-QR Code... אם ה-QR Code לא מופיע תוך כמה שניות, לחץ על "רענן".
+                </p>
+              </div>
+            )}
+
+            {/* Ready Status Info */}
+            {whatsappStatus === 'ready' && (
+              <div className="p-4 bg-green-50 rounded-xl">
+                <p className="text-sm text-green-700 text-center">
+                  ✅ WhatsApp מחובר ומוכן! כעת תוכל לשלוח הודעות אוטומטיות.
+                </p>
+              </div>
+            )}
           </div>
         </div>
 
