@@ -99,6 +99,27 @@ let qrCodeDataUrl = null
 
 // Routes
 
+// Initialize/Reinitialize WhatsApp connection
+app.post('/api/whatsapp/init', (req, res) => {
+  if (client && isReady) {
+    return res.json({ status: 'ready', message: 'Already connected' })
+  }
+  
+  // Reset and reinitialize
+  if (client) {
+    client.destroy()
+    client = null
+  }
+  
+  clientStatus = 'connecting'
+  initializeWhatsApp()
+  
+  res.json({ 
+    status: 'connecting', 
+    message: 'Initializing WhatsApp connection...' 
+  })
+})
+
 // Get QR code for scanning
 app.get('/api/whatsapp/qr', async (req, res) => {
   if (clientStatus === 'qr' && qrCode) {

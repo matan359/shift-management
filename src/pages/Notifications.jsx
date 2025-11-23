@@ -113,6 +113,10 @@ export default function Notifications() {
       if (data.error && data.status === 'disconnected') {
         setWhatsappStatus('disconnected')
         setQrCode(null)
+        // Try to initialize connection if server is available
+        if (data.error !== 'Server not configured') {
+          await initializeConnection()
+        }
         return
       }
       
@@ -123,12 +127,30 @@ export default function Notifications() {
         await loadQRCode()
       } else if (data.status === 'ready') {
         setQrCode(null)
+      } else if (data.status === 'disconnected') {
+        // Try to initialize connection
+        await initializeConnection()
       }
     } catch (error) {
       console.error('Error checking WhatsApp status:', error)
       setWhatsappStatus('disconnected')
     } finally {
       setCheckingStatus(false)
+    }
+  }
+
+  async function initializeConnection() {
+    try {
+      // Try to trigger initialization on server
+      const url = API_URL 
+        ? `${API_URL}/api/whatsapp/init`
+        : '/.netlify/functions/whatsapp-init'
+      
+      await fetch(url, { method: 'POST' })
+      // Wait a bit and check status again
+      setTimeout(checkWhatsAppStatus, 2000)
+    } catch (error) {
+      console.error('Error initializing connection:', error)
     }
   }
 
@@ -450,13 +472,55 @@ export default function Notifications() {
             </div>
           ) : (
             <div className="bg-red-50 border-2 border-red-300 rounded-xl p-4 sm:p-6">
-              <div className="flex items-center gap-3">
-                <XCircle className="w-8 h-8 text-red-600 flex-shrink-0" />
-                <div>
-                  <h3 className="text-lg font-bold text-red-800 mb-1">❌ לא מחובר</h3>
-                  <p className="text-sm text-red-700">
-                    WhatsApp לא מחובר. המתן ל-QR Code או ודא שהשרת רץ.
-                  </p>
+              <div className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <XCircle className="w-8 h-8 text-red-600 flex-shrink-0" />
+                  <div>
+                    <h3 className="text-lg font-bold text-red-800 mb-1">❌ לא מחובר</h3>
+                    <p className="text-sm text-red-700">
+                      WhatsApp לא מחובר. עקוב אחר ההוראות למטה.
+                    </p>
+                  </div>
+                </div>
+                
+                {/* Instructions */}
+                <div className="bg-white rounded-lg p-4 border border-red-200">
+                  <h4 className="font-bold text-gray-800 mb-3 text-base">איך להתחבר:</h4>
+                  <div className="space-y-3 text-sm text-gray-700">
+                    <div className="flex items-start gap-2">
+                      <span className="font-bold text-blue-600">1.</span>
+                      <div>
+                        <p className="font-semibold">ודא שהשרת רץ:</p>
+                        <p className="text-xs text-gray-600 mt-1">
+                          אם אתה בפיתוח מקומי: פתח טרמינל בתיקיית <code className="bg-gray-100 px-1 rounded">server</code> והרץ <code className="bg-gray-100 px-1 rounded">npm start</code>
+                        </p>
+                        <p className="text-xs text-gray-600 mt-1">
+                          אם אתה ב-production: ודא שהשרת רץ ב-Railway ושה-<code className="bg-gray-100 px-1 rounded">WHATSAPP_SERVER_URL</code> מוגדר ב-Netlify
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <span className="font-bold text-blue-600">2.</span>
+                      <div>
+                        <p className="font-semibold">לחץ על "התחל חיבור":</p>
+                        <button
+                          onClick={initializeConnection}
+                          className="mt-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition text-sm font-semibold"
+                        >
+                          התחל חיבור
+                        </button>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <span className="font-bold text-blue-600">3.</span>
+                      <div>
+                        <p className="font-semibold">סרוק QR Code:</p>
+                        <p className="text-xs text-gray-600 mt-1">
+                          כשה-QR Code יופיע, פתח WhatsApp בטלפון → הגדרות → מכשירים מקושרים → קשר מכשיר → סרוק
+                        </p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
