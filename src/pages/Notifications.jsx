@@ -1,24 +1,11 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
-import { Bell, Send, Clock, CheckCircle, XCircle, AlertCircle, Smartphone, Loader2, X, ExternalLink } from 'lucide-react'
+import { Bell, Send, Clock, Smartphone, X } from 'lucide-react'
 import WhatsAppQRConnection from '../components/WhatsAppQRConnection'
 import { getFirebaseDb, getAppId } from '../api/firebase'
 import { collection, query, where, getDocs } from 'firebase/firestore'
 import { format } from 'date-fns'
 import { he } from 'date-fns/locale'
-
-// Use Netlify Functions in production, local server in development
-const getAPIUrl = () => {
-  if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-    return 'http://localhost:3001'
-  }
-  if (window.location.hostname.includes('netlify.app') || window.location.hostname.includes('netlify.com')) {
-    return '' // Use relative path for Netlify Functions
-  }
-  return import.meta.env.VITE_API_URL || 'https://your-whatsapp-server.railway.app'
-}
-
-const API_URL = getAPIUrl()
 
 export default function Notifications() {
   const { user, db } = useAuth()
@@ -32,9 +19,6 @@ export default function Notifications() {
   const [autoSendTime, setAutoSendTime] = useState('07:00') // שעת שליחה אוטומטית
   const [savedLinks, setSavedLinks] = useState([]) // קישורים שנשמרו משליחה אוטומטית
   const [showSavedLinks, setShowSavedLinks] = useState(false) // האם להציג קישורים שנשמרו
-  const [showWhatsAppModal, setShowWhatsAppModal] = useState(false) // Modal להצגת WhatsApp בתוך האתר
-  const [whatsAppLinks, setWhatsAppLinks] = useState([]) // קישורי WhatsApp להצגה ב-modal
-  const [currentLinkIndex, setCurrentLinkIndex] = useState(0) // אינדקס הקישור הנוכחי
   
   // WhatsApp QR Connection state
   const [whatsappStatus, setWhatsappStatus] = useState('disconnected') // disconnected, connecting, qr, ready
@@ -443,82 +427,12 @@ export default function Notifications() {
           </div>
         )}
 
-        {/* WhatsApp Connection Status */}
-        <div className="mb-6 bg-white rounded-2xl shadow-xl p-4 sm:p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-              <Smartphone className="w-6 h-6 text-green-600" />
-              סטטוס חיבור WhatsApp
-            </h2>
-            <button
-              onClick={checkWhatsAppStatus}
-              disabled={checkingStatus}
-              className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 text-sm"
-            >
-              {checkingStatus ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  <span>בודק...</span>
-                </>
-              ) : (
-                <>
-                  <span>רענן</span>
-                </>
-              )}
-            </button>
-          </div>
-
-          <div className="space-y-4">
-            {/* Status Display */}
-            <div className="flex items-center gap-3">
-              {whatsappStatus === 'ready' ? (
-                <>
-                  <CheckCircle className="w-6 h-6 text-green-600" />
-                  <span className="text-green-700 font-semibold">✅ מחובר ומוכן</span>
-                </>
-              ) : whatsappStatus === 'checking' ? (
-                <>
-                  <Loader2 className="w-6 h-6 text-blue-600 animate-spin" />
-                  <span className="text-blue-700 font-semibold">🔄 בודק...</span>
-                </>
-              ) : (
-                <>
-                  <XCircle className="w-6 h-6 text-red-600" />
-                  <span className="text-red-700 font-semibold">❌ לא מוגדר</span>
-                </>
-              )}
-            </div>
-
-            {/* Not Configured Message */}
-            {whatsappStatus === 'not_configured' && (
-              <div className="p-4 bg-yellow-50 rounded-xl border-2 border-yellow-300">
-                <p className="text-sm text-yellow-800 font-semibold mb-2">
-                  ⚠️ WhatsApp Cloud API לא מוגדר
-                </p>
-                <p className="text-xs text-yellow-700 mb-3">
-                  כדי לשלוח הודעות אוטומטיות, צריך להגדיר את WhatsApp Cloud API של Meta.
-                </p>
-                <a
-                  href="https://github.com/matan359/shift-management/blob/main/WHATSAPP_CLOUD_API_SETUP.md"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg transition text-sm font-semibold"
-                >
-                  <ExternalLink className="w-4 h-4" />
-                  <span>מדריך הגדרה</span>
-                </a>
-              </div>
-            )}
-
-            {/* Ready Status Info */}
-            {whatsappStatus === 'ready' && (
-              <div className="p-4 bg-green-50 rounded-xl border-2 border-green-300">
-                <p className="text-sm text-green-700 text-center font-semibold">
-                  ✅ WhatsApp Cloud API מוגדר ומוכן! כעת תוכל לשלוח הודעות אוטומטיות ישירות - בלי שרת חיצוני, בלי Railway, הכל עובד על Netlify!
-                </p>
-              </div>
-            )}
-          </div>
+        {/* WhatsApp QR Connection */}
+        <div className="mb-6">
+          <WhatsAppQRConnection 
+            onConnected={handleWhatsAppConnected}
+            onDisconnected={handleWhatsAppDisconnected}
+          />
         </div>
 
         {/* Send All Button */}
