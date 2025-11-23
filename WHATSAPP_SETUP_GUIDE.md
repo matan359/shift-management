@@ -31,6 +31,12 @@
 
 **אם לא תעשה את זה, Railway ינסה לבנות את כל האתר ויכשל!**
 
+### 1.4 הגדר Build Method (אם צריך)
+אם Railway לא מזהה את ה-Dockerfile:
+1. ב-Settings → **"Build Command"**
+2. השאר ריק (Dockerfile יעשה את העבודה)
+3. ב-**"Start Command"** - השאר: `npm start`
+
 ### 1.4 קבל את ה-URL
 1. לאחר הפריסה, Railway ייתן לך URL (לדוגמה: `https://your-app.railway.app`)
 2. העתק את ה-URL הזה
