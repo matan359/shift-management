@@ -5,6 +5,7 @@ import { getFirebaseDb, getAppId } from '../api/firebase'
 import { collection, query, where, getDocs } from 'firebase/firestore'
 import { format } from 'date-fns'
 import { he } from 'date-fns/locale'
+import { createWhatsAppLink, formatPhoneNumber } from '../utils/whatsappLink'
 
 // Use Netlify Functions in production, local server in development
 const getAPIUrl = () => {
@@ -285,58 +286,39 @@ export default function Notifications() {
         return
       }
 
-      // Send bulk messages via Netlify Functions
-      const sendUrl = '/.netlify/functions/whatsapp-send-bulk'
-      
-      const response = await fetch(sendUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ recipients })
+      // Create WhatsApp Web links locally (no server needed!)
+      const successfulLinks = recipients.map(rec => {
+        const formattedPhone = formatPhoneNumber(rec.phoneNumber)
+        return {
+          link: createWhatsAppLink(formattedPhone, rec.message),
+          employeeName: rec.employeeName,
+          phoneNumber: formattedPhone
+        }
       })
 
-      const data = await response.json()
-      
-      if (data.success) {
-        // Collect all successful links
-        const successfulLinks = data.results
-          .filter(r => r.success && r.whatsappLink)
-          .map(r => ({
-            link: r.whatsappLink,
-            employeeName: recipients.find(rec => {
-              const originalPhone = rec.phoneNumber.replace(/[^0-9]/g, '')
-              const formattedPhone = r.phoneNumber.replace(/[^0-9]/g, '')
-              return originalPhone === formattedPhone || formattedPhone.includes(originalPhone.slice(-9))
-            })?.employeeName || 'עובד',
-            phoneNumber: r.phoneNumber
-          }))
-        
-        if (successfulLinks.length > 0) {
-          // Show modal with all links - בתוך האתר!
-          setWhatsAppLinks(successfulLinks)
-          setCurrentLinkIndex(0)
-          setShowWhatsAppModal(true)
-        }
-        
-        setResults(data.results.map(r => ({
-          phoneNumber: r.phoneNumber,
-          success: r.success,
-          employeeName: recipients.find(rec => {
-            const originalPhone = rec.phoneNumber.replace(/[^0-9]/g, '')
-            const formattedPhone = r.phoneNumber.replace(/[^0-9]/g, '')
-            return originalPhone === formattedPhone || formattedPhone.includes(originalPhone.slice(-9))
-          })?.employeeName || 'עובד',
-          sent: r.success,
-          error: r.error,
-          whatsappLink: r.whatsappLink
-        })))
-      } else {
-        alert('שגיאה ביצירת קישורי WhatsApp: ' + (data.error || 'Unknown error'))
-      }
+      // Open WhatsApp windows sequentially so the browser לא יחסום אותם
+      successfulLinks.forEach((link, index) => {
+        setTimeout(() => {
+          window.open(link.link, '_blank', 'noopener,noreferrer')
+        }, index * 400)
+      })
+
+      // Show the links inside the site as well
+      setWhatsAppLinks(successfulLinks)
+      setCurrentLinkIndex(0)
+      setShowWhatsAppModal(true)
+
+      setResults(successfulLinks.map(link => ({
+        phoneNumber: link.phoneNumber,
+        success: true,
+        employeeName: link.employeeName,
+        sent: true,
+        error: null,
+        whatsappLink: link.link
+      })))
     } catch (error) {
       console.error('Error sending notifications:', error)
-      alert('שגיאה בשליחת ההודעות: ' + error.message + '\n\nודא שהשרת רץ ושה-WhatsApp מחובר.')
+      alert('שגיאה בשליחת ההודעות: ' + error.message + '\n\nנסה שוב ובדוק שחוסמי פופ-אפים כבויים.')
     } finally {
       setSending(false)
     }
@@ -356,38 +338,32 @@ export default function Notifications() {
     setSending(true)
     try {
       const message = formatShiftMessage(employee, shift, tasks)
-      
-      // Send message via Netlify Functions
-      const sendUrl = '/.netlify/functions/whatsapp-send'
-      
-      const response = await fetch(sendUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          phoneNumber: employee.phoneNumber,
-          message: message
-        })
-      })
 
-      const data = await response.json()
-      
-      if (data.success && data.whatsappLink) {
-        // Show in modal - בתוך האתר!
-        setWhatsAppLinks([{
-          link: data.whatsappLink,
-          employeeName: employee.fullName,
-          phoneNumber: data.phoneNumber
-        }])
-        setCurrentLinkIndex(0)
-        setShowWhatsAppModal(true)
-      } else {
-        alert('שגיאה ביצירת קישור WhatsApp: ' + (data.error || 'Unknown error'))
-      }
+      // Create link locally and open it right away
+      const formattedPhone = formatPhoneNumber(employee.phoneNumber)
+      const whatsappLink = createWhatsAppLink(formattedPhone, message)
+
+      window.open(whatsappLink, '_blank', 'noopener,noreferrer')
+
+      // Show in modal - בתוך האתר!
+      setWhatsAppLinks([{
+        link: whatsappLink,
+        employeeName: employee.fullName,
+        phoneNumber: formattedPhone
+      }])
+      setCurrentLinkIndex(0)
+      setShowWhatsAppModal(true)
+      setResults([{
+        phoneNumber: formattedPhone,
+        success: true,
+        employeeName: employee.fullName,
+        sent: true,
+        error: null,
+        whatsappLink
+      }])
     } catch (error) {
       console.error('Error sending message:', error)
-      alert('שגיאה בשליחת ההודעה: ' + error.message)
+      alert('שגיאה בשליחת ההודעה: ' + error.message + '\n\nנסה שוב ובדוק שחוסמי פופ-אפים כבויים.')
     } finally {
       setSending(false)
     }
@@ -655,93 +631,71 @@ export default function Notifications() {
                   </div>
                 </div>
 
-                {/* Right Side - WhatsApp Web */}
-                <div className="flex-1 flex flex-col">
+                {/* Right Side - WhatsApp Actions */}
+                <div className="flex-1 flex flex-col bg-gradient-to-br from-green-50 to-emerald-50 p-4">
                   {/* Current Message Info */}
-                  <div className="p-4 bg-green-50 border-b-2 border-green-200">
-                    <p className="font-semibold text-green-800">
-                      שולח ל: {whatsAppLinks[currentLinkIndex]?.employeeName}
-                    </p>
-                    <p className="text-sm text-green-700">
-                      לחץ על הקישור למטה כדי לפתוח WhatsApp Web
-                    </p>
-                  </div>
-
-                  {/* WhatsApp Web - Embedded Inside! */}
-                  <div className="flex-1 p-4 flex flex-col bg-gradient-to-br from-green-50 to-emerald-50">
-                    {/* Info Bar */}
-                    <div className="bg-white rounded-xl shadow-lg p-4 mb-4">
-                      <div className="flex items-center gap-3">
-                        <Smartphone className="w-8 h-8 text-green-600" />
-                        <div>
-                          <h3 className="text-lg font-bold text-gray-800">
-                            הודעה ל-{whatsAppLinks[currentLinkIndex]?.employeeName}
-                          </h3>
-                          <p className="text-sm text-gray-600">
-                            WhatsApp Web בתוך האתר - לחץ על הקישור למטה
-                          </p>
-                        </div>
+                  <div className="bg-white rounded-xl shadow-lg p-4 mb-4">
+                    <div className="flex items-center gap-3">
+                      <Smartphone className="w-8 h-8 text-green-600" />
+                      <div>
+                        <h3 className="text-lg font-bold text-gray-800">
+                          הודעה ל-{whatsAppLinks[currentLinkIndex]?.employeeName}
+                        </h3>
+                        <p className="text-sm text-gray-600">
+                          לחיצה על הכפתור תפתח WhatsApp בחלון חדש. ודא שחוסמי פופ-אפים כבויים.
+                        </p>
                       </div>
                     </div>
+                  </div>
 
-                    {/* WhatsApp Web Embedded */}
-                    <div className="flex-1 bg-white rounded-xl shadow-xl overflow-hidden">
-                      <iframe
-                        src={whatsAppLinks[currentLinkIndex]?.link}
-                        className="w-full h-full border-0"
-                        title={`WhatsApp Web - ${whatsAppLinks[currentLinkIndex]?.employeeName}`}
-                        allow="camera; microphone"
-                        sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
-                        style={{ minHeight: '500px' }}
-                      />
-                    </div>
-
-                    {/* Fallback Link */}
-                    <div className="mt-4 text-center">
-                      <p className="text-sm text-gray-600 mb-2">
-                        אם WhatsApp לא נטען, לחץ כאן:
-                      </p>
+                  {/* Open Link */}
+                  <div className="bg-white rounded-xl shadow-xl p-6 flex flex-col gap-4 items-stretch">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                      <div>
+                        <p className="font-semibold text-gray-800">קישור WhatsApp מוכן</p>
+                        <p className="text-sm text-gray-600">טלפון: {whatsAppLinks[currentLinkIndex]?.phoneNumber}</p>
+                      </div>
                       <a
                         href={whatsAppLinks[currentLinkIndex]?.link}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-block bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold py-3 px-6 rounded-xl transition-all duration-200 transform hover:scale-105 shadow-lg"
+                        className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold py-3 px-6 rounded-xl transition-all duration-200 transform hover:scale-105 shadow-lg"
                       >
-                        <div className="flex items-center justify-center gap-2">
-                          <Smartphone className="w-5 h-5" />
-                          <span>פתח WhatsApp בחלון חדש</span>
-                        </div>
+                        <Smartphone className="w-5 h-5" />
+                        <span>פתח WhatsApp</span>
                       </a>
                     </div>
-
-                    {/* Navigation Buttons */}
-                    <div className="flex gap-3 mt-4">
-                      <button
-                        onClick={() => {
-                          if (currentLinkIndex > 0) {
-                            setCurrentLinkIndex(currentLinkIndex - 1)
-                          }
-                        }}
-                        disabled={currentLinkIndex === 0}
-                        className="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-semibold py-3 px-4 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        ← קודם
-                      </button>
-                      <button
-                        onClick={() => {
-                          if (currentLinkIndex < whatsAppLinks.length - 1) {
-                            setCurrentLinkIndex(currentLinkIndex + 1)
-                          } else {
-                            // Close modal when done
-                            setShowWhatsAppModal(false)
-                          }
-                        }}
-                        className="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-4 rounded-lg transition"
-                      >
-                        {currentLinkIndex < whatsAppLinks.length - 1 ? 'הבא →' : 'סיום ✅'}
-                      </button>
-                    </div>
+                    <p className="text-sm text-gray-700 bg-green-50 border border-green-200 rounded-lg p-3">
+                      אם החלון לא נפתח, לחץ על הכפתור שוב לאחר ביטול חוסם הפופ-אפים או השתמש בקישור הידני למעלה.
+                    </p>
                   </div>
+
+                  {/* Navigation Buttons */}
+                  <div className="flex gap-3 mt-4">
+                    <button
+                      onClick={() => {
+                        if (currentLinkIndex > 0) {
+                          setCurrentLinkIndex(currentLinkIndex - 1)
+                        }
+                      }}
+                      disabled={currentLinkIndex === 0}
+                      className="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-semibold py-3 px-4 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      ← קודם
+                    </button>
+                    <button
+                      onClick={() => {
+                        if (currentLinkIndex < whatsAppLinks.length - 1) {
+                          setCurrentLinkIndex(currentLinkIndex + 1)
+                        } else {
+                          // Close modal when done
+                          setShowWhatsAppModal(false)
+                        }
+                      }}
+                      className="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-4 rounded-lg transition"
+                    >
+                      {currentLinkIndex < whatsAppLinks.length - 1 ? 'הבא →' : 'סיום ✅'}
+                    </button>
                   </div>
                 </div>
               </div>
