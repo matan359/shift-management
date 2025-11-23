@@ -15,11 +15,9 @@
 [functions]
   directory = "netlify/functions"
 
-# Scheduled Functions - שליחה אוטומטית כל יום
-# Note: Netlify Scheduled Functions require a paid plan
-# Alternative: Use Firebase Cloud Functions or Vercel Cron Jobs
-[[plugins]]
-  package = "@netlify/plugin-scheduled-functions"
+# Note: Scheduled Functions require @netlify/plugin-scheduled-functions
+# For now, we'll use Firebase Cloud Functions for scheduled tasks
+# See SCHEDULED_NOTIFICATIONS_SETUP.md for alternatives
 
 # Environment variables
 # Add these in Netlify Dashboard > Site settings > Environment variables
