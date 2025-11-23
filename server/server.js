@@ -43,7 +43,7 @@ function initializeWhatsApp() {
     }
   })
 
-  client.on('qr', (qr) => {
+  client.on('qr', async (qr) => {
     console.log('QR Code received, scan it!')
     qrCode = qr
     clientStatus = 'qr'
@@ -52,13 +52,13 @@ function initializeWhatsApp() {
     qrcode.generate(qr, { small: true })
     
     // Also generate QR code as data URL for web
-    import('qrcode').then((QRCode) => {
-      QRCode.default.toDataURL(qr, (err, url) => {
-        if (!err) {
-          qrCodeDataUrl = url
-        }
-      })
-    })
+    try {
+      const QRCode = await import('qrcode')
+      qrCodeDataUrl = await QRCode.default.toDataURL(qr)
+      console.log('QR Code data URL generated')
+    } catch (err) {
+      console.error('Error generating QR code data URL:', err)
+    }
   })
 
   client.on('ready', () => {
