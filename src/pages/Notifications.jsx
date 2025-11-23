@@ -334,7 +334,7 @@ export default function Notifications() {
       alert(`✅ נפתחו ${successCount} חלונות WhatsApp!\n\nפשוט לחץ "שלח" בכל חלון.`)
     } catch (error) {
       console.error('Error sending notifications:', error)
-      alert('שגיאה בשליחת ההודעות: ' + error.message + '\n\nודא שהשרת רץ ושה-WhatsApp מחובר.')
+      alert('שגיאה בשליחת ההודעות: ' + error.message)
     } finally {
       setSending(false)
     }
