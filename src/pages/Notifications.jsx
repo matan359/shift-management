@@ -667,31 +667,52 @@ export default function Notifications() {
                     </p>
                   </div>
 
-                  {/* WhatsApp Link - Embedded */}
-                  <div className="flex-1 p-4 flex flex-col items-center justify-center bg-gradient-to-br from-green-50 to-emerald-50">
-                    <div className="bg-white rounded-xl shadow-xl p-6 sm:p-8 max-w-2xl w-full">
-                      <div className="text-center mb-6">
-                        <Smartphone className="w-16 h-16 text-green-600 mx-auto mb-4" />
-                        <h3 className="text-2xl font-bold text-gray-800 mb-2">
-                          הודעה מוכנה ל-{whatsAppLinks[currentLinkIndex]?.employeeName}
-                        </h3>
-                        <p className="text-gray-600 mb-6">
-                          לחץ על הכפתור למטה כדי לפתוח WhatsApp Web עם ההודעה המוכנה
-                        </p>
+                  {/* WhatsApp Web - Embedded Inside! */}
+                  <div className="flex-1 p-4 flex flex-col bg-gradient-to-br from-green-50 to-emerald-50">
+                    {/* Info Bar */}
+                    <div className="bg-white rounded-xl shadow-lg p-4 mb-4">
+                      <div className="flex items-center gap-3">
+                        <Smartphone className="w-8 h-8 text-green-600" />
+                        <div>
+                          <h3 className="text-lg font-bold text-gray-800">
+                            הודעה ל-{whatsAppLinks[currentLinkIndex]?.employeeName}
+                          </h3>
+                          <p className="text-sm text-gray-600">
+                            WhatsApp Web בתוך האתר - לחץ על הקישור למטה
+                          </p>
+                        </div>
                       </div>
+                    </div>
 
-                      {/* WhatsApp Link Button */}
+                    {/* WhatsApp Web Embedded */}
+                    <div className="flex-1 bg-white rounded-xl shadow-xl overflow-hidden">
+                      <iframe
+                        src={whatsAppLinks[currentLinkIndex]?.link}
+                        className="w-full h-full border-0"
+                        title={`WhatsApp Web - ${whatsAppLinks[currentLinkIndex]?.employeeName}`}
+                        allow="camera; microphone"
+                        sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
+                        style={{ minHeight: '500px' }}
+                      />
+                    </div>
+
+                    {/* Fallback Link */}
+                    <div className="mt-4 text-center">
+                      <p className="text-sm text-gray-600 mb-2">
+                        אם WhatsApp לא נטען, לחץ כאן:
+                      </p>
                       <a
                         href={whatsAppLinks[currentLinkIndex]?.link}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="block w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold py-4 px-6 rounded-xl transition-all duration-200 transform hover:scale-105 shadow-lg text-center text-lg mb-4 touch-manipulation active:scale-95"
+                        className="inline-block bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold py-3 px-6 rounded-xl transition-all duration-200 transform hover:scale-105 shadow-lg"
                       >
-                        <div className="flex items-center justify-center gap-3">
-                          <Smartphone className="w-6 h-6" />
-                          <span>פתח WhatsApp Web</span>
+                        <div className="flex items-center justify-center gap-2">
+                          <Smartphone className="w-5 h-5" />
+                          <span>פתח WhatsApp בחלון חדש</span>
                         </div>
                       </a>
+                    </div>
 
                       {/* Navigation Buttons */}
                       <div className="flex gap-3">
