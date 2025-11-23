@@ -59,7 +59,7 @@ export default function SwapShifts() {
         .map(doc => ({ id: doc.id, ...doc.data() }))
         .filter(shift => {
           const shiftDate = parseISO(shift.date)
-          return shiftDate >= new Date()
+          return shiftDate >= new Date() && (shift.published === true) // Only show published shifts
         })
         .sort((a, b) => a.date.localeCompare(b.date))
 

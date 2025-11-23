@@ -37,7 +37,8 @@ export default function WorkerDashboard() {
         .map(doc => ({ id: doc.id, ...doc.data() }))
         .filter(shift => {
           const shiftDate = parseISO(shift.date)
-          return isWithinInterval(shiftDate, { start: weekStart, end: weekEnd })
+          return isWithinInterval(shiftDate, { start: weekStart, end: weekEnd }) &&
+                 (shift.published === true) // Only show published shifts
         })
         .sort((a, b) => a.date.localeCompare(b.date))
 
