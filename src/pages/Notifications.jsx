@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
-import { Bell, Send, Clock, Smartphone, X } from 'lucide-react'
+import { Bell, Send, Clock, Smartphone, CheckCircle, XCircle } from 'lucide-react'
 import WhatsAppQRConnection from '../components/WhatsAppQRConnection'
 import { getFirebaseDb, getAppId } from '../api/firebase'
 import { collection, query, where, getDocs } from 'firebase/firestore'
