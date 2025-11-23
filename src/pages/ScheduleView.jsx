@@ -520,11 +520,23 @@ function ShiftEditModal({ shift, cell, employees, onSave, onDelete, onClose }) {
               <option value="">בחר עובד</option>
               {employees
                 .filter(emp => {
-                  // Filter by category
-                  if (cell.category === 'אחראי') return emp.role === 'manager' || emp.category === 'אחראי'
-                  if (cell.category === 'פס') return emp.category === 'פס'
-                  if (cell.category === 'מטבח') return emp.category === 'מטבח'
-                  if (cell.category === 'נוסף') return emp.category === 'נוסף'
+                  // Only show active employees
+                  if (emp.isActive === false) return false
+                  
+                  // Filter by category if specified, but also show employees without category
+                  if (cell.category === 'אחראי') {
+                    return emp.role === 'manager' || emp.category === 'אחראי' || !emp.category
+                  }
+                  if (cell.category === 'פס') {
+                    return emp.category === 'פס' || !emp.category
+                  }
+                  if (cell.category === 'מטבח') {
+                    return emp.category === 'מטבח' || !emp.category
+                  }
+                  if (cell.category === 'נוסף') {
+                    return emp.category === 'נוסף' || !emp.category
+                  }
+                  // If no category specified, show all active employees
                   return true
                 })
                 .map(emp => (
