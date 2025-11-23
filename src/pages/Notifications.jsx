@@ -31,9 +31,10 @@ export default function Notifications() {
   const [autoSendTime, setAutoSendTime] = useState('07:00') // שעת שליחה אוטומטית
   
   // WhatsApp connection state - תמיד מוכן כי אנחנו משתמשים ב-Web Link API
-  const [whatsappStatus, setWhatsappStatus] = useState('ready')
-  const [qrCode, setQrCode] = useState(null)
-  const [checkingStatus, setCheckingStatus] = useState(false)
+  // אין צורך בבדיקות - תמיד מוכן!
+  const [whatsappStatus] = useState('ready') // תמיד ready - אין צורך לשנות
+  const [qrCode] = useState(null) // אין QR Code
+  const [checkingStatus] = useState(false) // אין בדיקות
 
   useEffect(() => {
     if (!db || !user) return
@@ -43,8 +44,7 @@ export default function Notifications() {
     loadTodayTasks()
     loadAutoSendSettings()
     
-    // WhatsApp Web Link API is always ready - no need to check
-    setWhatsappStatus('ready')
+    // WhatsApp Web Link API is always ready - no need to check or set status
   }, [db, user])
 
   async function loadAutoSendSettings() {
