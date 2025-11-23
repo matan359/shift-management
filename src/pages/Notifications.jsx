@@ -26,6 +26,9 @@ export default function Notifications() {
   const [tasks, setTasks] = useState([])
   const [sending, setSending] = useState(false)
   const [results, setResults] = useState([])
+  const [selectedEmployees, setSelectedEmployees] = useState(new Set()) // עובדים שנבחרו לשליחה
+  const [autoSendEnabled, setAutoSendEnabled] = useState(false) // שליחה אוטומטית
+  const [autoSendTime, setAutoSendTime] = useState('07:00') // שעת שליחה אוטומטית
   
   // WhatsApp connection state
   const [whatsappStatus, setWhatsappStatus] = useState('disconnected')
@@ -38,6 +41,7 @@ export default function Notifications() {
     loadTodayShifts()
     loadEmployees()
     loadTodayTasks()
+    loadAutoSendSettings()
     checkWhatsAppStatus()
     
     // Check WhatsApp status every 5 seconds
@@ -45,6 +49,56 @@ export default function Notifications() {
     
     return () => clearInterval(statusInterval)
   }, [db, user])
+
+  async function loadAutoSendSettings() {
+    if (!db || !user) return
+    try {
+      const dbInstance = db || getFirebaseDb()
+      const appId = getAppId()
+      const userId = user.uid
+      const { doc, getDoc } = await import('firebase/firestore')
+      
+      const settingsRef = doc(dbInstance, `artifacts/${appId}/users/${userId}/settings/notifications`)
+      const settingsDoc = await getDoc(settingsRef)
+      
+      if (settingsDoc.exists()) {
+        const data = settingsDoc.data()
+        setAutoSendEnabled(data.autoSendEnabled || false)
+        setAutoSendTime(data.autoSendTime || '07:00')
+        setSelectedEmployees(new Set(data.selectedEmployeeIds || []))
+      } else {
+        // Default: select all employees with shifts today
+        const shifts = await loadTodayShifts()
+        const employeeIds = shifts.map(s => s.employeeId)
+        setSelectedEmployees(new Set(employeeIds))
+      }
+    } catch (error) {
+      console.error('Error loading auto send settings:', error)
+    }
+  }
+
+  async function saveAutoSendSettings() {
+    if (!db || !user) return
+    try {
+      const dbInstance = db || getFirebaseDb()
+      const appId = getAppId()
+      const userId = user.uid
+      const { doc, setDoc } = await import('firebase/firestore')
+      
+      const settingsRef = doc(dbInstance, `artifacts/${appId}/users/${userId}/settings/notifications`)
+      await setDoc(settingsRef, {
+        autoSendEnabled,
+        autoSendTime,
+        selectedEmployeeIds: Array.from(selectedEmployees),
+        updatedAt: new Date()
+      })
+      
+      alert('✅ ההגדרות נשמרו בהצלחה!')
+    } catch (error) {
+      console.error('Error saving auto send settings:', error)
+      alert('שגיאה בשמירת ההגדרות')
+    }
+  }
 
   async function checkWhatsAppStatus() {
     try {
@@ -96,7 +150,7 @@ export default function Notifications() {
   }
 
   async function loadTodayShifts() {
-    if (!db || !user) return
+    if (!db || !user) return []
 
     try {
       const dbInstance = db || getFirebaseDb()
@@ -110,8 +164,10 @@ export default function Notifications() {
 
       const shiftsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
       setTodayShifts(shiftsData)
+      return shiftsData
     } catch (error) {
       console.error('Error loading shifts:', error)
+      return []
     }
   }
 
@@ -188,24 +244,32 @@ export default function Notifications() {
       return
     }
 
+    // Check if any employees selected
+    if (selectedEmployees.size === 0) {
+      alert('⚠️ לא נבחרו עובדים לשליחה!\n\nאנא בחר עובדים מהרשימה למטה.')
+      return
+    }
+
     setSending(true)
     setResults([])
 
     try {
-      // Prepare messages for all employees with shifts today
-      const recipients = todayShifts.map(shift => {
-        const employee = employees.find(emp => emp.id === shift.employeeId)
-        if (!employee || !employee.phoneNumber) {
-          return null
-        }
-        
-        const message = formatShiftMessage(employee, shift, tasks)
-        return {
-          phoneNumber: employee.phoneNumber,
-          message: message,
-          employeeName: employee.fullName
-        }
-      }).filter(r => r !== null)
+      // Prepare messages only for selected employees
+      const recipients = todayShifts
+        .filter(shift => selectedEmployees.has(shift.employeeId)) // רק עובדים שנבחרו
+        .map(shift => {
+          const employee = employees.find(emp => emp.id === shift.employeeId)
+          if (!employee || !employee.phoneNumber) {
+            return null
+          }
+          
+          const message = formatShiftMessage(employee, shift, tasks)
+          return {
+            phoneNumber: employee.phoneNumber,
+            message: message,
+            employeeName: employee.fullName
+          }
+        }).filter(r => r !== null)
 
       if (recipients.length === 0) {
         alert('אין עובדים עם מספרי טלפון למשמרות היום')
@@ -421,12 +485,33 @@ export default function Notifications() {
           </div>
         </div>
 
-        {/* Today's Shifts */}
+        {/* Today's Shifts with Selection */}
         <div className="mb-6 bg-white rounded-2xl shadow-xl p-4 sm:p-6">
-          <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-            <Clock className="w-6 h-6 text-blue-600" />
-            משמרות היום ({format(new Date(), 'dd/MM/yyyy', { locale: he })})
-          </h2>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+              <Clock className="w-6 h-6 text-blue-600" />
+              משמרות היום ({format(new Date(), 'dd/MM/yyyy', { locale: he })})
+            </h2>
+            {todayShifts.length > 0 && (
+              <div className="flex gap-2">
+                <button
+                  onClick={() => {
+                    const allIds = new Set(todayShifts.map(s => s.employeeId))
+                    setSelectedEmployees(allIds)
+                  }}
+                  className="text-xs px-3 py-1 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-lg transition"
+                >
+                  בחר הכל
+                </button>
+                <button
+                  onClick={() => setSelectedEmployees(new Set())}
+                  className="text-xs px-3 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition"
+                >
+                  בטל הכל
+                </button>
+              </div>
+            )}
+          </div>
           
           {todayShifts.length === 0 ? (
             <p className="text-gray-500 text-center py-8">אין משמרות היום</p>
@@ -434,16 +519,41 @@ export default function Notifications() {
             <div className="space-y-3">
               {todayShifts.map((shift) => {
                 const employee = employees.find(emp => emp.id === shift.employeeId)
+                const isSelected = selectedEmployees.has(shift.employeeId)
+                
                 return (
-                  <div key={shift.id} className="border-2 border-gray-200 rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                    <div className="flex-1">
-                      <p className="font-bold text-gray-800 text-lg">{getEmployeeName(shift.employeeId)}</p>
-                      <p className="text-sm text-gray-600">
-                        {shift.shiftType} - {shift.startTime} עד {shift.endTime}
-                      </p>
-                      {employee && !employee.phoneNumber && (
-                        <p className="text-xs text-red-600 mt-1">⚠ אין מספר טלפון</p>
-                      )}
+                  <div 
+                    key={shift.id} 
+                    className={`border-2 rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 transition-all ${
+                      isSelected 
+                        ? 'border-green-500 bg-green-50' 
+                        : 'border-gray-200 bg-white'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3 flex-1">
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={(e) => {
+                          const newSet = new Set(selectedEmployees)
+                          if (e.target.checked) {
+                            newSet.add(shift.employeeId)
+                          } else {
+                            newSet.delete(shift.employeeId)
+                          }
+                          setSelectedEmployees(newSet)
+                        }}
+                        className="w-5 h-5 text-green-600 border-gray-300 rounded focus:ring-green-500 cursor-pointer"
+                      />
+                      <div className="flex-1">
+                        <p className="font-bold text-gray-800 text-lg">{getEmployeeName(shift.employeeId)}</p>
+                        <p className="text-sm text-gray-600">
+                          {shift.shiftType} - {shift.startTime} עד {shift.endTime}
+                        </p>
+                        {employee && !employee.phoneNumber && (
+                          <p className="text-xs text-red-600 mt-1">⚠ אין מספר טלפון</p>
+                        )}
+                      </div>
                     </div>
                     <button
                       onClick={() => sendToEmployee(shift)}
