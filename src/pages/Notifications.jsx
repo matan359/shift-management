@@ -30,8 +30,8 @@ export default function Notifications() {
   const [autoSendEnabled, setAutoSendEnabled] = useState(false) // שליחה אוטומטית
   const [autoSendTime, setAutoSendTime] = useState('07:00') // שעת שליחה אוטומטית
   
-  // WhatsApp connection state
-  const [whatsappStatus, setWhatsappStatus] = useState('disconnected')
+  // WhatsApp connection state - תמיד מוכן כי אנחנו משתמשים ב-Web Link API
+  const [whatsappStatus, setWhatsappStatus] = useState('ready')
   const [qrCode, setQrCode] = useState(null)
   const [checkingStatus, setCheckingStatus] = useState(false)
 
@@ -220,11 +220,7 @@ export default function Notifications() {
   async function sendAllNotifications() {
     if (!db || !user) return
 
-    // Check WhatsApp connection first
-    if (whatsappStatus !== 'ready') {
-      alert('⚠️ WhatsApp לא מחובר!\n\nאנא סרוק את ה-QR Code למעלה כדי להתחבר תחילה.')
-      return
-    }
+    // WhatsApp Web Link API תמיד מוכן - אין צורך בבדיקה
 
     // Check if any employees selected
     if (selectedEmployees.size === 0) {
@@ -320,11 +316,7 @@ export default function Notifications() {
   async function sendToEmployee(shift) {
     if (!db || !user) return
 
-    // Check WhatsApp connection first
-    if (whatsappStatus !== 'ready') {
-      alert('⚠️ WhatsApp לא מחובר!\n\nאנא סרוק את ה-QR Code למעלה כדי להתחבר תחילה.')
-      return
-    }
+    // WhatsApp Web Link API תמיד מוכן - אין צורך בבדיקה
 
     const employee = employees.find(emp => emp.id === shift.employeeId)
     if (!employee || !employee.phoneNumber) {
@@ -386,78 +378,28 @@ export default function Notifications() {
           </p>
         </div>
 
-        {/* WhatsApp Connection Status - Simple and Clear */}
-        <div className="mb-6 bg-white rounded-2xl shadow-xl p-4 sm:p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-              <Smartphone className="w-6 h-6 text-green-600" />
-              סטטוס חיבור WhatsApp
-            </h2>
-            <button
-              onClick={checkWhatsAppStatus}
-              disabled={checkingStatus}
-              className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition disabled:opacity-50 flex items-center gap-2 text-sm"
-            >
-              {checkingStatus ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
-              ) : (
-                <span>רענן</span>
-              )}
-            </button>
+        {/* WhatsApp Info - Simple Explanation */}
+        <div className="mb-6 bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-300 rounded-xl p-4 sm:p-6">
+          <div className="flex items-start gap-3">
+            <CheckCircle className="w-8 h-8 text-green-600 flex-shrink-0 mt-1" />
+            <div>
+              <h2 className="text-xl font-bold text-green-800 mb-2 flex items-center gap-2">
+                <Smartphone className="w-6 h-6" />
+                איך לשלוח הודעות WhatsApp
+              </h2>
+              <div className="space-y-2 text-sm text-green-700">
+                <p className="font-semibold">זה פשוט מאוד:</p>
+                <ol className="list-decimal list-inside space-y-1 text-right">
+                  <li>לחץ על "שלח הכל" או "שלח הודעה" ליד כל עובד</li>
+                  <li>ייפתח חלון WhatsApp עם הודעה מוכנה</li>
+                  <li>פשוט לחץ "שלח" בחלון WhatsApp - זה הכל! ✅</li>
+                </ol>
+                <p className="text-xs text-green-600 mt-3">
+                  💡 אין צורך בחיבור או QR Code - הכל עובד מיד!
+                </p>
+              </div>
+            </div>
           </div>
-
-          {whatsappStatus === 'ready' ? (
-            <div className="bg-green-50 border-2 border-green-300 rounded-xl p-4 sm:p-6">
-              <div className="flex items-center gap-3">
-                <CheckCircle className="w-8 h-8 text-green-600 flex-shrink-0" />
-                <div>
-                  <h3 className="text-lg font-bold text-green-800 mb-1">✅ מוכן לשליחה!</h3>
-                  <p className="text-sm text-green-700">
-                    המערכת מוכנה לשלוח הודעות דרך WhatsApp Web Link. כל לחיצה תפתח חלון WhatsApp עם הודעה מוכנה.
-                  </p>
-                </div>
-              </div>
-            </div>
-          ) : whatsappStatus === 'qr' && qrCode ? (
-            <div className="bg-yellow-50 border-2 border-yellow-300 rounded-xl p-4 sm:p-6">
-              <div className="text-center">
-                <h3 className="text-lg font-bold text-yellow-800 mb-4 flex items-center justify-center gap-2">
-                  <QrCode className="w-6 h-6" />
-                  סרוק QR Code להתחברות
-                </h3>
-                <div className="flex justify-center mb-4">
-                  <div className="bg-white p-4 rounded-xl shadow-lg">
-                    <img 
-                      src={qrCode} 
-                      alt="QR Code" 
-                      className="w-48 h-48 sm:w-64 sm:h-64 border-4 border-yellow-400 rounded-lg"
-                    />
-                  </div>
-                </div>
-                <div className="bg-white rounded-lg p-4 text-right">
-                  <p className="text-sm font-semibold text-gray-800 mb-2">הוראות:</p>
-                  <ol className="text-xs sm:text-sm text-gray-700 space-y-1 list-decimal list-inside">
-                    <li>פתח WhatsApp בטלפון שלך</li>
-                    <li>לך להגדרות → מכשירים מקושרים</li>
-                    <li>לחץ על "קשר מכשיר"</li>
-                    <li>סרוק את ה-QR Code למעלה</li>
-                  </ol>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="bg-green-50 border-2 border-green-300 rounded-xl p-4 sm:p-6">
-              <div className="flex items-center gap-3">
-                <CheckCircle className="w-8 h-8 text-green-600 flex-shrink-0" />
-                <div>
-                  <h3 className="text-lg font-bold text-green-800 mb-1">✅ מוכן לשליחה!</h3>
-                  <p className="text-sm text-green-700">
-                    המערכת מוכנה לשלוח הודעות דרך WhatsApp Web Link. כל לחיצה תפתח חלון WhatsApp עם הודעה מוכנה.
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
 
         {/* Send All Button */}
@@ -473,11 +415,11 @@ export default function Notifications() {
             </div>
             <button
               onClick={sendAllNotifications}
-              disabled={sending || todayShifts.length === 0 || whatsappStatus !== 'ready'}
+              disabled={sending || todayShifts.length === 0}
               className="w-full sm:w-auto bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold py-3 px-8 rounded-xl transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg disabled:transform-none flex items-center justify-center gap-2 touch-manipulation active:scale-95"
             >
               <Send className="w-5 h-5" />
-              <span>{sending ? 'שולח...' : 'שלח הכל'}</span>
+              <span>{sending ? 'פותח חלונות...' : 'שלח הכל'}</span>
             </button>
           </div>
         </div>
@@ -554,11 +496,11 @@ export default function Notifications() {
                     </div>
                     <button
                       onClick={() => sendToEmployee(shift)}
-                      disabled={sending || !employee?.phoneNumber || whatsappStatus !== 'ready'}
+                      disabled={sending || !employee?.phoneNumber}
                       className="w-full sm:w-auto bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white text-sm py-2 px-6 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 touch-manipulation active:scale-95 shadow-md"
                     >
                       <Send className="w-4 h-4" />
-                      <span>{sending ? 'שולח...' : 'שלח הודעה'}</span>
+                      <span>{sending ? 'פותח...' : 'שלח הודעה'}</span>
                     </button>
                   </div>
                 )
