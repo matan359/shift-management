@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { Bell, Send, Clock, CheckCircle, XCircle, AlertCircle, Smartphone, Loader2, X, ExternalLink } from 'lucide-react'
+import WhatsAppQRConnection from '../components/WhatsAppQRConnection'
 import { getFirebaseDb, getAppId } from '../api/firebase'
 import { collection, query, where, getDocs } from 'firebase/firestore'
 import { format } from 'date-fns'
@@ -35,9 +36,9 @@ export default function Notifications() {
   const [whatsAppLinks, setWhatsAppLinks] = useState([]) // קישורי WhatsApp להצגה ב-modal
   const [currentLinkIndex, setCurrentLinkIndex] = useState(0) // אינדקס הקישור הנוכחי
   
-  // WhatsApp Cloud API connection state
-  const [whatsappStatus, setWhatsappStatus] = useState('checking') // checking, ready, not_configured, error
-  const [checkingStatus, setCheckingStatus] = useState(false) // האם בודקים סטטוס
+  // WhatsApp QR Connection state
+  const [whatsappStatus, setWhatsappStatus] = useState('disconnected') // disconnected, connecting, qr, ready
+  const [whatsappConnected, setWhatsappConnected] = useState(false)
 
   useEffect(() => {
     if (!db || !user) return
@@ -48,27 +49,22 @@ export default function Notifications() {
     loadAutoSendSettings()
     loadSavedLinks()
     
-    // Check WhatsApp status on mount and periodically
-    checkWhatsAppStatus()
-    const statusInterval = setInterval(checkWhatsAppStatus, 10000) // Check every 10 seconds
-    
-    return () => clearInterval(statusInterval)
+    // Check if WhatsApp was previously connected
+    const connected = localStorage.getItem('whatsapp_connected') === 'true'
+    if (connected) {
+      setWhatsappStatus('ready')
+      setWhatsappConnected(true)
+    }
   }, [db, user])
 
-  async function checkWhatsAppStatus() {
-    setCheckingStatus(true)
-    try {
-      const statusUrl = API_URL ? `${API_URL}/.netlify/functions/whatsapp-status` : '/.netlify/functions/whatsapp-status'
-      const response = await fetch(statusUrl)
-      const data = await response.json()
-      
-      setWhatsappStatus(data.status || 'not_configured')
-    } catch (error) {
-      console.error('Error checking WhatsApp status:', error)
-      setWhatsappStatus('error')
-    } finally {
-      setCheckingStatus(false)
-    }
+  function handleWhatsAppConnected() {
+    setWhatsappStatus('ready')
+    setWhatsappConnected(true)
+  }
+
+  function handleWhatsAppDisconnected() {
+    setWhatsappStatus('disconnected')
+    setWhatsappConnected(false)
   }
 
   async function loadSavedLinks() {
@@ -307,38 +303,51 @@ export default function Notifications() {
         return
       }
 
-      // Send bulk messages via Netlify Functions (proxies to WhatsApp Web.js server)
-      const sendUrl = API_URL ? `${API_URL}/.netlify/functions/whatsapp-send-bulk` : '/.netlify/functions/whatsapp-send-bulk'
-      
-      const response = await fetch(sendUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ recipients })
-      })
+      // Send messages via WhatsApp Web Link (opens WhatsApp Web with pre-filled messages)
+      let successCount = 0
+      const results = []
 
-      const data = await response.json()
-      
-      if (data.success) {
-        setResults(data.results.map(r => ({
-          phoneNumber: r.phoneNumber,
-          success: r.success,
-          employeeName: recipients.find(rec => {
-            const originalPhone = rec.phoneNumber.replace(/[^0-9]/g, '')
-            const formattedPhone = r.phoneNumber.replace(/[^0-9]/g, '')
-            return originalPhone === formattedPhone || formattedPhone.includes(originalPhone.slice(-9))
-          })?.employeeName || 'עובד',
-          sent: r.success,
-          error: r.error,
-          messageId: r.messageId
-        })))
-        
-        const successCount = data.results.filter(r => r.success).length
-        alert(`✅ נשלחו ${successCount} מתוך ${data.results.length} הודעות בהצלחה!`)
-      } else {
-        alert('שגיאה בשליחת ההודעות: ' + (data.error || 'Unknown error'))
+      for (const recipient of recipients) {
+        try {
+          // Format phone number
+          let formattedNumber = recipient.phoneNumber.replace(/[^0-9]/g, '')
+          
+          if (formattedNumber.startsWith('0')) {
+            formattedNumber = '972' + formattedNumber.substring(1)
+          } else if (!formattedNumber.startsWith('972')) {
+            formattedNumber = '972' + formattedNumber
+          }
+
+          // Create WhatsApp Web Link
+          const encodedMessage = encodeURIComponent(recipient.message)
+          const whatsappLink = `https://web.whatsapp.com/send?phone=${formattedNumber}&text=${encodedMessage}`
+          
+          // Open in new window
+          window.open(whatsappLink, '_blank', 'noopener,noreferrer')
+          
+          results.push({
+            phoneNumber: formattedNumber,
+            success: true,
+            employeeName: recipient.employeeName,
+            whatsappLink: whatsappLink
+          })
+          successCount++
+          
+          // Small delay between opening windows
+          await new Promise(resolve => setTimeout(resolve, 500))
+        } catch (error) {
+          console.error(`Error creating link for ${recipient.phoneNumber}:`, error)
+          results.push({
+            phoneNumber: recipient.phoneNumber,
+            success: false,
+            employeeName: recipient.employeeName,
+            error: error.message
+          })
+        }
       }
+
+      setResults(results)
+      alert(`✅ נפתחו ${successCount} חלונות WhatsApp!\n\nפשוט לחץ "שלח" בכל חלון.`)
     } catch (error) {
       console.error('Error sending notifications:', error)
       alert('שגיאה בשליחת ההודעות: ' + error.message + '\n\nודא שהשרת רץ ושה-WhatsApp מחובר.')
@@ -366,27 +375,23 @@ export default function Notifications() {
     try {
       const message = formatShiftMessage(employee, shift, tasks)
       
-      // Send message via Netlify Functions (proxies to WhatsApp Web.js server)
-      const sendUrl = API_URL ? `${API_URL}/.netlify/functions/whatsapp-send` : '/.netlify/functions/whatsapp-send'
+      // Format phone number
+      let formattedNumber = employee.phoneNumber.replace(/[^0-9]/g, '')
       
-      const response = await fetch(sendUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          phoneNumber: employee.phoneNumber,
-          message: message
-        })
-      })
-
-      const data = await response.json()
-      
-      if (data.success) {
-        alert(`✅ הודעה נשלחה בהצלחה ל-${employee.fullName}!`)
-      } else {
-        alert('שגיאה בשליחת ההודעה: ' + (data.error || 'Unknown error'))
+      if (formattedNumber.startsWith('0')) {
+        formattedNumber = '972' + formattedNumber.substring(1)
+      } else if (!formattedNumber.startsWith('972')) {
+        formattedNumber = '972' + formattedNumber
       }
+
+      // Create WhatsApp Web Link
+      const encodedMessage = encodeURIComponent(message)
+      const whatsappLink = `https://web.whatsapp.com/send?phone=${formattedNumber}&text=${encodedMessage}`
+      
+      // Open in new window
+      window.open(whatsappLink, '_blank', 'noopener,noreferrer')
+      
+      alert(`✅ נפתח חלון WhatsApp עם הודעה מוכנה ל-${employee.fullName}!\n\nפשוט לחץ "שלח" בחלון WhatsApp.`)
     } catch (error) {
       console.error('Error sending message:', error)
       alert('שגיאה בשליחת ההודעה: ' + error.message)
