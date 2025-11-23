@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
-import { Megaphone, X } from 'lucide-react'
+import { Megaphone } from 'lucide-react'
+import CloseIcon from './CloseIcon'
 import { getFirebaseDb, getAppId } from '../api/firebase'
 import { collection, getDocs } from 'firebase/firestore'
 
@@ -72,7 +73,7 @@ export default function AnnouncementsBanner() {
             onClick={() => dismissAnnouncement(announcement.id)}
             className="text-gray-500 hover:text-gray-700 mr-2"
           >
-            <X className="w-4 h-4" />
+            <CloseIcon className="w-4 h-4" />
           </button>
         </div>
       ))}

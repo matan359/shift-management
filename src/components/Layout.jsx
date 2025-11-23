@@ -1,6 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
-import { LogOut, Calendar, Users, Settings, Menu, X, Bell, Smartphone } from 'lucide-react'
+import { LogOut, Calendar, Users, Settings, Menu, Bell, Smartphone } from 'lucide-react'
+import CloseIcon from './CloseIcon'
 import { useState } from 'react'
 
 export default function Layout({ children }) {
@@ -103,7 +104,7 @@ export default function Layout({ children }) {
               className="md:hidden"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             >
-              {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              {mobileMenuOpen ? <CloseIcon className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
           </div>
 

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
-import { CheckSquare, Plus, Edit, Trash2, Save, X } from 'lucide-react'
+import { CheckSquare, Plus, Edit, Trash2, Save } from 'lucide-react'
+import CloseIcon from '../components/CloseIcon'
 import { getFirebaseDb, getAppId } from '../api/firebase'
 import { collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot } from 'firebase/firestore'
 
@@ -164,7 +165,7 @@ export default function ManageTasks() {
                 {editingTask ? 'ערוך משימה' : 'הוסף משימה חדשה'}
               </h3>
               <button onClick={() => setShowModal(false)} className="text-gray-500 hover:text-gray-700">
-                <X className="w-6 h-6" />
+                <CloseIcon className="w-6 h-6" />
               </button>
             </div>
 

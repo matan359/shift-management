@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
-import { Calendar, Check, X } from 'lucide-react'
+import { Calendar, Check } from 'lucide-react'
+import CloseIcon from '../components/CloseIcon'
 import { getFirebaseDb, getAppId } from '../api/firebase'
 import { collection, addDoc, query, where, getDocs, updateDoc, doc } from 'firebase/firestore'
 import { startOfWeek, endOfWeek, eachDayOfInterval, format, addWeeks } from 'date-fns'
@@ -184,7 +185,7 @@ export default function SubmitAvailability() {
                   {isAvailable ? (
                     <Check className="w-8 h-8 text-green-600 mx-auto" />
                   ) : (
-                    <X className="w-8 h-8 text-gray-400 mx-auto" />
+                    <CloseIcon className="w-8 h-8 text-gray-400 mx-auto" />
                   )}
                   {isAvailable && (
                     <div className="mt-3 space-y-1">

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
-import { MessageSquare, Plus, Edit, Trash2, Save, X } from 'lucide-react'
+import { MessageSquare, Plus, Edit, Trash2, Save } from 'lucide-react'
+import CloseIcon from '../components/CloseIcon'
 import { getFirebaseDb, getAppId } from '../api/firebase'
 import { collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot, query, where } from 'firebase/firestore'
 import { format, parseISO } from 'date-fns'
@@ -120,7 +121,7 @@ export default function ShiftNotes() {
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-2xl font-bold text-gray-800">הערה למשמרת</h3>
               <button onClick={() => setShowModal(false)} className="text-gray-500 hover:text-gray-700">
-                <X className="w-6 h-6" />
+                <CloseIcon className="w-6 h-6" />
               </button>
             </div>
 

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
-import { RefreshCw, Clock, User, MessageSquare, CheckCircle, XCircle, X } from 'lucide-react'
+import { RefreshCw, Clock, User, MessageSquare, CheckCircle, XCircle } from 'lucide-react'
+import CloseIcon from '../components/CloseIcon'
 import { getFirebaseDb, getAppId } from '../api/firebase'
 import { collection, addDoc, query, where, getDocs, updateDoc, doc, onSnapshot } from 'firebase/firestore'
 import { format, parseISO } from 'date-fns'
@@ -316,7 +317,7 @@ export default function SwapShifts() {
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-xl sm:text-2xl font-bold text-gray-800">בקש החלפת משמרת</h3>
               <button onClick={() => setShowSwapModal(false)} className="text-gray-500 hover:text-gray-700">
-                <X className="w-6 h-6" />
+                <CloseIcon className="w-6 h-6" />
               </button>
             </div>
 

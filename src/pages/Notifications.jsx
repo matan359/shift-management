@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
-import { Bell, Send, Clock, CheckCircle, XCircle, AlertCircle, Smartphone, QrCode, Loader2, X } from 'lucide-react'
+import { Bell, Send, Clock, CheckCircle, XCircle, AlertCircle, Smartphone, QrCode, Loader2 } from 'lucide-react'
+import CloseIcon from '../components/CloseIcon'
 import { getFirebaseDb, getAppId } from '../api/firebase'
 import { collection, query, where, getDocs } from 'firebase/firestore'
 import { format } from 'date-fns'
@@ -602,7 +603,7 @@ export default function Notifications() {
                   onClick={() => setShowWhatsAppModal(false)}
                   className="p-2 hover:bg-gray-100 rounded-lg transition"
                 >
-                  <X className="w-6 h-6 text-gray-600" />
+                  <CloseIcon className="w-6 h-6 text-gray-600" />
                 </button>
               </div>
 

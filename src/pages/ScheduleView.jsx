@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
-import { Calendar, ChevronLeft, ChevronRight, AlertTriangle, Edit2, X, Save, Plus, Trash2, Clock } from 'lucide-react'
+import { Calendar, ChevronLeft, ChevronRight, AlertTriangle, Edit2, Save, Plus, Trash2, Clock } from 'lucide-react'
+import CloseIcon from '../components/CloseIcon'
 import { getFirebaseDb, getAppId } from '../api/firebase'
 import { collection, onSnapshot, doc, addDoc, updateDoc, deleteDoc, query, where } from 'firebase/firestore'
 import { getSpecialDayInfo } from '../utils/holidayDetector'
@@ -499,7 +500,7 @@ function ShiftEditModal({ shift, cell, employees, onSave, onDelete, onClose }) {
             onClick={onClose}
             className="text-gray-500 hover:text-gray-700 transition-colors"
           >
-            <X className="w-6 h-6" />
+            <CloseIcon className="w-6 h-6" />
           </button>
         </div>
 
