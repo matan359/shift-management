@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
-import { Bell, Send, Clock, CheckCircle, XCircle, AlertCircle, Smartphone, QrCode, Loader2, X } from 'lucide-react'
+import { Bell, Send, Clock, CheckCircle, XCircle, AlertCircle, Smartphone, Loader2, X, ExternalLink } from 'lucide-react'
 import { getFirebaseDb, getAppId } from '../api/firebase'
 import { collection, query, where, getDocs } from 'firebase/firestore'
 import { format } from 'date-fns'
@@ -35,11 +35,9 @@ export default function Notifications() {
   const [whatsAppLinks, setWhatsAppLinks] = useState([]) // קישורי WhatsApp להצגה ב-modal
   const [currentLinkIndex, setCurrentLinkIndex] = useState(0) // אינדקס הקישור הנוכחי
   
-  // WhatsApp Web.js connection state
-  const [whatsappStatus, setWhatsappStatus] = useState('disconnected') // disconnected, connecting, qr, ready
-  const [qrCode, setQrCode] = useState(null) // QR Code data URL
+  // WhatsApp Cloud API connection state
+  const [whatsappStatus, setWhatsappStatus] = useState('checking') // checking, ready, not_configured, error
   const [checkingStatus, setCheckingStatus] = useState(false) // האם בודקים סטטוס
-  const [initializing, setInitializing] = useState(false) // האם מאתחלים חיבור
 
   useEffect(() => {
     if (!db || !user) return
@@ -52,7 +50,7 @@ export default function Notifications() {
     
     // Check WhatsApp status on mount and periodically
     checkWhatsAppStatus()
-    const statusInterval = setInterval(checkWhatsAppStatus, 5000) // Check every 5 seconds
+    const statusInterval = setInterval(checkWhatsAppStatus, 10000) // Check every 10 seconds
     
     return () => clearInterval(statusInterval)
   }, [db, user])
@@ -64,58 +62,12 @@ export default function Notifications() {
       const response = await fetch(statusUrl)
       const data = await response.json()
       
-      setWhatsappStatus(data.status || 'disconnected')
-      
-      // If status is 'qr', fetch QR code
-      if (data.status === 'qr') {
-        await fetchQRCode()
-      } else if (data.status === 'ready') {
-        setQrCode(null) // Clear QR code when ready
-      }
+      setWhatsappStatus(data.status || 'not_configured')
     } catch (error) {
       console.error('Error checking WhatsApp status:', error)
-      setWhatsappStatus('disconnected')
+      setWhatsappStatus('error')
     } finally {
       setCheckingStatus(false)
-    }
-  }
-
-  async function fetchQRCode() {
-    try {
-      const qrUrl = API_URL ? `${API_URL}/.netlify/functions/whatsapp-qr` : '/.netlify/functions/whatsapp-qr'
-      const response = await fetch(qrUrl)
-      const data = await response.json()
-      
-      if (data.qr) {
-        setQrCode(data.qr)
-      }
-    } catch (error) {
-      console.error('Error fetching QR code:', error)
-    }
-  }
-
-  async function initializeWhatsApp() {
-    setInitializing(true)
-    try {
-      const initUrl = API_URL ? `${API_URL}/.netlify/functions/whatsapp-init` : '/.netlify/functions/whatsapp-init'
-      const response = await fetch(initUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      })
-      const data = await response.json()
-      
-      if (data.success || data.status === 'connecting') {
-        setWhatsappStatus('connecting')
-        // Start checking for QR code
-        setTimeout(checkWhatsAppStatus, 2000)
-      }
-    } catch (error) {
-      console.error('Error initializing WhatsApp:', error)
-      alert('שגיאה באתחול WhatsApp: ' + error.message)
-    } finally {
-      setInitializing(false)
     }
   }
 
@@ -519,79 +471,45 @@ export default function Notifications() {
                   <CheckCircle className="w-6 h-6 text-green-600" />
                   <span className="text-green-700 font-semibold">✅ מחובר ומוכן</span>
                 </>
-              ) : whatsappStatus === 'qr' ? (
-                <>
-                  <QrCode className="w-6 h-6 text-yellow-600" />
-                  <span className="text-yellow-700 font-semibold">📱 סרוק QR Code</span>
-                </>
-              ) : whatsappStatus === 'connecting' ? (
+              ) : whatsappStatus === 'checking' ? (
                 <>
                   <Loader2 className="w-6 h-6 text-blue-600 animate-spin" />
-                  <span className="text-blue-700 font-semibold">🔄 מתחבר...</span>
+                  <span className="text-blue-700 font-semibold">🔄 בודק...</span>
                 </>
               ) : (
                 <>
                   <XCircle className="w-6 h-6 text-red-600" />
-                  <span className="text-red-700 font-semibold">❌ לא מחובר</span>
+                  <span className="text-red-700 font-semibold">❌ לא מוגדר</span>
                 </>
               )}
             </div>
 
-            {/* QR Code Display */}
-            {whatsappStatus === 'qr' && qrCode && (
-              <div className="flex flex-col items-center gap-4 p-4 bg-gray-50 rounded-xl">
-                <p className="text-sm text-gray-700 text-center">
-                  סרוק את ה-QR Code עם WhatsApp בטלפון שלך:
+            {/* Not Configured Message */}
+            {whatsappStatus === 'not_configured' && (
+              <div className="p-4 bg-yellow-50 rounded-xl border-2 border-yellow-300">
+                <p className="text-sm text-yellow-800 font-semibold mb-2">
+                  ⚠️ WhatsApp Cloud API לא מוגדר
                 </p>
-                <div className="bg-white p-4 rounded-lg shadow-lg">
-                  <img src={qrCode} alt="WhatsApp QR Code" className="w-64 h-64" />
-                </div>
-                <p className="text-xs text-gray-600 text-center">
-                  פתח WhatsApp → הגדרות → מכשירים מקושרים → קשר מכשיר
+                <p className="text-xs text-yellow-700 mb-3">
+                  כדי לשלוח הודעות אוטומטיות, צריך להגדיר את WhatsApp Cloud API של Meta.
                 </p>
-              </div>
-            )}
-
-            {/* Initialize Button */}
-            {whatsappStatus === 'disconnected' && (
-              <div className="flex flex-col items-center gap-4 p-4 bg-yellow-50 rounded-xl">
-                <p className="text-sm text-gray-700 text-center">
-                  WhatsApp לא מחובר. לחץ על הכפתור למטה כדי להתחיל את החיבור.
-                </p>
-                <button
-                  onClick={initializeWhatsApp}
-                  disabled={initializing}
-                  className="px-6 py-3 bg-green-500 hover:bg-green-600 text-white rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 font-semibold"
+                <a
+                  href="https://github.com/matan359/shift-management/blob/main/WHATSAPP_CLOUD_API_SETUP.md"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg transition text-sm font-semibold"
                 >
-                  {initializing ? (
-                    <>
-                      <Loader2 className="w-5 h-5 animate-spin" />
-                      <span>מאתחל...</span>
-                    </>
-                  ) : (
-                    <>
-                      <Smartphone className="w-5 h-5" />
-                      <span>התחל חיבור WhatsApp</span>
-                    </>
-                  )}
-                </button>
-              </div>
-            )}
-
-            {/* Connection Instructions */}
-            {whatsappStatus === 'connecting' && (
-              <div className="p-4 bg-blue-50 rounded-xl">
-                <p className="text-sm text-blue-700 text-center">
-                  ממתין ל-QR Code... אם ה-QR Code לא מופיע תוך כמה שניות, לחץ על "רענן".
-                </p>
+                  <ExternalLink className="w-4 h-4" />
+                  <span>מדריך הגדרה</span>
+                </a>
               </div>
             )}
 
             {/* Ready Status Info */}
             {whatsappStatus === 'ready' && (
-              <div className="p-4 bg-green-50 rounded-xl">
-                <p className="text-sm text-green-700 text-center">
-                  ✅ WhatsApp מחובר ומוכן! כעת תוכל לשלוח הודעות אוטומטיות.
+              <div className="p-4 bg-green-50 rounded-xl border-2 border-green-300">
+                <p className="text-sm text-green-700 text-center font-semibold">
+                  ✅ WhatsApp Cloud API מוגדר ומוכן! כעת תוכל לשלוח הודעות אוטומטיות ישירות - בלי שרת חיצוני, בלי Railway, הכל עובד על Netlify!
                 </p>
               </div>
             )}

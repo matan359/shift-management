@@ -1,5 +1,5 @@
 // Netlify Function - Initialize WhatsApp
-// Proxy to WhatsApp Web.js server to initialize connection
+// WhatsApp Cloud API doesn't need initialization - it uses API tokens
 
 exports.handler = async (event, context) => {
   // CORS headers
@@ -19,33 +19,29 @@ exports.handler = async (event, context) => {
     }
   }
 
-  const serverUrl = process.env.WHATSAPP_SERVER_URL || 'http://localhost:3001'
-  
-  try {
-    const response = await fetch(`${serverUrl}/api/whatsapp/init`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    })
-    const data = await response.json()
-    
+  const accessToken = process.env.WHATSAPP_ACCESS_TOKEN
+  const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID
+
+  if (!accessToken || !phoneNumberId) {
     return {
       statusCode: 200,
       headers,
-      body: JSON.stringify(data)
-    }
-  } catch (error) {
-    console.error('Error initializing WhatsApp:', error)
-    return {
-      statusCode: 500,
-      headers,
       body: JSON.stringify({
         success: false,
-        status: 'error',
-        message: 'Failed to initialize WhatsApp server.',
-        error: error.message
+        status: 'not_configured',
+        message: 'WhatsApp Cloud API not configured. Please set WHATSAPP_ACCESS_TOKEN and WHATSAPP_PHONE_NUMBER_ID in Netlify environment variables. See WHATSAPP_CLOUD_API_SETUP.md for instructions.'
       })
     }
+  }
+
+  // WhatsApp Cloud API is always ready if configured
+  return {
+    statusCode: 200,
+    headers,
+    body: JSON.stringify({
+      success: true,
+      status: 'ready',
+      message: 'WhatsApp Cloud API is configured and ready'
+    })
   }
 }

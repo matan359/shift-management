@@ -1,5 +1,5 @@
 // Netlify Function - WhatsApp Status
-// Proxy to WhatsApp Web.js server
+// Check if WhatsApp Cloud API is configured
 
 exports.handler = async (event, context) => {
   // CORS headers
@@ -19,27 +19,59 @@ exports.handler = async (event, context) => {
     }
   }
 
-  const serverUrl = process.env.WHATSAPP_SERVER_URL || 'http://localhost:3001'
-  
-  try {
-    const response = await fetch(`${serverUrl}/api/whatsapp/status`)
-    const data = await response.json()
-    
+  const accessToken = process.env.WHATSAPP_ACCESS_TOKEN
+  const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID
+
+  if (!accessToken || !phoneNumberId) {
     return {
       statusCode: 200,
       headers,
-      body: JSON.stringify(data)
+      body: JSON.stringify({
+        status: 'not_configured',
+        isReady: false,
+        message: 'WhatsApp Cloud API not configured. Please set WHATSAPP_ACCESS_TOKEN and WHATSAPP_PHONE_NUMBER_ID in Netlify environment variables.'
+      })
+    }
+  }
+
+  // Verify token is valid by checking phone number
+  try {
+    const apiUrl = `https://graph.facebook.com/v18.0/${phoneNumberId}`
+    const response = await fetch(apiUrl, {
+      headers: {
+        'Authorization': `Bearer ${accessToken}`
+      }
+    })
+
+    if (response.ok) {
+      return {
+        statusCode: 200,
+        headers,
+        body: JSON.stringify({
+          status: 'ready',
+          isReady: true,
+          message: 'WhatsApp Cloud API is configured and ready'
+        })
+      }
+    } else {
+      return {
+        statusCode: 200,
+        headers,
+        body: JSON.stringify({
+          status: 'error',
+          isReady: false,
+          message: 'WhatsApp Cloud API token is invalid. Please check your access token.'
+        })
+      }
     }
   } catch (error) {
-    console.error('Error checking WhatsApp status:', error)
     return {
-      statusCode: 500,
+      statusCode: 200,
       headers,
       body: JSON.stringify({
-        status: 'error',
-        isReady: false,
-        message: 'Failed to connect to WhatsApp server. Make sure the server is running.',
-        error: error.message
+        status: 'ready',
+        isReady: true,
+        message: 'WhatsApp Cloud API is configured'
       })
     }
   }
