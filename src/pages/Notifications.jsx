@@ -698,7 +698,6 @@ export default function Notifications() {
                     </button>
                   </div>
                 </div>
-                </div>
               </div>
             </div>
           </div>
