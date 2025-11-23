@@ -29,6 +29,8 @@ export default function Notifications() {
   const [selectedEmployees, setSelectedEmployees] = useState(new Set()) // עובדים שנבחרו לשליחה
   const [autoSendEnabled, setAutoSendEnabled] = useState(false) // שליחה אוטומטית
   const [autoSendTime, setAutoSendTime] = useState('07:00') // שעת שליחה אוטומטית
+  const [savedLinks, setSavedLinks] = useState([]) // קישורים שנשמרו משליחה אוטומטית
+  const [showSavedLinks, setShowSavedLinks] = useState(false) // האם להציג קישורים שנשמרו
   
   // WhatsApp connection state - תמיד מוכן כי אנחנו משתמשים ב-Web Link API
   // אין צורך בבדיקות - תמיד מוכן!
@@ -43,9 +45,66 @@ export default function Notifications() {
     loadEmployees()
     loadTodayTasks()
     loadAutoSendSettings()
+    loadSavedLinks()
     
     // WhatsApp Web Link API is always ready - no need to check or set status
   }, [db, user])
+
+  async function loadSavedLinks() {
+    if (!db || !user) return
+    try {
+      const dbInstance = db || getFirebaseDb()
+      const appId = getAppId()
+      const userId = user.uid
+      const today = format(new Date(), 'yyyy-MM-dd')
+      const { doc, getDoc } = await import('firebase/firestore')
+      
+      const linksRef = doc(dbInstance, `artifacts/${appId}/users/${userId}/whatsappLinks/${today}`)
+      const linksDoc = await getDoc(linksRef)
+      
+      if (linksDoc.exists()) {
+        const data = linksDoc.data()
+        if (data.links && data.links.length > 0 && !data.opened) {
+          setSavedLinks(data.links)
+          setShowSavedLinks(true)
+        }
+      }
+    } catch (error) {
+      console.error('Error loading saved links:', error)
+    }
+  }
+
+  async function openSavedLinks() {
+    if (savedLinks.length === 0) return
+    
+    // פתח את כל הקישורים
+    savedLinks.forEach((link, index) => {
+      setTimeout(() => {
+        window.open(link.link, '_blank', 'noopener,noreferrer')
+      }, index * 500) // השהיה של 500ms בין כל קישור
+    })
+    
+    // סמן כנפתח
+    if (!db || !user) return
+    try {
+      const dbInstance = db || getFirebaseDb()
+      const appId = getAppId()
+      const userId = user.uid
+      const today = format(new Date(), 'yyyy-MM-dd')
+      const { doc, updateDoc } = await import('firebase/firestore')
+      
+      const linksRef = doc(dbInstance, `artifacts/${appId}/users/${userId}/whatsappLinks/${today}`)
+      await updateDoc(linksRef, {
+        opened: true,
+        openedAt: new Date()
+      })
+      
+      setShowSavedLinks(false)
+      alert(`נפתחו ${savedLinks.length} חלונות WhatsApp!\n\nפשוט לחץ "שלח" בכל חלון.`)
+    } catch (error) {
+      console.error('Error marking links as opened:', error)
+    }
+  }
 
   async function loadAutoSendSettings() {
     if (!db || !user) return
