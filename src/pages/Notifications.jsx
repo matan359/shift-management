@@ -405,6 +405,30 @@ export default function Notifications() {
           </p>
         </div>
 
+        {/* Saved Links from Auto-Send */}
+        {showSavedLinks && savedLinks.length > 0 && (
+          <div className="mb-6 bg-gradient-to-r from-purple-50 to-pink-50 border-2 border-purple-300 rounded-xl p-4 sm:p-6">
+            <div className="flex items-start gap-3">
+              <Bell className="w-8 h-8 text-purple-600 flex-shrink-0 mt-1" />
+              <div className="flex-1">
+                <h2 className="text-xl font-bold text-purple-800 mb-2 flex items-center gap-2">
+                  <span>📱 קישורי WhatsApp מוכנים משליחה אוטומטית!</span>
+                </h2>
+                <p className="text-sm text-purple-700 mb-4">
+                  נשמרו {savedLinks.length} קישורי WhatsApp משליחה אוטומטית היום. לחץ על הכפתור למטה כדי לפתוח אותם.
+                </p>
+                <button
+                  onClick={openSavedLinks}
+                  className="w-full sm:w-auto bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white font-bold py-3 px-8 rounded-xl transition-all duration-200 transform hover:scale-105 shadow-lg flex items-center justify-center gap-2 touch-manipulation active:scale-95"
+                >
+                  <Send className="w-5 h-5" />
+                  <span>פתח {savedLinks.length} חלונות WhatsApp</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* WhatsApp Info - Simple Explanation */}
         <div className="mb-6 bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-300 rounded-xl p-4 sm:p-6">
           <div className="flex items-start gap-3">
