@@ -12,17 +12,61 @@
 
 ## 📋 שלב 1: הרשמה ל-WhatsApp Cloud API
 
+### דרך 1: דרך Meta Developers (מומלץ)
+
 1. לך ל: https://developers.facebook.com
 2. היכנס עם Facebook
 3. לחץ על **"My Apps"** → **"Create App"**
-4. בחר **"Business"** → **"Continue"**
+4. **חשוב!** בחר **"Business"** → **"Continue"** (לא "Consumer" או "None")
 5. מלא פרטים:
    - **App Name:** Shift Management WhatsApp
    - **App Contact Email:** האימייל שלך
+   - **App Purpose:** בחר "Business" או "Other"
 6. לחץ **"Create App"**
+
+### דרך 2: דרך Meta Business Suite (אם דרך 1 לא עובדת)
+
+1. לך ל: https://business.facebook.com
+2. היכנס עם Facebook
+3. אם אין לך Business Manager, צור אחד:
+   - לחץ על **"Create Account"**
+   - מלא את הפרטים
+4. לך ל-**"WhatsApp"** בתפריט השמאלי
+5. לחץ על **"Get Started"** או **"Add Phone Number"**
+6. עקוב אחר ההוראות להוספת מספר טלפון
+
+### דרך 3: דרך Meta Business Manager ישירות
+
+1. לך ל: https://business.facebook.com/settings
+2. היכנס עם Facebook
+3. לחץ על **"WhatsApp Accounts"** בתפריט השמאלי
+4. לחץ על **"Add"** → **"Add Phone Number"**
+5. עקוב אחר ההוראות
 
 ## 📋 שלב 2: הוסף WhatsApp Product
 
+### אם אתה לא רואה WhatsApp ברשימה:
+
+**אפשרות 1: ודא שאתה ב-Business App**
+1. בדף ה-App, בדוק את הסוג - צריך להיות **"Business"**
+2. אם זה לא Business, צור App חדש ובחר **"Business"**
+
+**אפשרות 2: הוסף דרך Meta Business Suite**
+1. לך ל: https://business.facebook.com
+2. היכנס עם החשבון שלך
+3. לך ל-**"WhatsApp"** בתפריט
+4. לחץ על **"Get Started"** או **"Add Phone Number"**
+
+**אפשרות 3: הוסף דרך Meta Business Manager**
+1. לך ל: https://business.facebook.com/settings
+2. לחץ על **"WhatsApp Accounts"**
+3. לחץ על **"Add"** → **"Add Phone Number"**
+
+**אפשרות 4: הוסף ישירות דרך URL**
+1. לך ישירות ל: https://developers.facebook.com/apps/[YOUR_APP_ID]/whatsapp-business/onboarding/
+2. החלף `[YOUR_APP_ID]` ב-ID של ה-App שלך (תוכל למצוא אותו בדף ה-App)
+
+### אם אתה רואה WhatsApp:
 1. בדף ה-App, לחץ על **"Add Product"**
 2. מצא **"WhatsApp"** ולחץ **"Set Up"**
 3. בחר **"Cloud API"** (החינמי)
