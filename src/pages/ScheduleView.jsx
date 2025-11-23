@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
-import { Calendar, ChevronLeft, ChevronRight, AlertTriangle, Edit2, X, Save, Plus, Trash2, Clock, Send, CheckCircle } from 'lucide-react'
+import { Calendar, ChevronLeft, ChevronRight, AlertTriangle, Edit2, X, Save, Plus, Trash2, Clock } from 'lucide-react'
 import { getFirebaseDb, getAppId } from '../api/firebase'
-import { collection, onSnapshot, doc, addDoc, updateDoc, deleteDoc, query, where, getDocs, writeBatch } from 'firebase/firestore'
+import { collection, onSnapshot, doc, addDoc, updateDoc, deleteDoc } from 'firebase/firestore'
 import { getSpecialDayInfo } from '../utils/holidayDetector'
 import { startOfWeek, endOfWeek, eachDayOfInterval, format, addWeeks, parseISO, isWithinInterval } from 'date-fns'
 import { he } from 'date-fns/locale'
@@ -22,8 +22,6 @@ export default function ScheduleView() {
   const [editingCell, setEditingCell] = useState(null)
   const [showAddModal, setShowAddModal] = useState(false)
   const [selectedCell, setSelectedCell] = useState(null)
-  const [publishing, setPublishing] = useState(false)
-  const [publishedStatus, setPublishedStatus] = useState({})
 
   const isManager = user?.role === 'manager'
 
@@ -32,7 +30,6 @@ export default function ScheduleView() {
 
     loadShifts()
     loadEmployees()
-    checkPublishedStatus()
   }, [db, user, currentWeek])
 
   function loadShifts() {
@@ -53,13 +50,7 @@ export default function ScheduleView() {
         .filter(shift => {
           if (!shift.date) return false
           const shiftDate = parseISO(shift.date)
-          const inWeek = isWithinInterval(shiftDate, { start: weekStart, end: weekEnd })
-          // Managers see all shifts, employees only see published ones
-          if (isManager) {
-            return inWeek
-          } else {
-            return inWeek && (shift.published === true)
-          }
+          return isWithinInterval(shiftDate, { start: weekStart, end: weekEnd })
         })
 
       setShifts(shiftsData)
@@ -87,88 +78,6 @@ export default function ScheduleView() {
     return () => unsubscribe()
   }
 
-  async function checkPublishedStatus() {
-    if (!db || !user || !isManager) return
-
-    try {
-      const dbInstance = db || getFirebaseDb()
-      const appId = getAppId()
-      const userId = user.uid
-
-      const weekStart = startOfWeek(currentWeek, { locale: he })
-      const weekEnd = endOfWeek(currentWeek, { locale: he })
-
-      const shiftsRef = collection(dbInstance, `artifacts/${appId}/users/${userId}/assignedShifts`)
-      const q = query(
-        shiftsRef,
-        where('date', '>=', format(weekStart, 'yyyy-MM-dd')),
-        where('date', '<=', format(weekEnd, 'yyyy-MM-dd'))
-      )
-      
-      const snapshot = await getDocs(q)
-      const status = {}
-      snapshot.docs.forEach(doc => {
-        const data = doc.data()
-        status[data.date] = data.published || false
-      })
-      setPublishedStatus(status)
-    } catch (error) {
-      console.error('Error checking published status:', error)
-    }
-  }
-
-  async function publishWeek() {
-    if (!db || !user || !isManager) return
-
-    if (!confirm('האם אתה בטוח שברצונך לפרסם את כל המשמרות של השבוע הנוכחי?\n\nלאחר הפרסום, כל העובדים יוכלו לראות את המשמרות שלהם.')) {
-      return
-    }
-
-    setPublishing(true)
-    try {
-      const dbInstance = db || getFirebaseDb()
-      const appId = getAppId()
-      const userId = user.uid
-
-      const weekStart = startOfWeek(currentWeek, { locale: he })
-      const weekEnd = endOfWeek(currentWeek, { locale: he })
-
-      const shiftsRef = collection(dbInstance, `artifacts/${appId}/users/${userId}/assignedShifts`)
-      const q = query(
-        shiftsRef,
-        where('date', '>=', format(weekStart, 'yyyy-MM-dd')),
-        where('date', '<=', format(weekEnd, 'yyyy-MM-dd'))
-      )
-      
-      const snapshot = await getDocs(q)
-      const batch = writeBatch(dbInstance)
-
-      snapshot.docs.forEach(doc => {
-        const shiftRef = doc.ref
-        batch.update(shiftRef, {
-          published: true,
-          publishedAt: new Date().toISOString()
-        })
-      })
-
-      await batch.commit()
-      
-      // Update local status
-      const status = {}
-      snapshot.docs.forEach(doc => {
-        const data = doc.data()
-        status[data.date] = true
-      })
-      setPublishedStatus(status)
-      
-      alert(`✅ הושלם! ${snapshot.docs.length} משמרות פורסמו בהצלחה.\n\nכל העובדים יכולים כעת לראות את המשמרות שלהם.`)
-    } catch (error) {
-      console.error('Error publishing shifts:', error)
-      alert('שגיאה בפרסום המשמרות: ' + error.message)
-    } finally {
-      setPublishing(false)
-    }
-  }
 
   const weekDays = eachDayOfInterval({
     start: startOfWeek(currentWeek, { locale: he }),
@@ -271,7 +180,6 @@ export default function ScheduleView() {
         const shiftRef = doc(dbInstance, `artifacts/${appId}/users/${userId}/assignedShifts/${editingCell.id}`)
         await updateDoc(shiftRef, {
           ...shiftData,
-          published: false, // Reset published status when editing
           updatedAt: new Date().toISOString()
         })
       } else {
@@ -279,7 +187,6 @@ export default function ScheduleView() {
         const shiftsRef = collection(dbInstance, `artifacts/${appId}/users/${userId}/assignedShifts`)
         await addDoc(shiftsRef, {
           ...shiftData,
-          published: false, // New shifts are unpublished by default
           createdAt: new Date().toISOString()
         })
       }
@@ -336,18 +243,10 @@ export default function ScheduleView() {
               </h2>
               <p className="text-gray-600">צפה וערוך את כל המשמרות השבוע</p>
               {isManager && (
-                <div className="flex flex-col items-center md:items-end gap-2 mt-2">
-                  <p className="text-sm text-blue-600 flex items-center gap-1">
-                    <Edit2 className="w-4 h-4" />
-                    לחץ על תא כדי לערוך או להוסיף משמרת
-                  </p>
-                  {Object.values(publishedStatus).some(published => published) && (
-                    <p className="text-sm text-green-600 flex items-center gap-1">
-                      <CheckCircle className="w-4 h-4" />
-                      משמרות השבוע פורסמו לעובדים
-                    </p>
-                  )}
-                </div>
+                <p className="text-sm text-blue-600 mt-2 flex items-center justify-center md:justify-end gap-1">
+                  <Edit2 className="w-4 h-4" />
+                  לחץ על תא כדי לערוך או להוסיף משמרת
+                </p>
               )}
             </div>
             <div className="flex flex-col sm:flex-row items-center gap-3">
@@ -375,25 +274,6 @@ export default function ScheduleView() {
                   היום
                 </button>
               </div>
-              {isManager && (
-                <button
-                  onClick={publishWeek}
-                  disabled={publishing || shifts.length === 0}
-                  className="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 disabled:from-gray-400 disabled:to-gray-500 text-white rounded-xl transition-all duration-200 transform active:scale-95 shadow-lg font-semibold text-sm sm:text-base touch-manipulation disabled:transform-none disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                >
-                  {publishing ? (
-                    <>
-                      <Clock className="w-4 h-4 animate-spin" />
-                      <span>מפרסם...</span>
-                    </>
-                  ) : (
-                    <>
-                      <Send className="w-4 h-4" />
-                      <span>פרסם משמרות</span>
-                    </>
-                  )}
-                </button>
-              )}
             </div>
           </div>
         </div>

@@ -27,8 +27,5 @@
 # VITE_FIREBASE_PROJECT_ID
 # etc.
 
-# WhatsApp Server URL (required for WhatsApp Web.js integration)
-# Set this to your WhatsApp server URL (e.g., Railway, Render, or your own server)
-# Example: WHATSAPP_SERVER_URL=https://your-whatsapp-server.railway.app
-# For local development, use: http://localhost:3001
-# IMPORTANT: Make sure your WhatsApp server is running and accessible!
+# No external WhatsApp server needed - everything runs on Netlify Functions!
+# WhatsApp Web Link API is used - simple and works immediately!
