@@ -31,6 +31,9 @@ export default function Notifications() {
   const [autoSendTime, setAutoSendTime] = useState('07:00') // שעת שליחה אוטומטית
   const [savedLinks, setSavedLinks] = useState([]) // קישורים שנשמרו משליחה אוטומטית
   const [showSavedLinks, setShowSavedLinks] = useState(false) // האם להציג קישורים שנשמרו
+  const [showWhatsAppModal, setShowWhatsAppModal] = useState(false) // Modal להצגת WhatsApp בתוך האתר
+  const [whatsAppLinks, setWhatsAppLinks] = useState([]) // קישורי WhatsApp להצגה ב-modal
+  const [currentLinkIndex, setCurrentLinkIndex] = useState(0) // אינדקס הקישור הנוכחי
   
   // WhatsApp connection state - תמיד מוכן כי אנחנו משתמשים ב-Web Link API
   // אין צורך בבדיקות - תמיד מוכן!
@@ -296,22 +299,30 @@ export default function Notifications() {
       const data = await response.json()
       
       if (data.success) {
-        // Open WhatsApp links in new tabs
-        const successfulLinks = data.results.filter(r => r.success && r.whatsappLink)
+        // Collect all successful links
+        const successfulLinks = data.results
+          .filter(r => r.success && r.whatsappLink)
+          .map(r => ({
+            link: r.whatsappLink,
+            employeeName: recipients.find(rec => {
+              const originalPhone = rec.phoneNumber.replace(/[^0-9]/g, '')
+              const formattedPhone = r.phoneNumber.replace(/[^0-9]/g, '')
+              return originalPhone === formattedPhone || formattedPhone.includes(originalPhone.slice(-9))
+            })?.employeeName || 'עובד',
+            phoneNumber: r.phoneNumber
+          }))
         
-        // Open first few links (browsers may block too many popups)
-        const linksToOpen = successfulLinks.slice(0, 5)
-        linksToOpen.forEach((result, index) => {
-          setTimeout(() => {
-            window.open(result.whatsappLink, '_blank', 'noopener,noreferrer')
-          }, index * 500) // Delay between opens
-        })
+        if (successfulLinks.length > 0) {
+          // Show modal with all links - בתוך האתר!
+          setWhatsAppLinks(successfulLinks)
+          setCurrentLinkIndex(0)
+          setShowWhatsAppModal(true)
+        }
         
         setResults(data.results.map(r => ({
           phoneNumber: r.phoneNumber,
           success: r.success,
           employeeName: recipients.find(rec => {
-            // Find by original phone number
             const originalPhone = rec.phoneNumber.replace(/[^0-9]/g, '')
             const formattedPhone = r.phoneNumber.replace(/[^0-9]/g, '')
             return originalPhone === formattedPhone || formattedPhone.includes(originalPhone.slice(-9))
@@ -320,15 +331,6 @@ export default function Notifications() {
           error: r.error,
           whatsappLink: r.whatsappLink
         })))
-        
-        const sentCount = data.sent || data.results.filter(r => r.success).length
-        const failedCount = data.failed || data.results.filter(r => !r.success).length
-        
-        if (failedCount === 0) {
-          alert(`✅ נפתחו ${sentCount} חלונות WhatsApp!\n\nפשוט לחץ "שלח" בכל חלון.`)
-        } else {
-          alert(`נפתחו ${sentCount} חלונות WhatsApp, ${failedCount} נכשלו.\n\nפשוט לחץ "שלח" בכל חלון.`)
-        }
       } else {
         alert('שגיאה ביצירת קישורי WhatsApp: ' + (data.error || 'Unknown error'))
       }
@@ -372,9 +374,14 @@ export default function Notifications() {
       const data = await response.json()
       
       if (data.success && data.whatsappLink) {
-        // Open WhatsApp link
-        window.open(data.whatsappLink, '_blank', 'noopener,noreferrer')
-        alert(`✅ נפתח חלון WhatsApp ל-${employee.fullName}!\n\nפשוט לחץ "שלח" בחלון.`)
+        // Show in modal - בתוך האתר!
+        setWhatsAppLinks([{
+          link: data.whatsappLink,
+          employeeName: employee.fullName,
+          phoneNumber: data.phoneNumber
+        }])
+        setCurrentLinkIndex(0)
+        setShowWhatsAppModal(true)
       } else {
         alert('שגיאה ביצירת קישור WhatsApp: ' + (data.error || 'Unknown error'))
       }
@@ -594,6 +601,129 @@ export default function Notifications() {
                   )}
                 </div>
               ))}
+            </div>
+          </div>
+        )}
+
+        {/* WhatsApp Modal - בתוך האתר! */}
+        {showWhatsAppModal && whatsAppLinks.length > 0 && (
+          <div className="fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center p-2 sm:p-4 animate-fadeIn">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-6xl h-[90vh] flex flex-col">
+              {/* Header */}
+              <div className="flex items-center justify-between p-4 sm:p-6 border-b-2 border-gray-200">
+                <div className="flex items-center gap-3">
+                  <Smartphone className="w-8 h-8 text-green-600" />
+                  <div>
+                    <h2 className="text-xl sm:text-2xl font-bold text-gray-800">
+                      שליחת הודעות WhatsApp - בתוך האתר
+                    </h2>
+                    <p className="text-sm text-gray-600">
+                      הודעה {currentLinkIndex + 1} מתוך {whatsAppLinks.length}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setShowWhatsAppModal(false)}
+                  className="p-2 hover:bg-gray-100 rounded-lg transition"
+                >
+                  <X className="w-6 h-6 text-gray-600" />
+                </button>
+              </div>
+
+              {/* Content - WhatsApp Web */}
+              <div className="flex-1 flex flex-col sm:flex-row overflow-hidden">
+                {/* Left Side - Navigation */}
+                <div className="w-full sm:w-80 border-b-2 sm:border-b-0 sm:border-r-2 border-gray-200 bg-gray-50 p-4 overflow-y-auto">
+                  <h3 className="font-bold text-gray-800 mb-4">רשימת הודעות:</h3>
+                  <div className="space-y-2">
+                    {whatsAppLinks.map((link, index) => (
+                      <button
+                        key={index}
+                        onClick={() => setCurrentLinkIndex(index)}
+                        className={`w-full text-right p-3 rounded-lg transition ${
+                          index === currentLinkIndex
+                            ? 'bg-green-500 text-white'
+                            : 'bg-white hover:bg-gray-100 text-gray-800'
+                        }`}
+                      >
+                        <p className="font-semibold">{link.employeeName}</p>
+                        <p className="text-xs opacity-75">
+                          {index === currentLinkIndex ? 'נוכחי' : `הודעה ${index + 1}`}
+                        </p>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Right Side - WhatsApp Web */}
+                <div className="flex-1 flex flex-col">
+                  {/* Current Message Info */}
+                  <div className="p-4 bg-green-50 border-b-2 border-green-200">
+                    <p className="font-semibold text-green-800">
+                      שולח ל: {whatsAppLinks[currentLinkIndex]?.employeeName}
+                    </p>
+                    <p className="text-sm text-green-700">
+                      לחץ על הקישור למטה כדי לפתוח WhatsApp Web
+                    </p>
+                  </div>
+
+                  {/* WhatsApp Link - Embedded */}
+                  <div className="flex-1 p-4 flex flex-col items-center justify-center bg-gradient-to-br from-green-50 to-emerald-50">
+                    <div className="bg-white rounded-xl shadow-xl p-6 sm:p-8 max-w-2xl w-full">
+                      <div className="text-center mb-6">
+                        <Smartphone className="w-16 h-16 text-green-600 mx-auto mb-4" />
+                        <h3 className="text-2xl font-bold text-gray-800 mb-2">
+                          הודעה מוכנה ל-{whatsAppLinks[currentLinkIndex]?.employeeName}
+                        </h3>
+                        <p className="text-gray-600 mb-6">
+                          לחץ על הכפתור למטה כדי לפתוח WhatsApp Web עם ההודעה המוכנה
+                        </p>
+                      </div>
+
+                      {/* WhatsApp Link Button */}
+                      <a
+                        href={whatsAppLinks[currentLinkIndex]?.link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="block w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold py-4 px-6 rounded-xl transition-all duration-200 transform hover:scale-105 shadow-lg text-center text-lg mb-4 touch-manipulation active:scale-95"
+                      >
+                        <div className="flex items-center justify-center gap-3">
+                          <Smartphone className="w-6 h-6" />
+                          <span>פתח WhatsApp Web</span>
+                        </div>
+                      </a>
+
+                      {/* Navigation Buttons */}
+                      <div className="flex gap-3">
+                        <button
+                          onClick={() => {
+                            if (currentLinkIndex > 0) {
+                              setCurrentLinkIndex(currentLinkIndex - 1)
+                            }
+                          }}
+                          disabled={currentLinkIndex === 0}
+                          className="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-semibold py-3 px-4 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          ← קודם
+                        </button>
+                        <button
+                          onClick={() => {
+                            if (currentLinkIndex < whatsAppLinks.length - 1) {
+                              setCurrentLinkIndex(currentLinkIndex + 1)
+                            } else {
+                              // Close modal when done
+                              setShowWhatsAppModal(false)
+                            }
+                          }}
+                          className="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-4 rounded-lg transition"
+                        >
+                          {currentLinkIndex < whatsAppLinks.length - 1 ? 'הבא →' : 'סיום ✅'}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         )}
