@@ -26,7 +26,6 @@ RUN apt-get update && apt-get install -y \
     xdg-utils \
     libu2f-udev \
     libvulkan1 \
-    libgobject-2.0-0 \
     libglib2.0-0 \
     && rm -rf /var/lib/apt/lists/*
 
