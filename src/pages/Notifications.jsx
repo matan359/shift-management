@@ -580,9 +580,6 @@ export default function Notifications() {
           </div>
         )}
 
-        {/* WhatsApp Modal - בתוך האתר! */}
-        {showWhatsAppModal && whatsAppLinks.length > 0 && (
-          <div className="fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center p-2 sm:p-4 animate-fadeIn">
             <div className="bg-white rounded-2xl shadow-2xl w-full max-w-6xl h-[90vh] flex flex-col">
               {/* Header */}
               <div className="flex items-center justify-between p-4 sm:p-6 border-b-2 border-gray-200">
