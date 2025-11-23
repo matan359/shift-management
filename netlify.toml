@@ -1,6 +1,7 @@
 [build]
   command = "npm run build"
   publish = "dist"
+  node_bundler = "esbuild"
 
 [[redirects]]
   from = "/*"
@@ -15,13 +16,10 @@
   directory = "netlify/functions"
 
 # Scheduled Functions - שליחה אוטומטית כל יום
+# Note: Netlify Scheduled Functions require a paid plan
+# Alternative: Use Firebase Cloud Functions or Vercel Cron Jobs
 [[plugins]]
   package = "@netlify/plugin-scheduled-functions"
-
-[build]
-  command = "npm run build"
-  publish = "dist"
-  node_bundler = "esbuild"
 
 # Environment variables
 # Add these in Netlify Dashboard > Site settings > Environment variables
@@ -32,4 +30,3 @@
 # etc.
 
 # No external WhatsApp server needed - everything runs on Netlify Functions!
-
