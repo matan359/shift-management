@@ -42,12 +42,9 @@ export default function Notifications() {
     loadEmployees()
     loadTodayTasks()
     loadAutoSendSettings()
-    checkWhatsAppStatus()
     
-    // Check WhatsApp status every 5 seconds
-    const statusInterval = setInterval(checkWhatsAppStatus, 5000)
-    
-    return () => clearInterval(statusInterval)
+    // WhatsApp Web Link API is always ready - no need to check
+    setWhatsappStatus('ready')
   }, [db, user])
 
   async function loadAutoSendSettings() {
@@ -100,36 +97,7 @@ export default function Notifications() {
     }
   }
 
-  async function checkWhatsAppStatus() {
-    try {
-      setCheckingStatus(true)
-      // Always use Netlify Functions - no external server needed
-      const url = '/.netlify/functions/whatsapp-status'
-      
-      const response = await fetch(url)
-      const data = await response.json()
-      
-      setWhatsappStatus(data.status || 'ready')
-      
-      // No QR code needed for WhatsApp Web Link API
-      setQrCode(null)
-    } catch (error) {
-      console.error('Error checking WhatsApp status:', error)
-      setWhatsappStatus('ready') // Default to ready since we use Web Link API
-    } finally {
-      setCheckingStatus(false)
-    }
-  }
-
-  async function initializeConnection() {
-    // No initialization needed for WhatsApp Web Link API
-    setWhatsappStatus('ready')
-  }
-
-  async function loadQRCode() {
-    // No QR code needed for WhatsApp Web Link API
-    setQrCode(null)
-  }
+  // WhatsApp Web Link API is always ready - no functions needed
 
   async function loadTodayShifts() {
     if (!db || !user) return []
