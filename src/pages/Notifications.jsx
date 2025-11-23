@@ -714,34 +714,34 @@ export default function Notifications() {
                       </a>
                     </div>
 
-                      {/* Navigation Buttons */}
-                      <div className="flex gap-3">
-                        <button
-                          onClick={() => {
-                            if (currentLinkIndex > 0) {
-                              setCurrentLinkIndex(currentLinkIndex - 1)
-                            }
-                          }}
-                          disabled={currentLinkIndex === 0}
-                          className="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-semibold py-3 px-4 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                          ← קודם
-                        </button>
-                        <button
-                          onClick={() => {
-                            if (currentLinkIndex < whatsAppLinks.length - 1) {
-                              setCurrentLinkIndex(currentLinkIndex + 1)
-                            } else {
-                              // Close modal when done
-                              setShowWhatsAppModal(false)
-                            }
-                          }}
-                          className="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-4 rounded-lg transition"
-                        >
-                          {currentLinkIndex < whatsAppLinks.length - 1 ? 'הבא →' : 'סיום ✅'}
-                        </button>
-                      </div>
+                    {/* Navigation Buttons */}
+                    <div className="flex gap-3 mt-4">
+                      <button
+                        onClick={() => {
+                          if (currentLinkIndex > 0) {
+                            setCurrentLinkIndex(currentLinkIndex - 1)
+                          }
+                        }}
+                        disabled={currentLinkIndex === 0}
+                        className="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-semibold py-3 px-4 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        ← קודם
+                      </button>
+                      <button
+                        onClick={() => {
+                          if (currentLinkIndex < whatsAppLinks.length - 1) {
+                            setCurrentLinkIndex(currentLinkIndex + 1)
+                          } else {
+                            // Close modal when done
+                            setShowWhatsAppModal(false)
+                          }
+                        }}
+                        className="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-4 rounded-lg transition"
+                      >
+                        {currentLinkIndex < whatsAppLinks.length - 1 ? 'הבא →' : 'סיום ✅'}
+                      </button>
                     </div>
+                  </div>
                   </div>
                 </div>
               </div>
