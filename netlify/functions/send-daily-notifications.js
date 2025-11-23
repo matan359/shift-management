@@ -1,5 +1,6 @@
 // Netlify Scheduled Function - שולח הודעות WhatsApp אוטומטית כל יום
 // זה ירוץ אוטומטית לפי ה-schedule ב-netlify.toml
+// משתמש ב-WhatsApp Web Link API - הכל על Netlify!
 
 const { initializeApp } = require('firebase/app')
 const { getFirestore, collection, query, where, getDocs, doc, getDoc } = require('firebase/firestore')
@@ -14,8 +15,6 @@ const firebaseConfig = {
   appId: process.env.VITE_FIREBASE_APP_ID
 }
 
-const WHATSAPP_SERVER_URL = process.env.WHATSAPP_SERVER_URL
-
 exports.handler = async (event, context) => {
   try {
     // Initialize Firebase
@@ -24,17 +23,61 @@ exports.handler = async (event, context) => {
     
     const today = new Date().toISOString().split('T')[0] // YYYY-MM-DD
     const dayOfWeek = new Date().getDay() // 0 = Sunday, 6 = Saturday
-    
-    // Get all managers/users who have auto-send enabled
-    // Note: This is a simplified version - you might need to adjust based on your data structure
     const appId = process.env.FIREBASE_APP_ID || 'default'
     
-    // For each user, check if auto-send is enabled
-    // This is a placeholder - you'll need to implement the actual logic to get all users
-    // and check their settings
+    // Get all users/managers (you'll need to adjust this based on your data structure)
+    // For now, we'll process one user at a time
     
-    // Example: Get shifts for today
-    const shiftsRef = collection(db, `artifacts/${appId}/users/{userId}/assignedShifts`)
+    // This is a simplified version - you might need to iterate over all users
+    const userId = event.queryStringParameters?.userId || null
+    
+    if (!userId) {
+      // If no userId provided, you might want to get all managers
+      // For now, return success but log that we need userId
+      console.log('No userId provided - scheduled function needs userId parameter')
+      return {
+        statusCode: 200,
+        body: JSON.stringify({ 
+          message: 'No userId provided. This function should be called for each user with auto-send enabled.',
+          note: 'Consider creating a separate function that iterates over all users'
+        })
+      }
+    }
+    
+    // Get user settings for auto-send
+    const settingsRef = doc(db, `artifacts/${appId}/users/${userId}/settings/notifications`)
+    const settingsDoc = await getDoc(settingsRef)
+    
+    if (!settingsDoc.exists() || !settingsDoc.data().autoSendEnabled) {
+      return {
+        statusCode: 200,
+        body: JSON.stringify({ message: 'Auto-send disabled for this user' })
+      }
+    }
+    
+    const settings = settingsDoc.data()
+    const selectedEmployeeIds = settings.selectedEmployeeIds || []
+    const autoSendTime = settings.autoSendTime || '07:00'
+    
+    // Check if it's time to send (compare current time with autoSendTime)
+    const now = new Date()
+    const [hours, minutes] = autoSendTime.split(':').map(Number)
+    const sendTime = new Date()
+    sendTime.setHours(hours, minutes, 0, 0)
+    
+    // Allow 5 minute window
+    const timeDiff = Math.abs(now - sendTime)
+    if (timeDiff > 5 * 60 * 1000) {
+      return {
+        statusCode: 200,
+        body: JSON.stringify({ 
+          message: `Not time to send yet. Scheduled for ${autoSendTime}, current time is ${now.toTimeString()}` 
+        })
+      }
+    }
+    
+    // Get shifts for today
+    const shiftsRef = collection(db, `artifacts/${appId}/users/${userId}/assignedShifts`)
     const shiftsQuery = query(shiftsRef, where('date', '==', today))
     const shiftsSnapshot = await getDocs(shiftsQuery)
     
@@ -47,47 +90,14 @@ exports.handler = async (event, context) => {
     })
     
     // Get tasks for today
-    const tasksRef = collection(db, `artifacts/${appId}/users/{userId}/tasks`)
+    const tasksRef = collection(db, `artifacts/${appId}/users/${userId}/tasks`)
     const tasksQuery = query(tasksRef, where('dayOfWeek', '==', dayOfWeek))
     const tasksSnapshot = await getDocs(tasksQuery)
     const tasks = tasksSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
     
-    // Check WhatsApp connection
-    if (!WHATSAPP_SERVER_URL) {
-      console.error('WHATSAPP_SERVER_URL not configured')
-      return {
-        statusCode: 500,
-        body: JSON.stringify({ error: 'WhatsApp server not configured' })
-      }
-    }
+    // Prepare messages for selected employees
+    const whatsappLinks = []
     
-    const statusResponse = await fetch(`${WHATSAPP_SERVER_URL}/api/whatsapp/status`)
-    const statusData = await statusResponse.json()
-    
-    if (statusData.status !== 'ready') {
-      console.error('WhatsApp not connected')
-      return {
-        statusCode: 500,
-        body: JSON.stringify({ error: 'WhatsApp not connected' })
-      }
-    }
-    
-    // Get user settings for auto-send
-    const settingsRef = doc(db, `artifacts/${appId}/users/{userId}/settings/notifications`)
-    const settingsDoc = await getDoc(settingsRef)
-    
-    if (!settingsDoc.exists() || !settingsDoc.data().autoSendEnabled) {
-      return {
-        statusCode: 200,
-        body: JSON.stringify({ message: 'Auto-send disabled for this user' })
-      }
-    }
-    
-    const settings = settingsDoc.data()
-    const selectedEmployeeIds = settings.selectedEmployeeIds || []
-    
-    // Send messages to selected employees
-    const recipients = []
     shiftsSnapshot.docs.forEach(shiftDoc => {
       const shift = { id: shiftDoc.id, ...shiftDoc.data() }
       
@@ -127,37 +137,43 @@ exports.handler = async (event, context) => {
       
       message += `\nיום נעים!`
       
-      recipients.push({
-        phoneNumber: employee.phoneNumber,
-        message: message
+      // Format phone number
+      let formattedNumber = employee.phoneNumber.replace(/[^0-9]/g, '')
+      if (formattedNumber.startsWith('0')) {
+        formattedNumber = '972' + formattedNumber.substring(1)
+      } else if (!formattedNumber.startsWith('972')) {
+        formattedNumber = '972' + formattedNumber
+      }
+      
+      // Create WhatsApp Web Link
+      const encodedMessage = encodeURIComponent(message)
+      const whatsappLink = `https://wa.me/${formattedNumber}?text=${encodedMessage}`
+      
+      whatsappLinks.push({
+        employeeName: employee.fullName,
+        phoneNumber: formattedNumber,
+        link: whatsappLink
       })
     })
     
-    if (recipients.length === 0) {
-      return {
-        statusCode: 200,
-        body: JSON.stringify({ message: 'No recipients to send to' })
-      }
-    }
-    
-    // Send bulk messages
-    const sendResponse = await fetch(`${WHATSAPP_SERVER_URL}/api/whatsapp/send-bulk`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ recipients })
+    // Save links to Firestore for the manager to open later
+    // Or send via email/webhook (you can add this)
+    const linksRef = collection(db, `artifacts/${appId}/users/${userId}/whatsappLinks`)
+    const linkDoc = doc(linksRef, today)
+    await linkDoc.set({
+      date: today,
+      links: whatsappLinks,
+      createdAt: new Date(),
+      opened: false
     })
-    
-    const sendData = await sendResponse.json()
     
     return {
       statusCode: 200,
       body: JSON.stringify({
         success: true,
-        sent: sendData.sent || 0,
-        failed: sendData.failed || 0,
-        message: `Sent ${sendData.sent || 0} messages`
+        linksCreated: whatsappLinks.length,
+        message: `Created ${whatsappLinks.length} WhatsApp links. Links saved to Firestore.`,
+        note: 'Manager can open these links from the notifications page'
       })
     }
   } catch (error) {
@@ -168,4 +184,3 @@ exports.handler = async (event, context) => {
     }
   }
 }
-
