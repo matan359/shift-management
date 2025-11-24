@@ -35,63 +35,63 @@ export default function Layout({ children }) {
             <div className="hidden md:flex items-center space-x-6 space-x-reverse">
               {isManager && (
                 <>
-                  <Link to="/advanced-dashboard" className="hover:text-blue-200 transition">
+                  <Link to="/advanced-dashboard" className="hover:text-green-200 transition">
                     דשבורד
                   </Link>
-                  <Link to="/manager" className="hover:text-blue-200 transition">
+                  <Link to="/manager" className="hover:text-green-200 transition">
                     לוח בקרה
                   </Link>
-                  <Link to="/schedule" className="hover:text-blue-200 transition">
+                  <Link to="/schedule" className="hover:text-green-200 transition">
                     לוח משמרות
                   </Link>
-                  <Link to="/employees" className="hover:text-blue-200 transition">
+                  <Link to="/employees" className="hover:text-green-200 transition">
                     <Users className="w-4 h-4 inline ml-1" />
                     עובדים
                   </Link>
-                  <Link to="/events" className="hover:text-blue-200 transition">
+                  <Link to="/events" className="hover:text-green-200 transition">
                     אירועים
                   </Link>
-                  <Link to="/tasks" className="hover:text-blue-200 transition">
+                  <Link to="/tasks" className="hover:text-green-200 transition">
                     משימות
                   </Link>
-                  <Link to="/notifications" className="hover:text-blue-200 transition">
+                  <Link to="/notifications" className="hover:text-green-200 transition">
                     <Bell className="w-4 h-4 inline ml-1" />
                     התראות WhatsApp
                   </Link>
-                  <Link to="/announcements" className="hover:text-blue-200 transition">
+                  <Link to="/announcements" className="hover:text-green-200 transition">
                     הודעות
                   </Link>
-                  <Link to="/special-days" className="hover:text-blue-200 transition">
+                  <Link to="/special-days" className="hover:text-green-200 transition">
                     ימים מיוחדים
                   </Link>
                 </>
               )}
               {isWorker && (
                 <>
-                  <Link to="/shift-notes" className="hover:text-blue-200 transition">
+                  <Link to="/shift-notes" className="hover:text-green-200 transition">
                     הערות
                   </Link>
                 </>
               )}
               {isWorker && (
                 <>
-                  <Link to="/worker" className="hover:text-blue-200 transition">
+                  <Link to="/worker" className="hover:text-green-200 transition">
                     לוח בקרה
                   </Link>
-                  <Link to="/schedule" className="hover:text-blue-200 transition">
+                  <Link to="/schedule" className="hover:text-green-200 transition">
                     לוח משמרות
                   </Link>
-                  <Link to="/availability" className="hover:text-blue-200 transition">
+                  <Link to="/availability" className="hover:text-green-200 transition">
                     הגשת זמינות
                   </Link>
-                  <Link to="/swap" className="hover:text-blue-200 transition">
+                  <Link to="/swap" className="hover:text-green-200 transition">
                     החלפת משמרות
                   </Link>
                 </>
               )}
               <button
                 onClick={handleSignOut}
-                className="flex items-center space-x-1 space-x-reverse hover:text-blue-200 transition"
+                className="flex items-center space-x-1 space-x-reverse hover:text-green-200 transition"
               >
                 <LogOut className="w-4 h-4" />
                 <span>התנתק</span>
@@ -112,45 +112,45 @@ export default function Layout({ children }) {
             <div className="md:hidden mt-4 space-y-2 pb-4">
               {isManager && (
                 <>
-                  <Link to="/manager" className="block py-2 hover:text-blue-200" onClick={() => setMobileMenuOpen(false)}>
+                  <Link to="/manager" className="block py-2 hover:text-green-200" onClick={() => setMobileMenuOpen(false)}>
                     לוח בקרה
                   </Link>
-                  <Link to="/schedule" className="block py-2 hover:text-blue-200" onClick={() => setMobileMenuOpen(false)}>
+                  <Link to="/schedule" className="block py-2 hover:text-green-200" onClick={() => setMobileMenuOpen(false)}>
                     לוח משמרות
                   </Link>
-                  <Link to="/employees" className="block py-2 hover:text-blue-200" onClick={() => setMobileMenuOpen(false)}>
+                  <Link to="/employees" className="block py-2 hover:text-green-200" onClick={() => setMobileMenuOpen(false)}>
                     עובדים
                   </Link>
-                  <Link to="/events" className="block py-2 hover:text-blue-200" onClick={() => setMobileMenuOpen(false)}>
+                  <Link to="/events" className="block py-2 hover:text-green-200" onClick={() => setMobileMenuOpen(false)}>
                     אירועים
                   </Link>
-                  <Link to="/tasks" className="block py-2 hover:text-blue-200" onClick={() => setMobileMenuOpen(false)}>
+                  <Link to="/tasks" className="block py-2 hover:text-green-200" onClick={() => setMobileMenuOpen(false)}>
                     משימות
                   </Link>
-                  <Link to="/notifications" className="block py-2 hover:text-blue-200" onClick={() => setMobileMenuOpen(false)}>
+                  <Link to="/notifications" className="block py-2 hover:text-green-200" onClick={() => setMobileMenuOpen(false)}>
                     התראות WhatsApp
                   </Link>
                 </>
               )}
               {isWorker && (
                 <>
-                  <Link to="/worker" className="block py-2 hover:text-blue-200" onClick={() => setMobileMenuOpen(false)}>
+                  <Link to="/worker" className="block py-2 hover:text-green-200" onClick={() => setMobileMenuOpen(false)}>
                     לוח בקרה
                   </Link>
-                  <Link to="/schedule" className="block py-2 hover:text-blue-200" onClick={() => setMobileMenuOpen(false)}>
+                  <Link to="/schedule" className="block py-2 hover:text-green-200" onClick={() => setMobileMenuOpen(false)}>
                     לוח משמרות
                   </Link>
-                  <Link to="/availability" className="block py-2 hover:text-blue-200" onClick={() => setMobileMenuOpen(false)}>
+                  <Link to="/availability" className="block py-2 hover:text-green-200" onClick={() => setMobileMenuOpen(false)}>
                     הגשת זמינות
                   </Link>
-                  <Link to="/swap" className="block py-2 hover:text-blue-200" onClick={() => setMobileMenuOpen(false)}>
+                  <Link to="/swap" className="block py-2 hover:text-green-200" onClick={() => setMobileMenuOpen(false)}>
                     החלפת משמרות
                   </Link>
                 </>
               )}
               <button
                 onClick={handleSignOut}
-                className="flex items-center space-x-1 space-x-reverse py-2 hover:text-blue-200 w-full text-right"
+                className="flex items-center space-x-1 space-x-reverse py-2 hover:text-green-200 w-full text-right"
               >
                 <LogOut className="w-4 h-4" />
                 <span>התנתק</span>
