@@ -245,15 +245,15 @@ export default function ManageNotifications() {
     <div>
       <div className="mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-green-600 via-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
+          <h2 className="text-3xl sm:text-4xl font-bold text-green-700 mb-2">
             📱 ניהול התראות WhatsApp
           </h2>
-          <p className="text-gray-700 font-medium">שלח הודעות יומיות לעובדים עם משמרות</p>
+          <p className="text-gray-600 font-medium">שלח הודעות יומיות לעובדים עם משמרות</p>
         </div>
         <button
           onClick={sendAllNotifications}
           disabled={sending || todayShifts.length === 0}
-          className="bg-gradient-to-r from-green-500 via-emerald-600 to-teal-600 hover:from-green-600 hover:via-emerald-700 hover:to-teal-700 text-white font-bold py-4 px-6 sm:px-8 rounded-xl transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed shadow-glow-lg disabled:transform-none flex items-center space-x-2 space-x-reverse touch-manipulation active:scale-95 text-base sm:text-lg w-full sm:w-auto justify-center"
+          className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-bold py-4 px-6 sm:px-8 rounded-xl transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed shadow-glow-lg disabled:transform-none flex items-center space-x-2 space-x-reverse touch-manipulation active:scale-95 text-base sm:text-lg w-full sm:w-auto justify-center"
         >
           <Send className="w-5 h-5" />
           <span>{sending ? '⏳ שולח...' : '📤 שלח הכל דרך WhatsApp'}</span>
@@ -280,8 +280,8 @@ export default function ManageNotifications() {
 
       {/* Today's Shifts */}
       <div className="glass-effect rounded-2xl shadow-glow p-4 sm:p-6 mb-6">
-        <h3 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-4 flex items-center">
-          <div className="p-2 bg-gradient-to-br from-blue-400 to-blue-600 rounded-lg ml-2">
+          <h3 className="text-xl sm:text-2xl font-bold text-green-700 mb-4 flex items-center">
+          <div className="p-2 bg-green-600 rounded-lg ml-2">
             <Clock className="w-5 h-5 text-white" />
           </div>
           משמרות היום ({format(new Date(), 'dd/MM/yyyy', { locale: he })})
@@ -307,7 +307,7 @@ export default function ManageNotifications() {
                   <button
                     onClick={() => sendToEmployee(shift)}
                     disabled={sending || !employee?.phoneNumber}
-                    className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white text-sm sm:text-base font-bold py-3 px-4 sm:px-6 rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2 space-x-reverse touch-manipulation active:scale-95 shadow-lg transform hover:scale-105 w-full sm:w-auto justify-center"
+                    className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white text-sm sm:text-base font-bold py-3 px-4 sm:px-6 rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2 space-x-reverse touch-manipulation active:scale-95 shadow-lg transform hover:scale-105 w-full sm:w-auto justify-center"
                   >
                     <Send className="w-4 h-4 sm:w-5 sm:h-5" />
                     <span>{sending ? '⏳ שולח...' : '📤 שלח הודעה'}</span>

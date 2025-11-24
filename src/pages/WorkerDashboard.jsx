@@ -63,10 +63,10 @@ export default function WorkerDashboard() {
   return (
     <div>
       <div className="mb-4 sm:mb-6 px-2 sm:px-0">
-        <h2 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent mb-2 animate-gradient">
+        <h2 className="text-3xl sm:text-4xl font-bold text-green-700 mb-2">
           ברוך הבא, {user?.fullName} 👋
         </h2>
-        <p className="text-sm sm:text-base text-gray-700 font-medium">לוח בקרה אישי</p>
+        <p className="text-sm sm:text-base text-gray-600 font-medium">לוח בקרה אישי</p>
       </div>
 
       <AnnouncementsBanner />
@@ -76,9 +76,9 @@ export default function WorkerDashboard() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-gray-600 text-xs sm:text-sm font-medium mb-1">משמרות השבוע</p>
-              <p className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">{shifts.length}</p>
+              <p className="text-3xl sm:text-4xl font-bold text-green-700">{shifts.length}</p>
             </div>
-            <div className="p-3 bg-gradient-to-br from-blue-400 to-blue-600 rounded-xl shadow-lg animate-float">
+            <div className="p-3 bg-gradient-to-br from-green-600 to-green-700 rounded-xl shadow-lg animate-float">
               <Calendar className="w-8 h-8 sm:w-12 sm:h-12 text-white" />
             </div>
           </div>
@@ -88,9 +88,9 @@ export default function WorkerDashboard() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-gray-600 text-xs sm:text-sm font-medium mb-1">משמרות קרובות</p>
-              <p className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-green-600 to-green-800 bg-clip-text text-transparent">{upcomingShifts.length}</p>
+              <p className="text-3xl sm:text-4xl font-bold text-green-700">{upcomingShifts.length}</p>
             </div>
-            <div className="p-3 bg-gradient-to-br from-green-400 to-green-600 rounded-xl shadow-lg animate-float" style={{ animationDelay: '0.5s' }}>
+            <div className="p-3 bg-gradient-to-br from-green-600 to-green-700 rounded-xl shadow-lg animate-float" style={{ animationDelay: '0.5s' }}>
               <Clock className="w-8 h-8 sm:w-12 sm:h-12 text-white" />
             </div>
           </div>
@@ -100,9 +100,9 @@ export default function WorkerDashboard() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-gray-600 text-xs sm:text-sm font-medium mb-1">סטטוס</p>
-              <p className="text-lg sm:text-xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">פעיל ✅</p>
+              <p className="text-lg sm:text-xl font-bold text-green-700">פעיל ✅</p>
             </div>
-            <div className="p-3 bg-gradient-to-br from-purple-400 to-pink-600 rounded-xl shadow-lg animate-float" style={{ animationDelay: '1s' }}>
+            <div className="p-3 bg-gradient-to-br from-green-600 to-green-700 rounded-xl shadow-lg animate-float" style={{ animationDelay: '1s' }}>
               <CheckCircle className="w-8 h-8 sm:w-12 sm:h-12 text-white" />
             </div>
           </div>
@@ -111,23 +111,23 @@ export default function WorkerDashboard() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8 px-2 sm:px-0">
         <div className="glass-effect rounded-2xl shadow-glow p-4 sm:p-6 card-hover">
-          <h3 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-4">פעולות מהירות</h3>
+          <h3 className="text-xl sm:text-2xl font-bold text-green-700 mb-4">פעולות מהירות</h3>
           <div className="space-y-3">
             <Link
               to="/availability"
-              className="block w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-bold py-4 px-4 rounded-xl transition-all duration-200 text-center touch-manipulation active:scale-95 shadow-lg transform hover:scale-105"
+              className="block w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-bold py-4 px-4 rounded-xl transition-all duration-200 text-center touch-manipulation active:scale-95 shadow-lg transform hover:scale-105"
             >
               📅 הגשת זמינות שבועית
             </Link>
             <Link
               to="/swap"
-              className="block w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold py-4 px-4 rounded-xl transition-all duration-200 text-center touch-manipulation active:scale-95 shadow-lg transform hover:scale-105"
+              className="block w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-bold py-4 px-4 rounded-xl transition-all duration-200 text-center touch-manipulation active:scale-95 shadow-lg transform hover:scale-105"
             >
               🔄 החלפת משמרת
             </Link>
             <Link
               to="/schedule"
-              className="block w-full bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white font-bold py-4 px-4 rounded-xl transition-all duration-200 text-center touch-manipulation active:scale-95 shadow-lg transform hover:scale-105"
+              className="block w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-bold py-4 px-4 rounded-xl transition-all duration-200 text-center touch-manipulation active:scale-95 shadow-lg transform hover:scale-105"
             >
               📊 צפייה בלוח משמרות
             </Link>
@@ -135,7 +135,7 @@ export default function WorkerDashboard() {
         </div>
 
         <div className="glass-effect rounded-2xl shadow-glow p-4 sm:p-6 card-hover">
-          <h3 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-4">משמרות קרובות</h3>
+          <h3 className="text-xl sm:text-2xl font-bold text-green-700 mb-4">משמרות קרובות</h3>
           {loading ? (
             <div className="flex items-center justify-center py-8">
               <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-600"></div>
@@ -156,8 +156,8 @@ export default function WorkerDashboard() {
                     </div>
                     <span className={`px-3 sm:px-4 py-2 rounded-full text-xs sm:text-sm font-bold shadow-md ${
                       shift.status === 'confirmed' 
-                        ? 'bg-gradient-to-r from-green-400 to-green-600 text-white' 
-                        : 'bg-gradient-to-r from-yellow-400 to-yellow-600 text-white'
+                        ? 'bg-green-600 text-white' 
+                        : 'bg-yellow-500 text-white'
                     }`}>
                       {shift.status === 'confirmed' ? '✅ מאושר' : '⏳ ממתין'}
                     </span>

@@ -107,18 +107,18 @@ export default function QuickStats() {
 
   return (
     <div className="glass-effect rounded-2xl shadow-glow p-4 sm:p-6">
-      <h3 className="text-lg sm:text-xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-4 flex items-center">
-        <Zap className="w-5 h-5 ml-2 text-purple-600" />
+      <h3 className="text-lg sm:text-xl font-bold text-green-700 mb-4 flex items-center">
+        <Zap className="w-5 h-5 ml-2 text-green-600" />
         סטטיסטיקות מהירות
       </h3>
       <div className="grid grid-cols-2 gap-3 sm:gap-4">
-        <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-3 sm:p-4 border-2 border-blue-200">
+        <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-3 sm:p-4 border-2 border-green-200">
           <div className="flex items-center justify-between mb-2">
-            <Calendar className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" />
-            <TrendingUp className="w-4 h-4 text-blue-500" />
+            <Calendar className="w-5 h-5 sm:w-6 sm:h-6 text-green-600" />
+            <TrendingUp className="w-4 h-4 text-green-500" />
           </div>
           <p className="text-xs sm:text-sm text-gray-600 font-medium mb-1">משמרות השבוע</p>
-          <p className="text-2xl sm:text-3xl font-bold text-blue-700">{stats.thisWeekShifts}</p>
+          <p className="text-2xl sm:text-3xl font-bold text-green-700">{stats.thisWeekShifts}</p>
         </div>
 
         <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-3 sm:p-4 border-2 border-green-200">
@@ -130,22 +130,22 @@ export default function QuickStats() {
           <p className="text-2xl sm:text-3xl font-bold text-green-700">{stats.todayShifts}</p>
         </div>
 
-        <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-3 sm:p-4 border-2 border-purple-200">
+        <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-3 sm:p-4 border-2 border-green-200">
           <div className="flex items-center justify-between mb-2">
-            <Users className="w-5 h-5 sm:w-6 sm:h-6 text-purple-600" />
-            <TrendingUp className="w-4 h-4 text-purple-500" />
+            <Users className="w-5 h-5 sm:w-6 sm:h-6 text-green-600" />
+            <TrendingUp className="w-4 h-4 text-green-500" />
           </div>
           <p className="text-xs sm:text-sm text-gray-600 font-medium mb-1">עובדים פעילים</p>
-          <p className="text-2xl sm:text-3xl font-bold text-purple-700">{stats.activeEmployees}</p>
+          <p className="text-2xl sm:text-3xl font-bold text-green-700">{stats.activeEmployees}</p>
         </div>
 
-        <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl p-3 sm:p-4 border-2 border-orange-200">
+        <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-3 sm:p-4 border-2 border-green-200">
           <div className="flex items-center justify-between mb-2">
-            <Clock className="w-5 h-5 sm:w-6 sm:h-6 text-orange-600" />
-            <TrendingUp className="w-4 h-4 text-orange-500" />
+            <Clock className="w-5 h-5 sm:w-6 sm:h-6 text-green-600" />
+            <TrendingUp className="w-4 h-4 text-green-500" />
           </div>
           <p className="text-xs sm:text-sm text-gray-600 font-medium mb-1">סה"כ שעות</p>
-          <p className="text-2xl sm:text-3xl font-bold text-orange-700">{stats.totalHours}</p>
+          <p className="text-2xl sm:text-3xl font-bold text-green-700">{stats.totalHours}</p>
         </div>
       </div>
     </div>

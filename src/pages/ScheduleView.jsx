@@ -224,8 +224,8 @@ export default function ScheduleView() {
 
   function getCellClassName(day, category, shiftType, isEmpty) {
     const baseClasses = 'px-4 py-3 border border-gray-300 text-sm transition-all duration-200'
-    const hoverClasses = isManager ? 'hover:bg-blue-50 hover:shadow-md cursor-pointer' : ''
-    const emptyClasses = isEmpty ? 'bg-gray-50' : 'bg-gradient-to-br from-white to-blue-50'
+    const hoverClasses = isManager ? 'hover:bg-green-50 hover:shadow-md cursor-pointer' : ''
+    const emptyClasses = isEmpty ? 'bg-gray-50' : 'bg-gradient-to-br from-white to-green-50'
     const specialDay = getSpecialDayInfo(day)
     const specialClasses = specialDay.isSpecial ? 'ring-2 ring-yellow-400' : ''
     
@@ -233,18 +233,18 @@ export default function ScheduleView() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-2 sm:p-4 md:p-8">
+    <div className="min-h-screen bg-gradient-to-br from-green-50 via-green-50 to-white p-2 sm:p-4 md:p-8">
       <div className="max-w-7xl mx-auto">
         {/* Header with animations */}
         <div className="mb-8 bg-white rounded-2xl shadow-xl p-6 transform transition-all duration-300 hover:shadow-2xl">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="text-center md:text-right">
-              <h2 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2 animate-pulse">
+              <h2 className="text-4xl font-bold text-green-700 mb-2">
                 לוח משמרות שבועי
               </h2>
               <p className="text-gray-600">צפה וערוך את כל המשמרות השבוע</p>
               {isManager && (
-                <p className="text-sm text-blue-600 mt-2 flex items-center justify-center md:justify-end gap-1">
+                <p className="text-sm text-green-700 mt-2 flex items-center justify-center md:justify-end gap-1">
                   <Edit2 className="w-4 h-4" />
                   לחץ על תא כדי לערוך או להוסיף משמרת
                 </p>
@@ -254,7 +254,7 @@ export default function ScheduleView() {
               <div className="flex items-center gap-3">
                 <button
                   onClick={() => setCurrentWeek(addWeeks(currentWeek, -1))}
-                  className="p-2 sm:p-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-xl transition-all duration-200 transform active:scale-95 shadow-lg touch-manipulation"
+                  className="p-2 sm:p-3 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white rounded-xl transition-all duration-200 transform active:scale-95 shadow-lg touch-manipulation"
                 >
                   <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
                 </button>
@@ -264,13 +264,13 @@ export default function ScheduleView() {
                 </div>
                 <button
                   onClick={() => setCurrentWeek(addWeeks(currentWeek, 1))}
-                  className="p-2 sm:p-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-xl transition-all duration-200 transform active:scale-95 shadow-lg touch-manipulation"
+                  className="p-2 sm:p-3 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white rounded-xl transition-all duration-200 transform active:scale-95 shadow-lg touch-manipulation"
                 >
                   <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
                 </button>
                 <button
                   onClick={() => setCurrentWeek(new Date())}
-                  className="px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-xl transition-all duration-200 transform active:scale-95 shadow-lg font-semibold text-sm sm:text-base touch-manipulation"
+                  className="px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white rounded-xl transition-all duration-200 transform active:scale-95 shadow-lg font-semibold text-sm sm:text-base touch-manipulation"
                 >
                   היום
                 </button>
@@ -339,9 +339,9 @@ export default function ScheduleView() {
                                     e.stopPropagation()
                                     setEditingCell(shift)
                                   }}
-                                  className="opacity-0 group-hover:opacity-100 sm:opacity-0 transition-opacity p-1 hover:bg-blue-200 rounded touch-manipulation mt-1 self-end"
+                                  className="opacity-0 group-hover:opacity-100 sm:opacity-0 transition-opacity p-1 hover:bg-green-200 rounded touch-manipulation mt-1 self-end"
                                 >
-                                  <Edit2 className="w-3 h-3 sm:w-4 sm:h-4 text-blue-600" />
+                                  <Edit2 className="w-3 h-3 sm:w-4 sm:h-4 text-green-600" />
                                 </button>
                               )}
                             </div>
@@ -403,7 +403,7 @@ export default function ScheduleView() {
                                   }}
                                   className="opacity-0 group-hover:opacity-100 sm:opacity-0 transition-opacity p-1 hover:bg-orange-200 rounded touch-manipulation mt-1 self-end"
                                 >
-                                  <Edit2 className="w-3 h-3 sm:w-4 sm:h-4 text-orange-600" />
+                                  <Edit2 className="w-3 h-3 sm:w-4 sm:h-4 text-green-600" />
                                 </button>
                               )}
                             </div>
@@ -571,7 +571,7 @@ function ShiftEditModal({ shift, cell, employees, onSave, onDelete, onClose }) {
           <div className="flex gap-3">
             <button
               type="submit"
-              className="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-all duration-200 transform hover:scale-105 shadow-lg"
+              className="flex-1 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-semibold py-2 px-4 rounded-lg transition-all duration-200 transform hover:scale-105 shadow-lg"
             >
               <Save className="w-4 h-4 inline ml-2" />
               שמור

@@ -23,7 +23,7 @@ export default function Layout({ children }) {
   return (
     <div className="min-h-screen relative">
       {/* Navigation Bar */}
-      <nav className="glass-effect text-white shadow-glow-lg sticky top-0 z-50 bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600">
+      <nav className="glass-effect text-white shadow-glow-lg sticky top-0 z-50 bg-gradient-to-r from-green-700 via-green-600 to-green-700">
         <div className="container mx-auto px-2 sm:px-4 py-2 sm:py-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2 sm:space-x-4 space-x-reverse">

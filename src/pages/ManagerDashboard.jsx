@@ -70,10 +70,10 @@ export default function ManagerDashboard() {
   return (
     <div>
       <div className="mb-4 sm:mb-6 px-2 sm:px-0">
-        <h2 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent mb-2 animate-gradient">
+        <h2 className="text-3xl sm:text-4xl font-bold text-green-700 mb-2">
           לוח בקרה - מנהל 👨‍💼
         </h2>
-        <p className="text-sm sm:text-base text-gray-700 font-medium">סקירה כללית של המערכת</p>
+        <p className="text-sm sm:text-base text-gray-600 font-medium">סקירה כללית של המערכת</p>
       </div>
 
       {/* Statistics Cards */}
@@ -82,9 +82,9 @@ export default function ManagerDashboard() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-gray-600 text-xs sm:text-sm font-medium mb-1">סה"כ עובדים</p>
-              <p className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">{loading ? '...' : stats.totalEmployees}</p>
+              <p className="text-3xl sm:text-4xl font-bold text-green-700">{loading ? '...' : stats.totalEmployees}</p>
             </div>
-            <div className="p-3 bg-gradient-to-br from-blue-400 to-blue-600 rounded-xl shadow-lg animate-float">
+            <div className="p-3 bg-gradient-to-br from-green-600 to-green-700 rounded-xl shadow-lg animate-float">
               <Users className="w-8 h-8 sm:w-12 sm:h-12 text-white" />
             </div>
           </div>
@@ -94,9 +94,9 @@ export default function ManagerDashboard() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-gray-600 text-xs sm:text-sm font-medium mb-1">משמרות פעילות</p>
-              <p className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-green-600 to-green-800 bg-clip-text text-transparent">{loading ? '...' : stats.activeShifts}</p>
+              <p className="text-3xl sm:text-4xl font-bold text-green-700">{loading ? '...' : stats.activeShifts}</p>
             </div>
-            <div className="p-3 bg-gradient-to-br from-green-400 to-green-600 rounded-xl shadow-lg animate-float" style={{ animationDelay: '0.3s' }}>
+            <div className="p-3 bg-gradient-to-br from-green-600 to-green-700 rounded-xl shadow-lg animate-float" style={{ animationDelay: '0.3s' }}>
               <Calendar className="w-8 h-8 sm:w-12 sm:h-12 text-white" />
             </div>
           </div>
@@ -106,9 +106,9 @@ export default function ManagerDashboard() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-gray-600 text-xs sm:text-sm font-medium mb-1">בקשות ממתינות</p>
-              <p className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-yellow-600 to-orange-600 bg-clip-text text-transparent">{loading ? '...' : stats.pendingRequests}</p>
+              <p className="text-3xl sm:text-4xl font-bold text-yellow-600">{loading ? '...' : stats.pendingRequests}</p>
             </div>
-            <div className="p-3 bg-gradient-to-br from-yellow-400 to-orange-600 rounded-xl shadow-lg animate-float" style={{ animationDelay: '0.6s' }}>
+            <div className="p-3 bg-yellow-500 rounded-xl shadow-lg animate-float" style={{ animationDelay: '0.6s' }}>
               <AlertTriangle className="w-8 h-8 sm:w-12 sm:h-12 text-white" />
             </div>
           </div>
@@ -118,9 +118,9 @@ export default function ManagerDashboard() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-gray-600 text-xs sm:text-sm font-medium mb-1">אירועים קרובים</p>
-              <p className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">{loading ? '...' : stats.upcomingEvents}</p>
+              <p className="text-3xl sm:text-4xl font-bold text-green-700">{loading ? '...' : stats.upcomingEvents}</p>
             </div>
-            <div className="p-3 bg-gradient-to-br from-purple-400 to-pink-600 rounded-xl shadow-lg animate-float" style={{ animationDelay: '0.9s' }}>
+            <div className="p-3 bg-gradient-to-br from-green-600 to-green-700 rounded-xl shadow-lg animate-float" style={{ animationDelay: '0.9s' }}>
               <Calendar className="w-8 h-8 sm:w-12 sm:h-12 text-white" />
             </div>
           </div>
@@ -134,8 +134,8 @@ export default function ManagerDashboard() {
           className="glass-effect rounded-2xl shadow-glow p-4 sm:p-6 card-hover touch-manipulation"
         >
           <div className="flex items-center justify-between mb-3 sm:mb-4">
-            <h3 className="text-lg sm:text-xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">📅 לוח משמרות</h3>
-            <div className="p-2 bg-gradient-to-br from-blue-400 to-blue-600 rounded-lg">
+            <h3 className="text-lg sm:text-xl font-bold text-green-700">📅 לוח משמרות</h3>
+            <div className="p-2 bg-green-600 rounded-lg">
               <Calendar className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
             </div>
           </div>
@@ -147,8 +147,8 @@ export default function ManagerDashboard() {
           className="glass-effect rounded-2xl shadow-glow p-4 sm:p-6 card-hover touch-manipulation"
         >
           <div className="flex items-center justify-between mb-3 sm:mb-4">
-            <h3 className="text-lg sm:text-xl font-bold bg-gradient-to-r from-green-600 to-green-800 bg-clip-text text-transparent">👥 ניהול עובדים</h3>
-            <div className="p-2 bg-gradient-to-br from-green-400 to-green-600 rounded-lg">
+            <h3 className="text-lg sm:text-xl font-bold text-green-700">👥 ניהול עובדים</h3>
+            <div className="p-2 bg-green-600 rounded-lg">
               <Users className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
             </div>
           </div>
@@ -160,8 +160,8 @@ export default function ManagerDashboard() {
           className="glass-effect rounded-2xl shadow-glow p-4 sm:p-6 card-hover touch-manipulation"
         >
           <div className="flex items-center justify-between mb-3 sm:mb-4">
-            <h3 className="text-lg sm:text-xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">🎉 ניהול אירועים</h3>
-            <div className="p-2 bg-gradient-to-br from-purple-400 to-pink-600 rounded-lg">
+            <h3 className="text-lg sm:text-xl font-bold text-green-700">🎉 ניהול אירועים</h3>
+            <div className="p-2 bg-green-600 rounded-lg">
               <Calendar className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
             </div>
           </div>
@@ -173,8 +173,8 @@ export default function ManagerDashboard() {
           className="glass-effect rounded-2xl shadow-glow p-4 sm:p-6 card-hover touch-manipulation"
         >
           <div className="flex items-center justify-between mb-3 sm:mb-4">
-            <h3 className="text-lg sm:text-xl font-bold bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">✅ משימות שבועיות</h3>
-            <div className="p-2 bg-gradient-to-br from-orange-400 to-red-600 rounded-lg">
+            <h3 className="text-lg sm:text-xl font-bold text-green-700">✅ משימות שבועיות</h3>
+            <div className="p-2 bg-green-600 rounded-lg">
               <Settings className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
             </div>
           </div>
@@ -186,8 +186,8 @@ export default function ManagerDashboard() {
           className="glass-effect rounded-2xl shadow-glow p-4 sm:p-6 card-hover touch-manipulation"
         >
           <div className="flex items-center justify-between mb-3 sm:mb-4">
-            <h3 className="text-lg sm:text-xl font-bold bg-gradient-to-r from-pink-600 to-rose-600 bg-clip-text text-transparent">📱 שליחת התראות</h3>
-            <div className="p-2 bg-gradient-to-br from-pink-400 to-rose-600 rounded-lg">
+            <h3 className="text-lg sm:text-xl font-bold text-green-700">📱 שליחת התראות</h3>
+            <div className="p-2 bg-green-600 rounded-lg">
               <Zap className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
             </div>
           </div>
