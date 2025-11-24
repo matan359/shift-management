@@ -558,12 +558,12 @@ export default function Notifications() {
   }
 
   return (
-    <div className="min-h-screen p-2 sm:p-4 md:p-8">
+    <div className="min-h-screen bg-gradient-to-br from-green-50 via-green-50 to-white p-2 sm:p-4 md:p-8">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <div className="mb-6 glass-effect rounded-2xl shadow-glow p-4 sm:p-6">
+        <div className="mb-6 glass-effect rounded-2xl shadow-glow p-4 sm:p-6 animate-fadeIn">
           <h1 className="text-2xl sm:text-3xl font-bold text-green-700 mb-2 flex items-center gap-3">
-            <Bell className="w-8 h-8 text-green-600" />
+            <Bell className="w-8 h-8 text-green-600 animate-pulse-slow" />
             שליחת התראות WhatsApp
           </h1>
           <p className="text-gray-600 text-sm sm:text-base font-medium">
@@ -572,7 +572,7 @@ export default function Notifications() {
         </div>
 
         {/* Info Box */}
-        <div className="mb-6 glass-effect rounded-2xl shadow-glow p-4 sm:p-6 border-2 border-green-300 bg-green-50">
+        <div className="mb-6 glass-effect rounded-2xl shadow-glow p-4 sm:p-6 border-2 border-green-300 bg-green-50 animate-slideUp">
           <div className="flex items-start gap-3">
             <CheckCircle className="w-8 h-8 text-green-600 flex-shrink-0 mt-1" />
             <div className="flex-1">
@@ -590,7 +590,7 @@ export default function Notifications() {
         </div>
 
         {/* Weekly Shifts Button - Send all next week shifts */}
-        <div className="mb-6 glass-effect rounded-2xl shadow-glow p-4 sm:p-6 border-2 border-green-300 bg-green-50">
+        <div className="mb-6 glass-effect rounded-2xl shadow-glow p-4 sm:p-6 border-2 border-green-300 bg-green-50 animate-fadeIn" style={{ animationDelay: '0.1s' }}>
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
               <h2 className="text-xl font-bold text-green-700 mb-1 flex items-center gap-2">
@@ -618,7 +618,7 @@ export default function Notifications() {
         </div>
 
         {/* Send All Button - Today's shifts */}
-        <div className="mb-6 glass-effect rounded-2xl shadow-glow p-4 sm:p-6">
+        <div className="mb-6 glass-effect rounded-2xl shadow-glow p-4 sm:p-6 animate-fadeIn" style={{ animationDelay: '0.2s' }}>
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
               <h2 className="text-xl font-bold text-green-700 mb-1">שלח הודעות לכל העובדים - משמרות היום</h2>
@@ -640,7 +640,7 @@ export default function Notifications() {
         </div>
 
         {/* Today's Shifts with Selection */}
-        <div className="mb-6 glass-effect rounded-2xl shadow-glow p-4 sm:p-6">
+        <div className="mb-6 glass-effect rounded-2xl shadow-glow p-4 sm:p-6 animate-fadeIn" style={{ animationDelay: '0.3s' }}>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-bold text-green-700 flex items-center gap-2">
               <Clock className="w-6 h-6 text-green-600" />
@@ -678,11 +678,12 @@ export default function Notifications() {
                 return (
                   <div 
                     key={shift.id} 
-                    className={`border-2 rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 transition-all ${
+                    className={`border-2 rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 transition-all duration-200 hover:shadow-md animate-fadeIn ${
                       isSelected 
-                        ? 'border-green-500 bg-green-50' 
-                        : 'border-gray-200 bg-white'
+                        ? 'border-green-500 bg-green-50 shadow-md' 
+                        : 'border-gray-200 bg-white hover:border-green-300'
                     }`}
+                    style={{ animationDelay: `${index * 0.05}s` }}
                   >
                     <div className="flex items-center gap-3 flex-1">
                       <input
@@ -726,11 +727,11 @@ export default function Notifications() {
 
         {/* Results */}
         {results.length > 0 && (
-          <div className="mb-6 glass-effect rounded-2xl shadow-glow p-4 sm:p-6">
+          <div className="mb-6 glass-effect rounded-2xl shadow-glow p-4 sm:p-6 animate-slideUp">
             <h2 className="text-xl font-bold text-green-700 mb-4">תוצאות שליחה</h2>
             <div className="space-y-2">
               {results.map((result, index) => (
-                <div key={index} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                <div key={index} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg animate-fadeIn" style={{ animationDelay: `${index * 0.1}s` }}>
                   {result.success ? (
                     <CheckCircle className="w-6 h-6 text-green-600 flex-shrink-0" />
                   ) : (
@@ -747,7 +748,7 @@ export default function Notifications() {
 
         {/* Today's Tasks - Separate section for sending */}
         {tasks.length > 0 && (
-          <div className="glass-effect rounded-2xl shadow-glow p-4 sm:p-6 border-2 border-green-300 bg-green-50">
+          <div className="glass-effect rounded-2xl shadow-glow p-4 sm:p-6 border-2 border-green-300 bg-green-50 animate-fadeIn" style={{ animationDelay: '0.4s' }}>
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4">
               <div>
                 <h2 className="text-xl font-bold text-green-700 mb-1 flex items-center gap-2">
