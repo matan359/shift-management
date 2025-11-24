@@ -150,9 +150,13 @@ export default function ManageNotifications() {
       }
 
       // Send bulk messages via API
+      // Try Meta WhatsApp first, fallback to Twilio
+      const useMeta = process.env.REACT_APP_USE_META_WHATSAPP === 'true' || false
       const sendUrl = API_URL 
         ? `${API_URL}/api/whatsapp/send-bulk`
-        : '/.netlify/functions/whatsapp-send-bulk'
+        : useMeta 
+          ? '/.netlify/functions/whatsapp-send-bulk-meta'
+          : '/.netlify/functions/whatsapp-send-bulk'
       
       const response = await fetch(sendUrl, {
         method: 'POST',
@@ -206,9 +210,13 @@ export default function ManageNotifications() {
       const message = formatShiftMessage(employee, shift, tasks)
       
       // Send message via API
+      // Try Meta WhatsApp first, fallback to Twilio
+      const useMeta = process.env.REACT_APP_USE_META_WHATSAPP === 'true' || false
       const sendUrl = API_URL 
         ? `${API_URL}/api/whatsapp/send`
-        : '/.netlify/functions/whatsapp-send'
+        : useMeta 
+          ? '/.netlify/functions/whatsapp-send-meta'
+          : '/.netlify/functions/whatsapp-send'
       
       const response = await fetch(sendUrl, {
         method: 'POST',
