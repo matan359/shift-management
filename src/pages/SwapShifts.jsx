@@ -233,7 +233,7 @@ export default function SwapShifts() {
                     <button
                       onClick={() => openSwapModal(shift)}
                       disabled={loading}
-                      className="bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm py-2 px-3 sm:px-4 rounded-lg transition disabled:opacity-50 touch-manipulation active:scale-95"
+                      className="bg-green-600 hover:bg-green-700 text-white text-xs sm:text-sm py-2 px-3 sm:px-4 rounded-lg transition disabled:opacity-50 touch-manipulation active:scale-95"
                     >
                       <RefreshCw className="w-4 h-4 inline ml-1" />
                       <span className="hidden sm:inline">בקש החלפה</span>
@@ -349,7 +349,7 @@ export default function SwapShifts() {
               <button
                 onClick={requestSwap}
                 disabled={loading || !selectedEmployee}
-                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 sm:py-2 px-4 rounded-lg transition disabled:opacity-50 touch-manipulation active:scale-95"
+                className="flex-1 bg-green-600 hover:bg-green-700 text-white font-semibold py-3 sm:py-2 px-4 rounded-lg transition disabled:opacity-50 touch-manipulation active:scale-95"
               >
                 שלח בקשה
               </button>

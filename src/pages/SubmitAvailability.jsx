@@ -157,7 +157,7 @@ export default function SubmitAvailability() {
               שבוע הבא
             </button>
           </div>
-          <div className="text-lg font-semibold text-blue-600">
+          <div className="text-lg font-semibold text-green-700">
             {availableCount} ימים זמינים
           </div>
         </div>
@@ -208,8 +208,8 @@ export default function SubmitAvailability() {
                         }}
                         className={`w-full text-xs py-1 rounded ${
                           avail?.priority === 'normal' || !avail?.priority
-                            ? 'bg-blue-500 text-white'
-                            : 'bg-blue-100 text-blue-700'
+                            ? 'bg-green-600 text-white'
+                            : 'bg-green-100 text-green-700'
                         }`}
                       >
                         רגיל
@@ -242,7 +242,7 @@ export default function SubmitAvailability() {
           <button
             onClick={saveAvailability}
             disabled={loading || availableCount < 6}
-            className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
+            className="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-6 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? 'שומר...' : saved ? 'נשמר!' : 'שמור זמינות'}
           </button>

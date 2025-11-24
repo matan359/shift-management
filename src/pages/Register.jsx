@@ -112,16 +112,16 @@ export default function Register() {
 
   if (success) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-gradient-to-br from-green-50 via-green-50 to-white flex items-center justify-center p-4">
         <div className="max-w-md w-full bg-white rounded-2xl shadow-2xl p-6 sm:p-8 text-center transform transition-all duration-300 animate-slideUp">
           <div className="mb-6">
             <div className="inline-flex items-center justify-center w-20 h-20 bg-green-500 rounded-full mb-4">
               <CheckCircle className="w-12 h-12 text-white" />
             </div>
             <h2 className="text-2xl font-bold text-gray-800 mb-4">הרשמה הושלמה בהצלחה! 🎉</h2>
-            <div className="bg-blue-50 border-2 border-blue-200 rounded-xl p-4 mb-4">
-              <p className="text-sm text-blue-800 font-semibold mb-2">אימייל אימות נשלח!</p>
-              <p className="text-xs text-blue-700">
+            <div className="bg-green-50 border-2 border-green-200 rounded-xl p-4 mb-4">
+              <p className="text-sm text-green-800 font-semibold mb-2">אימייל אימות נשלח!</p>
+              <p className="text-xs text-green-700">
                 נא לבדוק את תיבת הדואר שלך ולאמת את האימייל לפני הכניסה למערכת.
               </p>
             </div>
@@ -136,7 +136,7 @@ export default function Register() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center p-4">
       <div className="max-w-md w-full bg-white rounded-2xl shadow-2xl p-6 sm:p-8 transform transition-all duration-300 hover:scale-105 animate-slideUp">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full mb-4">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-green-600 to-green-700 rounded-full mb-4">
             <User className="w-8 h-8 text-white" />
           </div>
           <h2 className="text-3xl font-bold text-gray-800">הרשמה למערכת</h2>
@@ -247,7 +247,7 @@ export default function Register() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-3 px-4 rounded-xl transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg disabled:transform-none"
+            className="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-semibold py-3 px-4 rounded-xl transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg disabled:transform-none"
           >
             {loading ? 'נרשם...' : 'הרשמה'}
           </button>
@@ -256,14 +256,14 @@ export default function Register() {
         <div className="mt-6 text-center">
           <p className="text-sm text-gray-600">
             כבר יש לך חשבון?{' '}
-            <Link to="/login" className="text-blue-600 hover:text-blue-800 font-semibold underline">
+            <Link to="/login" className="text-green-600 hover:text-green-800 font-semibold underline">
               התחבר כאן
             </Link>
           </p>
         </div>
 
-        <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-          <p className="text-xs text-blue-800">
+        <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+          <p className="text-xs text-green-800">
             <strong>שימו לב:</strong> לאחר ההרשמה, תקבלו אימייל לאימות הכתובת. יש לאמת את האימייל לפני הכניסה למערכת.
           </p>
         </div>
