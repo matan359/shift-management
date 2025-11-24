@@ -113,7 +113,7 @@ export default function AdvancedDashboard() {
   return (
     <div className="animate-fadeIn">
       <div className="mb-6 sm:mb-8 px-2 sm:px-0">
-        <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
+        <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-green-700 mb-2">
           דשבורד מתקדם
         </h2>
         <p className="text-sm sm:text-base text-gray-600">סקירה כללית של המערכת</p>
@@ -171,7 +171,7 @@ export default function AdvancedDashboard() {
         <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 border border-gray-200">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg sm:text-xl font-semibold text-gray-800 flex items-center">
-              <BarChart3 className="w-4 h-4 sm:w-5 sm:h-5 ml-2 text-blue-600" />
+              <BarChart3 className="w-4 h-4 sm:w-5 sm:h-5 ml-2 text-green-600" />
               שעות שבועיות
             </h3>
           </div>
@@ -179,7 +179,7 @@ export default function AdvancedDashboard() {
             {[40, 35, 45, 38, 42, 40, 35].map((height, index) => (
               <div key={index} className="flex-1 flex flex-col items-center">
                 <div
-                  className="w-full bg-gradient-to-t from-blue-500 to-blue-300 rounded-t-lg transition-all duration-300 hover:from-blue-600 hover:to-blue-400"
+                  className="w-full bg-gradient-to-t from-green-600 to-green-400 rounded-t-lg transition-all duration-300 hover:from-green-700 hover:to-green-500"
                   style={{ height: `${(height / 50) * 100}%` }}
                 />
                 <span className="text-xs text-gray-500 mt-2">
@@ -206,8 +206,8 @@ export default function AdvancedDashboard() {
                   key={index}
                   className="flex items-center space-x-3 space-x-reverse p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-all duration-200"
                 >
-                  <div className="p-2 bg-blue-100 rounded-lg">
-                    <Icon className="w-5 h-5 text-blue-600" />
+                  <div className="p-2 bg-green-100 rounded-lg">
+                    <Icon className="w-5 h-5 text-green-600" />
                   </div>
                   <div className="flex-1">
                     <p className="text-sm font-medium text-gray-800">{activity.message}</p>
@@ -221,7 +221,7 @@ export default function AdvancedDashboard() {
       </div>
 
       {/* Quick Actions */}
-      <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-4 sm:p-6 border border-blue-200">
+      <div className="bg-gradient-to-r from-green-50 to-green-50 rounded-xl p-4 sm:p-6 border border-green-200">
         <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-4">פעולות מהירות</h3>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
           <QuickActionButton
@@ -256,12 +256,12 @@ export default function AdvancedDashboard() {
 
 function StatCard({ title, value, icon: Icon, color, trend }) {
   const colorClasses = {
-    blue: 'from-blue-500 to-blue-600',
-    green: 'from-green-500 to-green-600',
+    blue: 'from-green-600 to-green-700',
+    green: 'from-green-600 to-green-700',
     yellow: 'from-yellow-500 to-yellow-600',
-    purple: 'from-purple-500 to-purple-600',
-    indigo: 'from-indigo-500 to-indigo-600',
-    pink: 'from-pink-500 to-pink-600'
+    purple: 'from-green-600 to-green-700',
+    indigo: 'from-green-600 to-green-700',
+    pink: 'from-green-600 to-green-700'
   }
 
   return (
@@ -284,10 +284,10 @@ function StatCard({ title, value, icon: Icon, color, trend }) {
 
 function QuickActionButton({ icon: Icon, label, color, href }) {
   const colorClasses = {
-    blue: 'bg-blue-100 text-blue-600 hover:bg-blue-200',
-    green: 'bg-green-100 text-green-600 hover:bg-green-200',
-    purple: 'bg-purple-100 text-purple-600 hover:bg-purple-200',
-    indigo: 'bg-indigo-100 text-indigo-600 hover:bg-indigo-200'
+    blue: 'bg-green-100 text-green-700 hover:bg-green-200',
+    green: 'bg-green-100 text-green-700 hover:bg-green-200',
+    purple: 'bg-green-100 text-green-700 hover:bg-green-200',
+    indigo: 'bg-green-100 text-green-700 hover:bg-green-200'
   }
 
   return (
