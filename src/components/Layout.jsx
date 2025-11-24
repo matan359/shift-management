@@ -48,6 +48,9 @@ export default function Layout({ children }) {
                   <Link to="/schedule" className="text-white hover:text-green-200 transition font-semibold drop-shadow-md">
                     לוח משמרות
                   </Link>
+                  <Link to="/calendar" className="text-white hover:text-green-200 transition font-semibold drop-shadow-md">
+                    לוח שנה
+                  </Link>
                   <Link to="/employees" className="text-white hover:text-green-200 transition font-semibold drop-shadow-md">
                     <Users className="w-4 h-4 inline ml-1" />
                     עובדים
