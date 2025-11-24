@@ -73,7 +73,7 @@ export default function CreateFirstAdmin() {
 
   if (success) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-gradient-to-br from-green-50 to-green-50 flex items-center justify-center p-4">
         <div className="max-w-md w-full bg-white rounded-lg shadow-xl p-8 text-center">
           <div className="text-green-600 text-6xl mb-4">✓</div>
           <h2 className="text-2xl font-bold text-gray-800 mb-4">משתמש מנהל נוצר בהצלחה!</h2>
@@ -89,7 +89,7 @@ export default function CreateFirstAdmin() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
       <div className="max-w-md w-full bg-white rounded-lg shadow-xl p-8">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-600 rounded-full mb-4">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-green-600 rounded-full mb-4">
             <UserPlus className="w-8 h-8 text-white" />
           </div>
           <h2 className="text-3xl font-bold text-gray-800">יצירת משתמש מנהל ראשון</h2>
@@ -162,7 +162,7 @@ export default function CreateFirstAdmin() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? 'יוצר...' : 'צור משתמש מנהל'}
           </button>

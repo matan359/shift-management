@@ -186,7 +186,7 @@ export default function AttendanceTracking() {
           <div className={`inline-flex items-center justify-center w-20 h-20 sm:w-24 sm:h-24 rounded-full mb-3 sm:mb-4 ${
             isCheckedIn 
               ? 'bg-gradient-to-br from-green-400 to-emerald-500' 
-              : 'bg-gradient-to-br from-blue-400 to-indigo-500'
+              : 'bg-gradient-to-br from-green-600 to-green-700'
           }`}>
             <Clock className="w-10 h-10 sm:w-12 sm:h-12 text-white" />
           </div>

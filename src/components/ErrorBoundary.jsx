@@ -23,7 +23,7 @@ class ErrorBoundary extends React.Component {
             <p className="text-gray-600 mb-4">{this.state.error?.message || 'אירעה שגיאה לא צפויה'}</p>
             <button
               onClick={() => window.location.reload()}
-              className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg transition"
+              className="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-6 rounded-lg transition"
             >
               רענן דף
             </button>

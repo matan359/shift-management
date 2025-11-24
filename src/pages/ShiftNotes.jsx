@@ -93,7 +93,7 @@ export default function ShiftNotes() {
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-600">
                     {shift.note ? (
-                      <span className="text-blue-600">{shift.note}</span>
+                      <span className="text-green-700">{shift.note}</span>
                     ) : (
                       <span className="text-gray-400">אין הערה</span>
                     )}
@@ -101,7 +101,7 @@ export default function ShiftNotes() {
                   <td className="px-6 py-4 text-sm">
                     <button
                       onClick={() => openNoteModal(shift)}
-                      className="text-blue-600 hover:text-blue-900"
+                      className="text-green-600 hover:text-green-900"
                     >
                       <MessageSquare className="w-4 h-4" />
                     </button>
@@ -147,7 +147,7 @@ export default function ShiftNotes() {
             <div className="flex space-x-4 space-x-reverse">
               <button
                 onClick={saveNote}
-                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition"
+                className="flex-1 bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg transition"
               >
                 <Save className="w-4 h-4 inline ml-2" />
                 שמור
