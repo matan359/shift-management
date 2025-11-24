@@ -2,6 +2,8 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { LogOut, Calendar, Users, Settings, Menu, X, Bell, Smartphone } from 'lucide-react'
 import { useState } from 'react'
+import GlobalSearch from './GlobalSearch'
+import DarkModeToggle from './DarkModeToggle'
 
 export default function Layout({ children }) {
   const { user, signOut } = useAuth()

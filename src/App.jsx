@@ -16,6 +16,7 @@ import SpecialDaysAlerts from './pages/SpecialDaysAlerts'
 import ShiftNotes from './pages/ShiftNotes'
 import AdvancedDashboard from './pages/AdvancedDashboard'
 import AttendanceTracking from './pages/AttendanceTracking'
+import ActivityLogPage from './pages/ActivityLogPage'
 import Layout from './components/Layout'
 import LoadingSpinner from './components/LoadingSpinner'
 
@@ -177,6 +178,14 @@ function AppRoutes() {
         <PrivateRoute>
           <Layout>
             <AttendanceTracking />
+          </Layout>
+        </PrivateRoute>
+      } />
+
+      <Route path="/activity-log" element={
+        <PrivateRoute>
+          <Layout>
+            <ActivityLogPage />
           </Layout>
         </PrivateRoute>
       } />
