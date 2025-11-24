@@ -63,92 +63,103 @@ export default function WorkerDashboard() {
   return (
     <div>
       <div className="mb-4 sm:mb-6 px-2 sm:px-0">
-        <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-2">
-          ברוך הבא, {user?.fullName}
+        <h2 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent mb-2 animate-gradient">
+          ברוך הבא, {user?.fullName} 👋
         </h2>
-        <p className="text-sm sm:text-base text-gray-600">לוח בקרה אישי</p>
+        <p className="text-sm sm:text-base text-gray-700 font-medium">לוח בקרה אישי</p>
       </div>
 
       <AnnouncementsBanner />
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8 px-2 sm:px-0">
-        <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
+        <div className="glass-effect rounded-2xl shadow-glow p-4 sm:p-6 card-hover">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-gray-600 text-xs sm:text-sm">משמרות השבוע</p>
-              <p className="text-2xl sm:text-3xl font-bold text-gray-800">{shifts.length}</p>
+              <p className="text-gray-600 text-xs sm:text-sm font-medium mb-1">משמרות השבוע</p>
+              <p className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">{shifts.length}</p>
             </div>
-            <Calendar className="w-8 h-8 sm:w-12 sm:h-12 text-blue-600" />
+            <div className="p-3 bg-gradient-to-br from-blue-400 to-blue-600 rounded-xl shadow-lg animate-float">
+              <Calendar className="w-8 h-8 sm:w-12 sm:h-12 text-white" />
+            </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
+        <div className="glass-effect rounded-2xl shadow-glow p-4 sm:p-6 card-hover">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-gray-600 text-xs sm:text-sm">משמרות קרובות</p>
-              <p className="text-2xl sm:text-3xl font-bold text-gray-800">{upcomingShifts.length}</p>
+              <p className="text-gray-600 text-xs sm:text-sm font-medium mb-1">משמרות קרובות</p>
+              <p className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-green-600 to-green-800 bg-clip-text text-transparent">{upcomingShifts.length}</p>
             </div>
-            <Clock className="w-8 h-8 sm:w-12 sm:h-12 text-green-600" />
+            <div className="p-3 bg-gradient-to-br from-green-400 to-green-600 rounded-xl shadow-lg animate-float" style={{ animationDelay: '0.5s' }}>
+              <Clock className="w-8 h-8 sm:w-12 sm:h-12 text-white" />
+            </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
+        <div className="glass-effect rounded-2xl shadow-glow p-4 sm:p-6 card-hover">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-gray-600 text-xs sm:text-sm">סטטוס</p>
-              <p className="text-base sm:text-lg font-semibold text-gray-800">פעיל</p>
+              <p className="text-gray-600 text-xs sm:text-sm font-medium mb-1">סטטוס</p>
+              <p className="text-lg sm:text-xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">פעיל ✅</p>
             </div>
-            <CheckCircle className="w-8 h-8 sm:w-12 sm:h-12 text-purple-600" />
+            <div className="p-3 bg-gradient-to-br from-purple-400 to-pink-600 rounded-xl shadow-lg animate-float" style={{ animationDelay: '1s' }}>
+              <CheckCircle className="w-8 h-8 sm:w-12 sm:h-12 text-white" />
+            </div>
           </div>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8 px-2 sm:px-0">
-        <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
-          <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-4">פעולות מהירות</h3>
+        <div className="glass-effect rounded-2xl shadow-glow p-4 sm:p-6 card-hover">
+          <h3 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-4">פעולות מהירות</h3>
           <div className="space-y-3">
             <Link
               to="/availability"
-              className="block w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition text-center touch-manipulation active:scale-95"
+              className="block w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-bold py-4 px-4 rounded-xl transition-all duration-200 text-center touch-manipulation active:scale-95 shadow-lg transform hover:scale-105"
             >
-              הגשת זמינות שבועית
+              📅 הגשת זמינות שבועית
             </Link>
             <Link
               to="/swap"
-              className="block w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-4 rounded-lg transition text-center touch-manipulation active:scale-95"
+              className="block w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold py-4 px-4 rounded-xl transition-all duration-200 text-center touch-manipulation active:scale-95 shadow-lg transform hover:scale-105"
             >
-              החלפת משמרת
+              🔄 החלפת משמרת
             </Link>
             <Link
               to="/schedule"
-              className="block w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-4 rounded-lg transition text-center touch-manipulation active:scale-95"
+              className="block w-full bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white font-bold py-4 px-4 rounded-xl transition-all duration-200 text-center touch-manipulation active:scale-95 shadow-lg transform hover:scale-105"
             >
-              צפייה בלוח משמרות
+              📊 צפייה בלוח משמרות
             </Link>
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
-          <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-4">משמרות קרובות</h3>
+        <div className="glass-effect rounded-2xl shadow-glow p-4 sm:p-6 card-hover">
+          <h3 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-4">משמרות קרובות</h3>
           {loading ? (
-            <p className="text-gray-500">טוען...</p>
+            <div className="flex items-center justify-center py-8">
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-600"></div>
+            </div>
           ) : upcomingShifts.length === 0 ? (
-            <p className="text-gray-500">אין משמרות קרובות</p>
+            <div className="text-center py-8">
+              <p className="text-gray-500 text-lg">אין משמרות קרובות</p>
+              <p className="text-gray-400 text-sm mt-2">הגש זמינות כדי לקבל משמרות</p>
+            </div>
           ) : (
             <div className="space-y-3">
               {upcomingShifts.map((shift) => (
-                <div key={shift.id} className="border border-gray-200 rounded-lg p-3 sm:p-4">
+                <div key={shift.id} className="bg-gradient-to-r from-white to-blue-50 border-2 border-blue-200 rounded-xl p-4 shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-105">
                   <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
                     <div>
-                      <p className="font-semibold text-gray-800 text-sm sm:text-base">{format(parseISO(shift.date), 'dd/MM/yyyy', { locale: he })}</p>
-                      <p className="text-xs sm:text-sm text-gray-600">{shift.startTime} - {shift.endTime}</p>
+                      <p className="font-bold text-gray-800 text-base sm:text-lg">{format(parseISO(shift.date), 'dd/MM/yyyy', { locale: he })}</p>
+                      <p className="text-sm sm:text-base text-gray-600 font-medium">🕐 {shift.startTime} - {shift.endTime}</p>
                     </div>
-                    <span className={`px-2 sm:px-3 py-1 rounded-full text-xs font-semibold ${
+                    <span className={`px-3 sm:px-4 py-2 rounded-full text-xs sm:text-sm font-bold shadow-md ${
                       shift.status === 'confirmed' 
-                        ? 'bg-green-100 text-green-800' 
-                        : 'bg-yellow-100 text-yellow-800'
+                        ? 'bg-gradient-to-r from-green-400 to-green-600 text-white' 
+                        : 'bg-gradient-to-r from-yellow-400 to-yellow-600 text-white'
                     }`}>
-                      {shift.status === 'confirmed' ? 'מאושר' : 'ממתין'}
+                      {shift.status === 'confirmed' ? '✅ מאושר' : '⏳ ממתין'}
                     </span>
                   </div>
                 </div>

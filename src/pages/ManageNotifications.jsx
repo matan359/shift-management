@@ -127,20 +127,7 @@ export default function ManageNotifications() {
     setResults([])
 
     try {
-      // Check WhatsApp connection status
-      const statusUrl = API_URL 
-        ? `${API_URL}/api/whatsapp/status`
-        : '/.netlify/functions/whatsapp-status'
-      
-      const statusResponse = await fetch(statusUrl)
-      const statusData = await statusResponse.json()
-      
-      if (statusData.status !== 'ready') {
-        alert('WhatsApp לא מחובר. אנא התחבר תחילה בדף "התחברות WhatsApp" וסרוק את ה-QR Code.')
-        setSending(false)
-        return
-      }
-
+      // Twilio WhatsApp API is always ready - no need to check status
       // Prepare messages for all employees with shifts today
       const recipients = todayShifts.map(shift => {
         const employee = employees.find(emp => emp.id === shift.employeeId)
@@ -215,20 +202,7 @@ export default function ManageNotifications() {
 
     setSending(true)
     try {
-      // Check WhatsApp connection
-      const statusUrl = API_URL 
-        ? `${API_URL}/api/whatsapp/status`
-        : '/.netlify/functions/whatsapp-status'
-      
-      const statusResponse = await fetch(statusUrl)
-      const statusData = await statusResponse.json()
-      
-      if (statusData.status !== 'ready') {
-        alert('WhatsApp לא מחובר. אנא התחבר תחילה בדף "התחברות WhatsApp" וסרוק את ה-QR Code.')
-        setSending(false)
-        return
-      }
-
+      // Twilio WhatsApp API is always ready
       const message = formatShiftMessage(employee, shift, tasks)
       
       // Send message via API
@@ -269,47 +243,47 @@ export default function ManageNotifications() {
 
   return (
     <div>
-      <div className="mb-6 flex items-center justify-between">
+      <div className="mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-3xl font-bold text-gray-800 mb-2">ניהול התראות</h2>
-          <p className="text-gray-600">שלח הודעות יומיות לעובדים עם משמרות</p>
+          <h2 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-green-600 via-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
+            📱 ניהול התראות WhatsApp
+          </h2>
+          <p className="text-gray-700 font-medium">שלח הודעות יומיות לעובדים עם משמרות</p>
         </div>
         <button
           onClick={sendAllNotifications}
           disabled={sending || todayShifts.length === 0}
-          className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold py-3 px-6 rounded-xl transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg disabled:transform-none flex items-center space-x-2 space-x-reverse touch-manipulation active:scale-95"
+          className="bg-gradient-to-r from-green-500 via-emerald-600 to-teal-600 hover:from-green-600 hover:via-emerald-700 hover:to-teal-700 text-white font-bold py-4 px-6 sm:px-8 rounded-xl transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed shadow-glow-lg disabled:transform-none flex items-center space-x-2 space-x-reverse touch-manipulation active:scale-95 text-base sm:text-lg w-full sm:w-auto justify-center"
         >
           <Send className="w-5 h-5" />
-          <span>{sending ? 'שולח...' : 'שלח הכל דרך WhatsApp'}</span>
+          <span>{sending ? '⏳ שולח...' : '📤 שלח הכל דרך WhatsApp'}</span>
         </button>
       </div>
 
       {/* WhatsApp Connection Info */}
-      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-xl p-4 sm:p-6 mb-6">
+      <div className="glass-effect rounded-2xl shadow-glow p-4 sm:p-6 mb-6 border-2 border-green-200">
         <div className="flex items-start space-x-3 space-x-reverse">
-          <AlertCircle className="w-6 h-6 text-blue-600 flex-shrink-0 mt-1" />
+          <div className="p-2 bg-gradient-to-br from-green-400 to-green-600 rounded-lg">
+            <AlertCircle className="w-5 h-5 sm:w-6 sm:h-6 text-white flex-shrink-0" />
+          </div>
           <div>
-            <h3 className="font-semibold text-blue-800 mb-2 text-base sm:text-lg">שליחת הודעות אוטומטית דרך WhatsApp 📱</h3>
-            <p className="text-sm text-blue-700 mb-2">
-              ההודעות נשלחות אוטומטית לעובדים לפי מספר הטלפון שלהם במערכת.
+            <h3 className="font-bold text-gray-800 mb-2 text-base sm:text-lg">✅ שליחת הודעות אוטומטית דרך Twilio WhatsApp 📱</h3>
+            <p className="text-sm text-gray-700 mb-2 font-medium">
+              ההודעות נשלחות אוטומטית לעובדים לפי מספר הטלפון שלהם במערכת דרך Twilio API.
             </p>
-            <p className="text-xs text-blue-600 mb-2">
-              ⚠️ חשוב: ודא ש-WhatsApp מחובר לפני שליחת הודעות.
+            <p className="text-xs text-green-700 mb-2 bg-green-50 p-2 rounded-lg font-semibold">
+              ✅ Twilio מוגדר ומוכן לשליחה! מספר: +19714591103
             </p>
-            <a 
-              href="/whatsapp-connection" 
-              className="text-blue-600 hover:text-blue-800 underline font-semibold text-sm"
-            >
-              לך לדף התחברות WhatsApp →
-            </a>
           </div>
         </div>
       </div>
 
       {/* Today's Shifts */}
-      <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-        <h3 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
-          <Clock className="w-5 h-5 ml-2" />
+      <div className="glass-effect rounded-2xl shadow-glow p-4 sm:p-6 mb-6">
+        <h3 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-4 flex items-center">
+          <div className="p-2 bg-gradient-to-br from-blue-400 to-blue-600 rounded-lg ml-2">
+            <Clock className="w-5 h-5 text-white" />
+          </div>
           משמרות היום ({format(new Date(), 'dd/MM/yyyy', { locale: he })})
         </h3>
         
@@ -320,23 +294,23 @@ export default function ManageNotifications() {
             {todayShifts.map((shift) => {
               const employee = employees.find(emp => emp.id === shift.employeeId)
               return (
-                <div key={shift.id} className="border border-gray-200 rounded-lg p-4 flex items-center justify-between">
-                  <div>
-                    <p className="font-semibold text-gray-800">{getEmployeeName(shift.employeeId)}</p>
-                    <p className="text-sm text-gray-600">
+                <div key={shift.id} className="bg-gradient-to-r from-white to-blue-50 border-2 border-blue-200 rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-md hover:shadow-lg transition-all duration-200">
+                  <div className="flex-1">
+                    <p className="font-bold text-gray-800 text-base sm:text-lg">{getEmployeeName(shift.employeeId)}</p>
+                    <p className="text-sm sm:text-base text-gray-600 font-medium mt-1">
                       {shift.shiftType} - {shift.startTime} עד {shift.endTime}
                     </p>
                     {employee && !employee.phoneNumber && (
-                      <p className="text-xs text-red-600 mt-1">⚠ אין מספר טלפון</p>
+                      <p className="text-xs text-red-600 mt-1 font-semibold bg-red-50 p-1 rounded px-2 inline-block">⚠ אין מספר טלפון</p>
                     )}
                   </div>
                   <button
                     onClick={() => sendToEmployee(shift)}
                     disabled={sending || !employee?.phoneNumber}
-                    className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white text-sm py-2 px-4 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2 space-x-reverse touch-manipulation active:scale-95 shadow-md"
+                    className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white text-sm sm:text-base font-bold py-3 px-4 sm:px-6 rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2 space-x-reverse touch-manipulation active:scale-95 shadow-lg transform hover:scale-105 w-full sm:w-auto justify-center"
                   >
-                    <Send className="w-4 h-4" />
-                    <span>{sending ? 'שולח...' : 'שלח הודעה'}</span>
+                    <Send className="w-4 h-4 sm:w-5 sm:h-5" />
+                    <span>{sending ? '⏳ שולח...' : '📤 שלח הודעה'}</span>
                   </button>
                 </div>
               )

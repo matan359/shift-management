@@ -87,14 +87,16 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center p-4">
-      <div className="max-w-md w-full bg-white rounded-2xl shadow-2xl p-6 sm:p-8 transform transition-all duration-300 hover:scale-105 animate-slideUp">
+    <div className="min-h-screen flex items-center justify-center p-4 relative">
+      <div className="max-w-md w-full glass-effect rounded-3xl shadow-glow-lg p-6 sm:p-8 transform transition-all duration-300 hover:scale-[1.02] animate-slideUp">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-600 rounded-full mb-4">
-            <Lock className="w-8 h-8 text-white" />
+          <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 rounded-2xl mb-4 shadow-glow animate-float">
+            <Lock className="w-10 h-10 text-white" />
           </div>
-          <h2 className="text-3xl font-bold text-gray-800">כניסה למערכת</h2>
-          <p className="text-gray-600 mt-2">בייגל קפה רמת אשכול</p>
+          <h2 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent mb-2">
+            כניסה למערכת
+          </h2>
+          <p className="text-gray-700 mt-2 font-medium">בייגל קפה רמת אשכול ☕</p>
         </div>
 
         {error && (
@@ -168,9 +170,9 @@ export default function Login() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-3 px-4 rounded-xl transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg disabled:transform-none"
+            className="w-full bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 hover:from-blue-700 hover:via-purple-700 hover:to-pink-700 text-white font-bold py-4 px-4 rounded-xl transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed shadow-glow-lg disabled:transform-none text-lg"
           >
-            {loading ? 'מתחבר...' : 'התחבר'}
+            {loading ? '⏳ מתחבר...' : '🚀 התחבר'}
           </button>
         </form>
         ) : (

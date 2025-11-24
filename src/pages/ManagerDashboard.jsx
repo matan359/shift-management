@@ -5,6 +5,7 @@ import { Users, Calendar, AlertTriangle, Settings, Zap, Megaphone } from 'lucide
 import { getFirebaseDb, getAppId } from '../api/firebase'
 import { collection, getDocs, query, where } from 'firebase/firestore'
 import AutoScheduler from '../components/AutoScheduler'
+import QuickStats from '../components/QuickStats'
 
 export default function ManagerDashboard() {
   const { user, db } = useAuth()
@@ -69,49 +70,59 @@ export default function ManagerDashboard() {
   return (
     <div>
       <div className="mb-4 sm:mb-6 px-2 sm:px-0">
-        <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-2">לוח בקרה - מנהל</h2>
-        <p className="text-sm sm:text-base text-gray-600">סקירה כללית של המערכת</p>
+        <h2 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent mb-2 animate-gradient">
+          לוח בקרה - מנהל 👨‍💼
+        </h2>
+        <p className="text-sm sm:text-base text-gray-700 font-medium">סקירה כללית של המערכת</p>
       </div>
 
       {/* Statistics Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8 px-2 sm:px-0">
-        <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
+        <div className="glass-effect rounded-2xl shadow-glow p-4 sm:p-6 card-hover">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-gray-600 text-xs sm:text-sm">סה"כ עובדים</p>
-              <p className="text-2xl sm:text-3xl font-bold text-gray-800">{loading ? '...' : stats.totalEmployees}</p>
+              <p className="text-gray-600 text-xs sm:text-sm font-medium mb-1">סה"כ עובדים</p>
+              <p className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">{loading ? '...' : stats.totalEmployees}</p>
             </div>
-            <Users className="w-8 h-8 sm:w-12 sm:h-12 text-blue-600" />
+            <div className="p-3 bg-gradient-to-br from-blue-400 to-blue-600 rounded-xl shadow-lg animate-float">
+              <Users className="w-8 h-8 sm:w-12 sm:h-12 text-white" />
+            </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
+        <div className="glass-effect rounded-2xl shadow-glow p-4 sm:p-6 card-hover">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-gray-600 text-xs sm:text-sm">משמרות פעילות</p>
-              <p className="text-2xl sm:text-3xl font-bold text-gray-800">{loading ? '...' : stats.activeShifts}</p>
+              <p className="text-gray-600 text-xs sm:text-sm font-medium mb-1">משמרות פעילות</p>
+              <p className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-green-600 to-green-800 bg-clip-text text-transparent">{loading ? '...' : stats.activeShifts}</p>
             </div>
-            <Calendar className="w-8 h-8 sm:w-12 sm:h-12 text-green-600" />
+            <div className="p-3 bg-gradient-to-br from-green-400 to-green-600 rounded-xl shadow-lg animate-float" style={{ animationDelay: '0.3s' }}>
+              <Calendar className="w-8 h-8 sm:w-12 sm:h-12 text-white" />
+            </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
+        <div className="glass-effect rounded-2xl shadow-glow p-4 sm:p-6 card-hover">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-gray-600 text-xs sm:text-sm">בקשות ממתינות</p>
-              <p className="text-2xl sm:text-3xl font-bold text-gray-800">{loading ? '...' : stats.pendingRequests}</p>
+              <p className="text-gray-600 text-xs sm:text-sm font-medium mb-1">בקשות ממתינות</p>
+              <p className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-yellow-600 to-orange-600 bg-clip-text text-transparent">{loading ? '...' : stats.pendingRequests}</p>
             </div>
-            <AlertTriangle className="w-8 h-8 sm:w-12 sm:h-12 text-yellow-600" />
+            <div className="p-3 bg-gradient-to-br from-yellow-400 to-orange-600 rounded-xl shadow-lg animate-float" style={{ animationDelay: '0.6s' }}>
+              <AlertTriangle className="w-8 h-8 sm:w-12 sm:h-12 text-white" />
+            </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
+        <div className="glass-effect rounded-2xl shadow-glow p-4 sm:p-6 card-hover">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-gray-600 text-xs sm:text-sm">אירועים קרובים</p>
-              <p className="text-2xl sm:text-3xl font-bold text-gray-800">{loading ? '...' : stats.upcomingEvents}</p>
+              <p className="text-gray-600 text-xs sm:text-sm font-medium mb-1">אירועים קרובים</p>
+              <p className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">{loading ? '...' : stats.upcomingEvents}</p>
             </div>
-            <Calendar className="w-8 h-8 sm:w-12 sm:h-12 text-purple-600" />
+            <div className="p-3 bg-gradient-to-br from-purple-400 to-pink-600 rounded-xl shadow-lg animate-float" style={{ animationDelay: '0.9s' }}>
+              <Calendar className="w-8 h-8 sm:w-12 sm:h-12 text-white" />
+            </div>
           </div>
         </div>
       </div>
@@ -120,62 +131,77 @@ export default function ManagerDashboard() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 px-2 sm:px-0">
         <Link
           to="/schedule"
-          className="bg-white rounded-lg shadow-md p-4 sm:p-6 hover:shadow-lg transition cursor-pointer touch-manipulation"
+          className="glass-effect rounded-2xl shadow-glow p-4 sm:p-6 card-hover touch-manipulation"
         >
           <div className="flex items-center justify-between mb-3 sm:mb-4">
-            <h3 className="text-lg sm:text-xl font-semibold text-gray-800">לוח משמרות</h3>
-            <Calendar className="w-6 h-6 sm:w-8 sm:h-8 text-blue-600" />
+            <h3 className="text-lg sm:text-xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">📅 לוח משמרות</h3>
+            <div className="p-2 bg-gradient-to-br from-blue-400 to-blue-600 rounded-lg">
+              <Calendar className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+            </div>
           </div>
-          <p className="text-sm sm:text-base text-gray-600">צפה ונהל את לוח המשמרות השבועי</p>
+          <p className="text-sm sm:text-base text-gray-600 font-medium">צפה ונהל את לוח המשמרות השבועי</p>
         </Link>
 
         <Link
           to="/employees"
-          className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition cursor-pointer"
+          className="glass-effect rounded-2xl shadow-glow p-4 sm:p-6 card-hover touch-manipulation"
         >
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-xl font-semibold text-gray-800">ניהול עובדים</h3>
-            <Users className="w-8 h-8 text-green-600" />
+          <div className="flex items-center justify-between mb-3 sm:mb-4">
+            <h3 className="text-lg sm:text-xl font-bold bg-gradient-to-r from-green-600 to-green-800 bg-clip-text text-transparent">👥 ניהול עובדים</h3>
+            <div className="p-2 bg-gradient-to-br from-green-400 to-green-600 rounded-lg">
+              <Users className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+            </div>
           </div>
-          <p className="text-gray-600">הוסף, ערוך ומחק עובדים</p>
+          <p className="text-sm sm:text-base text-gray-600 font-medium">הוסף, ערוך ומחק עובדים</p>
         </Link>
 
         <Link
           to="/events"
-          className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition cursor-pointer"
+          className="glass-effect rounded-2xl shadow-glow p-4 sm:p-6 card-hover touch-manipulation"
         >
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-xl font-semibold text-gray-800">ניהול אירועים</h3>
-            <Calendar className="w-8 h-8 text-purple-600" />
+          <div className="flex items-center justify-between mb-3 sm:mb-4">
+            <h3 className="text-lg sm:text-xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">🎉 ניהול אירועים</h3>
+            <div className="p-2 bg-gradient-to-br from-purple-400 to-pink-600 rounded-lg">
+              <Calendar className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+            </div>
           </div>
-          <p className="text-gray-600">הוסף אירועים מיוחדים וצריך כוח אדם נוסף</p>
+          <p className="text-sm sm:text-base text-gray-600 font-medium">הוסף אירועים מיוחדים וצריך כוח אדם נוסף</p>
         </Link>
 
         <Link
           to="/tasks"
-          className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition cursor-pointer"
+          className="glass-effect rounded-2xl shadow-glow p-4 sm:p-6 card-hover touch-manipulation"
         >
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-xl font-semibold text-gray-800">משימות שבועיות</h3>
-            <Settings className="w-8 h-8 text-orange-600" />
+          <div className="flex items-center justify-between mb-3 sm:mb-4">
+            <h3 className="text-lg sm:text-xl font-bold bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">✅ משימות שבועיות</h3>
+            <div className="p-2 bg-gradient-to-br from-orange-400 to-red-600 rounded-lg">
+              <Settings className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+            </div>
           </div>
-          <p className="text-gray-600">הגדר משימות שבועיות לעובדים</p>
+          <p className="text-sm sm:text-base text-gray-600 font-medium">הגדר משימות שבועיות לעובדים</p>
         </Link>
 
         <Link
           to="/notifications"
-          className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition cursor-pointer"
+          className="glass-effect rounded-2xl shadow-glow p-4 sm:p-6 card-hover touch-manipulation"
         >
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-xl font-semibold text-gray-800">שליחת התראות</h3>
-            <Zap className="w-8 h-8 text-pink-600" />
+          <div className="flex items-center justify-between mb-3 sm:mb-4">
+            <h3 className="text-lg sm:text-xl font-bold bg-gradient-to-r from-pink-600 to-rose-600 bg-clip-text text-transparent">📱 שליחת התראות</h3>
+            <div className="p-2 bg-gradient-to-br from-pink-400 to-rose-600 rounded-lg">
+              <Zap className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+            </div>
           </div>
-          <p className="text-gray-600">שלח הודעות יומיות לעובדים</p>
+          <p className="text-sm sm:text-base text-gray-600 font-medium">שלח הודעות יומיות לעובדים</p>
         </Link>
 
-        <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="glass-effect rounded-2xl shadow-glow p-4 sm:p-6">
           <AutoScheduler />
         </div>
+      </div>
+
+      {/* Quick Stats Widget */}
+      <div className="mt-6 sm:mt-8 px-2 sm:px-0">
+        <QuickStats />
       </div>
     </div>
   )
