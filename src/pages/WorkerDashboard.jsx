@@ -137,8 +137,9 @@ export default function WorkerDashboard() {
         <div className="glass-effect rounded-2xl shadow-glow p-4 sm:p-6 card-hover">
           <h3 className="text-xl sm:text-2xl font-bold text-green-700 mb-4">משמרות קרובות</h3>
           {loading ? (
-            <div className="flex items-center justify-center py-8">
-              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-600"></div>
+            <div className="flex flex-col items-center justify-center py-8 gap-4">
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-600"></div>
+              <p className="text-gray-500 text-sm">טוען משמרות...</p>
             </div>
           ) : upcomingShifts.length === 0 ? (
             <div className="text-center py-8">
