@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
-import { Bell, Send, Clock, Smartphone, CheckCircle, XCircle, Loader2 } from 'lucide-react'
+import { Bell, Send, Clock, Smartphone, CheckCircle, XCircle } from 'lucide-react'
 import { getFirebaseDb, getAppId } from '../api/firebase'
 import { collection, query, where, getDocs } from 'firebase/firestore'
 import { format } from 'date-fns'
@@ -19,10 +19,6 @@ export default function Notifications() {
   const [savedLinks, setSavedLinks] = useState([]) // קישורים שנשמרו משליחה אוטומטית
   const [showSavedLinks, setShowSavedLinks] = useState(false) // האם להציג קישורים שנשמרו
   
-  // WhatsApp Meta API status
-  const [whatsappStatus, setWhatsappStatus] = useState('checking') // checking, ready, not_configured
-  const [checkingStatus, setCheckingStatus] = useState(false)
-
   useEffect(() => {
     if (!db || !user) return
 
@@ -31,28 +27,7 @@ export default function Notifications() {
     loadTodayTasks()
     loadAutoSendSettings()
     loadSavedLinks()
-    
-    // Check Meta WhatsApp status
-    checkWhatsAppStatus()
-    const statusInterval = setInterval(checkWhatsAppStatus, 10000) // Check every 10 seconds
-    
-    return () => clearInterval(statusInterval)
   }, [db, user])
-
-  async function checkWhatsAppStatus() {
-    setCheckingStatus(true)
-    try {
-      // Check if Meta WhatsApp is configured by trying to get phone number info
-      const testUrl = '/.netlify/functions/whatsapp-send-meta'
-      // Just check if function exists - actual status check would need a separate endpoint
-      setWhatsappStatus('ready') // Assume ready if function exists
-    } catch (error) {
-      console.error('Error checking WhatsApp status:', error)
-      setWhatsappStatus('not_configured')
-    } finally {
-      setCheckingStatus(false)
-    }
-  }
 
   async function loadSavedLinks() {
     if (!db || !user) return
@@ -248,6 +223,16 @@ export default function Notifications() {
     return message
   }
 
+  function formatPhoneNumber(phoneNumber) {
+    let formatted = phoneNumber.replace(/[^0-9]/g, '')
+    if (formatted.startsWith('0')) {
+      formatted = '972' + formatted.substring(1)
+    } else if (!formatted.startsWith('972')) {
+      formatted = '972' + formatted
+    }
+    return formatted
+  }
+
   async function sendAllNotifications() {
     if (!db || !user) return
 
@@ -261,9 +246,9 @@ export default function Notifications() {
     setResults([])
 
     try {
-      // Prepare messages only for selected employees
-      const recipients = todayShifts
-        .filter(shift => selectedEmployees.has(shift.employeeId)) // רק עובדים שנבחרו
+      // Prepare WhatsApp Web links for selected employees
+      const links = todayShifts
+        .filter(shift => selectedEmployees.has(shift.employeeId))
         .map(shift => {
           const employee = employees.find(emp => emp.id === shift.employeeId)
           if (!employee || !employee.phoneNumber) {
@@ -271,54 +256,37 @@ export default function Notifications() {
           }
           
           const message = formatShiftMessage(employee, shift, tasks)
+          const formattedNumber = formatPhoneNumber(employee.phoneNumber)
+          const encodedMessage = encodeURIComponent(message)
+          const whatsappLink = `https://wa.me/${formattedNumber}?text=${encodedMessage}`
+          
           return {
-            phoneNumber: employee.phoneNumber,
-            message: message,
-            employeeName: employee.fullName
+            link: whatsappLink,
+            employeeName: employee.fullName,
+            phoneNumber: formattedNumber,
+            success: true
           }
         }).filter(r => r !== null)
 
-      if (recipients.length === 0) {
+      if (links.length === 0) {
         alert('אין עובדים עם מספרי טלפון למשמרות היום')
         setSending(false)
         return
       }
 
-      // Send messages via Meta WhatsApp Cloud API (automatic sending in background)
-      const sendUrl = '/.netlify/functions/whatsapp-send-bulk-meta'
-      
-      const response = await fetch(sendUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ recipients })
+      // Open all WhatsApp Web links
+      links.forEach((link, index) => {
+        setTimeout(() => {
+          window.open(link.link, '_blank', 'noopener,noreferrer')
+        }, index * 500) // Delay of 500ms between each window
       })
 
-      const data = await response.json()
+      setResults(links)
       
-      if (data.success) {
-        setResults(data.results.map(r => ({
-          phoneNumber: r.phoneNumber,
-          success: r.success,
-          employeeName: recipients.find(rec => {
-            const originalPhone = rec.phoneNumber.replace(/[^0-9]/g, '')
-            const formattedPhone = r.phoneNumber.replace(/[^0-9]/g, '')
-            return originalPhone === formattedPhone || formattedPhone.includes(originalPhone.slice(-9))
-          })?.employeeName || 'עובד',
-          sent: r.success,
-          error: r.error,
-          messageId: r.messageId
-        })))
-        
-        const successCount = data.results.filter(r => r.success).length
-        alert(`✅ נשלחו ${successCount} מתוך ${data.results.length} הודעות בהצלחה דרך Meta WhatsApp!\n\nההודעות נשלחו אוטומטית מהמספר שלך - בלי לפתוח חלונות!`)
-      } else {
-        alert('שגיאה בשליחת ההודעות: ' + (data.error || 'Unknown error'))
-      }
+      alert(`✅ נפתחו ${links.length} חלונות WhatsApp Web!\n\nפשוט לחץ "שלח" בכל חלון.\n\n💡 טיפ: ודא ש-WhatsApp Web פתוח בדפדפן שלך!`)
     } catch (error) {
-      console.error('Error sending notifications:', error)
-      alert('שגיאה בשליחת ההודעות: ' + error.message)
+      console.error('Error opening WhatsApp links:', error)
+      alert('שגיאה בפתיחת חלונות WhatsApp: ' + error.message)
     } finally {
       setSending(false)
     }
@@ -333,36 +301,19 @@ export default function Notifications() {
       return
     }
 
-    setSending(true)
     try {
       const message = formatShiftMessage(employee, shift, tasks)
+      const formattedNumber = formatPhoneNumber(employee.phoneNumber)
+      const encodedMessage = encodeURIComponent(message)
+      const whatsappLink = `https://wa.me/${formattedNumber}?text=${encodedMessage}`
       
-      // Send message via Meta WhatsApp Cloud API (automatic sending in background)
-      const sendUrl = '/.netlify/functions/whatsapp-send-meta'
+      // Open WhatsApp Web link
+      window.open(whatsappLink, '_blank', 'noopener,noreferrer')
       
-      const response = await fetch(sendUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          phoneNumber: employee.phoneNumber,
-          message: message
-        })
-      })
-
-      const data = await response.json()
-      
-      if (data.success) {
-        alert(`✅ הודעה נשלחה בהצלחה ל-${employee.fullName} דרך Meta WhatsApp!\n\nההודעה נשלחה אוטומטית מהמספר שלך - בלי לפתוח חלונות!`)
-      } else {
-        alert('שגיאה בשליחת ההודעה: ' + (data.error || 'Unknown error'))
-      }
+      alert(`✅ נפתח חלון WhatsApp Web ל-${employee.fullName}!\n\nפשוט לחץ "שלח" בחלון שנפתח.\n\n💡 טיפ: ודא ש-WhatsApp Web פתוח בדפדפן שלך!`)
     } catch (error) {
-      console.error('Error sending message:', error)
-      alert('שגיאה בשליחת ההודעה: ' + error.message)
-    } finally {
-      setSending(false)
+      console.error('Error opening WhatsApp link:', error)
+      alert('שגיאה בפתיחת חלון WhatsApp: ' + error.message)
     }
   }
 
@@ -381,7 +332,7 @@ export default function Notifications() {
             שליחת התראות WhatsApp
           </h1>
           <p className="text-gray-300 text-sm sm:text-base">
-            שלח הודעות אוטומטיות מהמספר שלך לעובדים עם משמרות היום
+            פתח חלונות WhatsApp Web עם הודעות מוכנות - חינם וקל! 🆓
           </p>
         </div>
 
@@ -409,78 +360,25 @@ export default function Notifications() {
           </div>
         )}
 
-        {/* WhatsApp Status */}
+        {/* WhatsApp Web Info */}
         <div className="mb-6 bg-gray-800 rounded-2xl shadow-xl p-4 sm:p-6 border border-gray-700">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold text-white flex items-center gap-2">
-              <Smartphone className="w-6 h-6 text-green-500" />
-              סטטוס WhatsApp (Meta)
-            </h2>
-            <button
-              onClick={checkWhatsAppStatus}
-              disabled={checkingStatus}
-              className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 text-sm"
-            >
-              {checkingStatus ? (
-                <>
-                  <span>בודק...</span>
-                </>
-              ) : (
-                <>
-                  <span>רענן</span>
-                </>
-              )}
-            </button>
-          </div>
-
-          <div className="space-y-4">
-            {/* Status Display */}
-            <div className="flex items-center gap-3">
-              {whatsappStatus === 'ready' ? (
-                <>
-                  <CheckCircle className="w-6 h-6 text-green-500" />
-                  <span className="text-green-400 font-semibold">✅ מוכן לשליחה אוטומטית מהמספר שלך</span>
-                </>
-              ) : whatsappStatus === 'checking' ? (
-                <>
-                  <span className="text-gray-400 font-semibold">🔄 בודק...</span>
-                </>
-              ) : (
-                <>
-                  <XCircle className="w-6 h-6 text-red-500" />
-                  <span className="text-red-400 font-semibold">❌ לא מוגדר</span>
-                </>
-              )}
+          <div className="flex items-start gap-3">
+            <div className="p-2 bg-green-600 rounded-lg">
+              <Smartphone className="w-6 h-6 text-white" />
             </div>
-
-            {/* Not Configured Message */}
-            {whatsappStatus === 'not_configured' && (
-              <div className="p-4 bg-yellow-900 rounded-xl border-2 border-yellow-600">
-                <p className="text-sm text-yellow-300 font-semibold mb-2">
-                  ⚠️ Meta WhatsApp API לא מוגדר
-                </p>
-                <p className="text-xs text-yellow-200 mb-3">
-                  כדי לשלוח הודעות אוטומטיות מהמספר שלך, צריך להגדיר את Meta WhatsApp Cloud API.
-                </p>
-                <a
-                  href="https://github.com/matan359/shift-management/blob/main/META_WHATSAPP_SETUP.md"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white rounded-lg transition text-sm font-semibold"
-                >
-                  <span>מדריך הגדרה</span>
-                </a>
-              </div>
-            )}
-
-            {/* Ready Status Info */}
-            {whatsappStatus === 'ready' && (
-              <div className="p-4 bg-green-900 rounded-xl border-2 border-green-500">
-                <p className="text-sm text-green-300 text-center font-semibold">
-                  ✅ Meta WhatsApp API מוגדר ומוכן! כעת תוכל לשלוח הודעות אוטומטיות מהמספר שלך - הכל עובד ברקע, בלי לפתוח חלונות!
+            <div className="flex-1">
+              <h2 className="text-xl font-bold text-white mb-2 flex items-center gap-2">
+                💚 WhatsApp Web - חינם וקל!
+              </h2>
+              <p className="text-sm text-gray-300 mb-2">
+                המערכת פותחת חלונות WhatsApp Web עם הודעות מוכנות. פשוט לחץ "שלח" בכל חלון!
+              </p>
+              <div className="p-3 bg-green-900 rounded-lg border border-green-600">
+                <p className="text-xs text-green-300 font-semibold">
+                  ✅ לא צריך הגדרות • לא צריך API • לא צריך תשלום • פשוט לחץ "שלח"!
                 </p>
               </div>
-            )}
+            </div>
           </div>
         </div>
 
@@ -501,7 +399,7 @@ export default function Notifications() {
               className="w-full sm:w-auto bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold py-3 px-8 rounded-xl transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg disabled:transform-none flex items-center justify-center gap-2 touch-manipulation active:scale-95"
             >
               <Send className="w-5 h-5" />
-              <span>{sending ? 'פותח חלונות...' : 'שלח הכל'}</span>
+              <span>{sending ? 'פותח חלונות...' : 'פתח הכל ב-WhatsApp'}</span>
             </button>
           </div>
         </div>
@@ -582,7 +480,7 @@ export default function Notifications() {
                       className="w-full sm:w-auto bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white text-sm py-2 px-6 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 touch-manipulation active:scale-95 shadow-md"
                     >
                       <Send className="w-4 h-4" />
-                      <span>{sending ? 'פותח...' : 'שלח הודעה'}</span>
+                      <span>{sending ? 'פותח חלון...' : 'פתח WhatsApp'}</span>
                     </button>
                   </div>
                 )
