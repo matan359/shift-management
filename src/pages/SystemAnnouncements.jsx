@@ -156,7 +156,7 @@ export default function SystemAnnouncements() {
                   <div className="flex space-x-2 space-x-reverse mr-4">
                     <button
                       onClick={() => openEditModal(announcement)}
-                      className="text-blue-600 hover:text-blue-900"
+                      className="text-green-600 hover:text-green-900"
                     >
                       <Edit className="w-4 h-4" />
                     </button>
@@ -215,7 +215,7 @@ export default function SystemAnnouncements() {
                   <div className="flex items-center space-x-2 space-x-reverse">
                     <button
                       onClick={() => openEditModal(announcement)}
-                      className="text-blue-600 hover:text-blue-900"
+                      className="text-green-600 hover:text-green-900"
                     >
                       <Edit className="w-4 h-4" />
                     </button>
