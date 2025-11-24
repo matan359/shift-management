@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
-import { Bell, Send, Clock, Smartphone, CheckCircle, XCircle } from 'lucide-react'
+import { Bell, Send, Clock, Smartphone, CheckCircle, XCircle, Loader2 } from 'lucide-react'
 import { getFirebaseDb, getAppId } from '../api/firebase'
 import { collection, query, where, getDocs } from 'firebase/firestore'
 import { format } from 'date-fns'
@@ -224,13 +224,25 @@ export default function Notifications() {
   }
 
   function formatPhoneNumber(phoneNumber) {
-    let formatted = phoneNumber.replace(/[^0-9]/g, '')
-    if (formatted.startsWith('0')) {
-      formatted = '972' + formatted.substring(1)
-    } else if (!formatted.startsWith('972')) {
-      formatted = '972' + formatted
+    // Remove all non-digits
+    let cleaned = phoneNumber.replace(/[^0-9]/g, '')
+    
+    // If starts with 0, replace with 972
+    if (cleaned.startsWith('0')) {
+      cleaned = '972' + cleaned.substring(1)
     }
-    return formatted
+    // If doesn't start with country code, add 972
+    else if (!cleaned.startsWith('972')) {
+      cleaned = '972' + cleaned
+    }
+    
+    return cleaned
+  }
+
+  function createWhatsAppLink(phoneNumber, message) {
+    const formattedPhone = formatPhoneNumber(phoneNumber)
+    const encodedMessage = encodeURIComponent(message)
+    return `https://wa.me/${formattedPhone}?text=${encodedMessage}`
   }
 
   async function sendAllNotifications() {
@@ -246,9 +258,9 @@ export default function Notifications() {
     setResults([])
 
     try {
-      // Prepare WhatsApp Web links for selected employees
-      const links = todayShifts
-        .filter(shift => selectedEmployees.has(shift.employeeId))
+      // Prepare messages only for selected employees
+      const recipients = todayShifts
+        .filter(shift => selectedEmployees.has(shift.employeeId)) // רק עובדים שנבחרו
         .map(shift => {
           const employee = employees.find(emp => emp.id === shift.employeeId)
           if (!employee || !employee.phoneNumber) {
@@ -256,37 +268,42 @@ export default function Notifications() {
           }
           
           const message = formatShiftMessage(employee, shift, tasks)
-          const formattedNumber = formatPhoneNumber(employee.phoneNumber)
-          const encodedMessage = encodeURIComponent(message)
-          const whatsappLink = `https://wa.me/${formattedNumber}?text=${encodedMessage}`
+          const whatsappLink = createWhatsAppLink(employee.phoneNumber, message)
           
           return {
-            link: whatsappLink,
+            phoneNumber: employee.phoneNumber,
+            message: message,
             employeeName: employee.fullName,
-            phoneNumber: formattedNumber,
-            success: true
+            link: whatsappLink
           }
         }).filter(r => r !== null)
 
-      if (links.length === 0) {
+      if (recipients.length === 0) {
         alert('אין עובדים עם מספרי טלפון למשמרות היום')
         setSending(false)
         return
       }
 
-      // Open all WhatsApp Web links
-      links.forEach((link, index) => {
+      // Open WhatsApp Web links - FREE and EASY!
+      // Open each link with a small delay to avoid popup blockers
+      recipients.forEach((recipient, index) => {
         setTimeout(() => {
-          window.open(link.link, '_blank', 'noopener,noreferrer')
-        }, index * 500) // Delay of 500ms between each window
+          window.open(recipient.link, '_blank', 'noopener,noreferrer')
+        }, index * 500) // 500ms delay between each
       })
 
-      setResults(links)
-      
-      alert(`✅ נפתחו ${links.length} חלונות WhatsApp Web!\n\nפשוט לחץ "שלח" בכל חלון.\n\n💡 טיפ: ודא ש-WhatsApp Web פתוח בדפדפן שלך!`)
+      // Mark as sent
+      setResults(recipients.map(r => ({
+        phoneNumber: r.phoneNumber,
+        success: true,
+        employeeName: r.employeeName,
+        sent: true
+      })))
+
+      alert(`✅ נפתחו ${recipients.length} חלונות WhatsApp!\n\nפשוט לחץ "שלח" בכל חלון. זה חינם לחלוטין - לא צריך שום הגדרה!`)
     } catch (error) {
       console.error('Error opening WhatsApp links:', error)
-      alert('שגיאה בפתיחת חלונות WhatsApp: ' + error.message)
+      alert('שגיאה בפתיחת קישורי WhatsApp: ' + error.message)
     } finally {
       setSending(false)
     }
@@ -303,17 +320,15 @@ export default function Notifications() {
 
     try {
       const message = formatShiftMessage(employee, shift, tasks)
-      const formattedNumber = formatPhoneNumber(employee.phoneNumber)
-      const encodedMessage = encodeURIComponent(message)
-      const whatsappLink = `https://wa.me/${formattedNumber}?text=${encodedMessage}`
+      const whatsappLink = createWhatsAppLink(employee.phoneNumber, message)
       
-      // Open WhatsApp Web link
+      // Open WhatsApp Web link - FREE and EASY!
       window.open(whatsappLink, '_blank', 'noopener,noreferrer')
       
-      alert(`✅ נפתח חלון WhatsApp Web ל-${employee.fullName}!\n\nפשוט לחץ "שלח" בחלון שנפתח.\n\n💡 טיפ: ודא ש-WhatsApp Web פתוח בדפדפן שלך!`)
+      alert(`✅ נפתח חלון WhatsApp ל-${employee.fullName}!\n\nפשוט לחץ "שלח" - זה חינם לחלוטין!`)
     } catch (error) {
       console.error('Error opening WhatsApp link:', error)
-      alert('שגיאה בפתיחת חלון WhatsApp: ' + error.message)
+      alert('שגיאה בפתיחת קישור WhatsApp: ' + error.message)
     }
   }
 
@@ -332,52 +347,24 @@ export default function Notifications() {
             שליחת התראות WhatsApp
           </h1>
           <p className="text-gray-300 text-sm sm:text-base">
-            פתח חלונות WhatsApp Web עם הודעות מוכנות - חינם וקל! 🆓
+            שלח הודעות דרך WhatsApp Web - חינם לחלוטין, בלי שום הגדרה!
           </p>
         </div>
 
-        {/* Saved Links from Auto-Send */}
-        {showSavedLinks && savedLinks.length > 0 && (
-          <div className="mb-6 bg-gradient-to-r from-gray-800 to-gray-800 border-2 border-green-500 rounded-xl p-4 sm:p-6">
-            <div className="flex items-start gap-3">
-              <Bell className="w-8 h-8 text-green-500 flex-shrink-0 mt-1" />
-              <div className="flex-1">
-                <h2 className="text-xl font-bold text-green-400 mb-2 flex items-center gap-2">
-                  <span>📱 קישורי WhatsApp מוכנים משליחה אוטומטית!</span>
-                </h2>
-                <p className="text-sm text-gray-300 mb-4">
-                  נשמרו {savedLinks.length} קישורי WhatsApp משליחה אוטומטית היום. לחץ על הכפתור למטה כדי לפתוח אותם.
-                </p>
-                <button
-                  onClick={openSavedLinks}
-                  className="w-full sm:w-auto bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-bold py-3 px-8 rounded-xl transition-all duration-200 transform hover:scale-105 shadow-lg flex items-center justify-center gap-2 touch-manipulation active:scale-95"
-                >
-                  <Send className="w-5 h-5" />
-                  <span>פתח {savedLinks.length} חלונות WhatsApp</span>
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* WhatsApp Web Info */}
-        <div className="mb-6 bg-gray-800 rounded-2xl shadow-xl p-4 sm:p-6 border border-gray-700">
+        {/* Info Box */}
+        <div className="mb-6 bg-gradient-to-r from-green-900 to-green-800 border-2 border-green-500 rounded-xl p-4 sm:p-6">
           <div className="flex items-start gap-3">
-            <div className="p-2 bg-green-600 rounded-lg">
-              <Smartphone className="w-6 h-6 text-white" />
-            </div>
+            <CheckCircle className="w-8 h-8 text-green-400 flex-shrink-0 mt-1" />
             <div className="flex-1">
-              <h2 className="text-xl font-bold text-white mb-2 flex items-center gap-2">
-                💚 WhatsApp Web - חינם וקל!
+              <h2 className="text-xl font-bold text-green-300 mb-2 flex items-center gap-2">
+                <span>✅ מערכת חינמית ופשוטה!</span>
               </h2>
-              <p className="text-sm text-gray-300 mb-2">
-                המערכת פותחת חלונות WhatsApp Web עם הודעות מוכנות. פשוט לחץ "שלח" בכל חלון!
+              <p className="text-sm text-green-200 mb-2">
+                המערכת פותחת חלונות WhatsApp Web עם ההודעות מוכנות. פשוט לחץ "שלח" בכל חלון.
               </p>
-              <div className="p-3 bg-green-900 rounded-lg border border-green-600">
-                <p className="text-xs text-green-300 font-semibold">
-                  ✅ לא צריך הגדרות • לא צריך API • לא צריך תשלום • פשוט לחץ "שלח"!
-                </p>
-              </div>
+              <p className="text-xs text-green-300 font-semibold">
+                💰 חינם לחלוטין • 🚀 לא צריך שום הגדרה • ⚡ פשוט וקל!
+              </p>
             </div>
           </div>
         </div>
@@ -480,7 +467,7 @@ export default function Notifications() {
                       className="w-full sm:w-auto bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white text-sm py-2 px-6 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 touch-manipulation active:scale-95 shadow-md"
                     >
                       <Send className="w-4 h-4" />
-                      <span>{sending ? 'פותח חלון...' : 'פתח WhatsApp'}</span>
+                      <span>{sending ? 'פותח...' : 'פתח WhatsApp'}</span>
                     </button>
                   </div>
                 )
