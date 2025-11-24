@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
-import { Bell, Send, Clock, Smartphone, CheckCircle, XCircle, Loader2 } from 'lucide-react'
+import { Bell, Send, Clock, Smartphone, CheckCircle, XCircle, Loader2, Calendar, ListChecks } from 'lucide-react'
 import { getFirebaseDb, getAppId } from '../api/firebase'
 import { collection, query, where, getDocs } from 'firebase/firestore'
-import { format } from 'date-fns'
+import { format, startOfWeek, endOfWeek, addWeeks, isWithinInterval, parseISO } from 'date-fns'
 import { he } from 'date-fns/locale'
 
 export default function Notifications() {
@@ -18,6 +18,8 @@ export default function Notifications() {
   const [autoSendTime, setAutoSendTime] = useState('07:00') // שעת שליחה אוטומטית
   const [savedLinks, setSavedLinks] = useState([]) // קישורים שנשמרו משליחה אוטומטית
   const [showSavedLinks, setShowSavedLinks] = useState(false) // האם להציג קישורים שנשמרו
+  const [nextWeekShifts, setNextWeekShifts] = useState([]) // משמרות השבוע הבא
+  const [sendingTasks, setSendingTasks] = useState(false) // מצב שליחת משימות
   
   useEffect(() => {
     if (!db || !user) return
@@ -27,6 +29,7 @@ export default function Notifications() {
     loadTodayTasks()
     loadAutoSendSettings()
     loadSavedLinks()
+    loadNextWeekShifts()
   }, [db, user])
 
   async function loadSavedLinks() {
@@ -195,6 +198,36 @@ export default function Notifications() {
     }
   }
 
+  async function loadNextWeekShifts() {
+    if (!db || !user) return
+
+    try {
+      const dbInstance = db || getFirebaseDb()
+      const appId = getAppId()
+      const userId = user.uid
+
+      // Calculate next week
+      const now = new Date()
+      const nextWeekStart = startOfWeek(addWeeks(now, 1), { locale: he })
+      const nextWeekEnd = endOfWeek(addWeeks(now, 1), { locale: he })
+
+      const shiftsRef = collection(dbInstance, `artifacts/${appId}/users/${userId}/assignedShifts`)
+      const snapshot = await getDocs(shiftsRef)
+
+      const shiftsData = snapshot.docs
+        .map(doc => ({ id: doc.id, ...doc.data() }))
+        .filter(shift => {
+          const shiftDate = parseISO(shift.date)
+          return isWithinInterval(shiftDate, { start: nextWeekStart, end: nextWeekEnd })
+        })
+        .sort((a, b) => a.date.localeCompare(b.date))
+
+      setNextWeekShifts(shiftsData)
+    } catch (error) {
+      console.error('Error loading next week shifts:', error)
+    }
+  }
+
   function formatShiftMessage(employee, shift, tasks) {
     const shiftDate = new Date(shift.date).toLocaleDateString('he-IL', {
       weekday: 'long',
@@ -220,6 +253,57 @@ export default function Notifications() {
     }
 
     message += `\nיום נעים!`
+    return message
+  }
+
+  function formatWeeklyShiftsMessage(employee, shifts) {
+    let message = `שלום ${employee.fullName},\n\n`
+    message += `📅 המשמרות שלך השבוע הבא:\n\n`
+
+    // Group shifts by day
+    const shiftsByDay = {}
+    shifts.forEach(shift => {
+      const date = shift.date
+      if (!shiftsByDay[date]) {
+        shiftsByDay[date] = []
+      }
+      shiftsByDay[date].push(shift)
+    })
+
+    // Sort days
+    const sortedDays = Object.keys(shiftsByDay).sort()
+
+    sortedDays.forEach(date => {
+      const dayShifts = shiftsByDay[date]
+      const shiftDate = new Date(date).toLocaleDateString('he-IL', {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long'
+      })
+      
+      message += `📆 ${shiftDate}:\n`
+      dayShifts.forEach(shift => {
+        message += `   • ${shift.shiftType} - ${shift.startTime} עד ${shift.endTime}\n`
+      })
+      message += `\n`
+    })
+
+    message += `יום נעים!`
+    return message
+  }
+
+  function formatTasksMessage(tasks) {
+    let message = `📋 משימות היום:\n\n`
+
+    tasks.forEach((task, index) => {
+      message += `${index + 1}. ${task.title}\n`
+      if (task.description) {
+        message += `   ${task.description}\n`
+      }
+      message += `\n`
+    })
+
+    message += `יום נעים!`
     return message
   }
 
@@ -337,6 +421,142 @@ export default function Notifications() {
     return employee?.fullName || 'לא ידוע'
   }
 
+  async function sendWeeklyShifts() {
+    if (!db || !user) return
+
+    if (nextWeekShifts.length === 0) {
+      alert('אין משמרות לשבוע הבא')
+      return
+    }
+
+    setSending(true)
+    setResults([])
+
+    try {
+      // Group shifts by employee
+      const shiftsByEmployee = {}
+      nextWeekShifts.forEach(shift => {
+        if (!shiftsByEmployee[shift.employeeId]) {
+          shiftsByEmployee[shift.employeeId] = []
+        }
+        shiftsByEmployee[shift.employeeId].push(shift)
+      })
+
+      const recipients = Object.keys(shiftsByEmployee)
+        .map(employeeId => {
+          const employee = employees.find(emp => emp.id === employeeId)
+          if (!employee || !employee.phoneNumber) {
+            return null
+          }
+
+          const employeeShifts = shiftsByEmployee[employeeId]
+          const message = formatWeeklyShiftsMessage(employee, employeeShifts)
+          const whatsappLink = createWhatsAppLink(employee.phoneNumber, message)
+
+          return {
+            phoneNumber: employee.phoneNumber,
+            message: message,
+            employeeName: employee.fullName,
+            link: whatsappLink,
+            shiftCount: employeeShifts.length
+          }
+        })
+        .filter(r => r !== null)
+
+      if (recipients.length === 0) {
+        alert('אין עובדים עם מספרי טלפון למשמרות השבוע הבא')
+        setSending(false)
+        return
+      }
+
+      // Open WhatsApp Web links
+      recipients.forEach((recipient, index) => {
+        setTimeout(() => {
+          window.open(recipient.link, '_blank', 'noopener,noreferrer')
+        }, index * 500)
+      })
+
+      setResults(recipients.map(r => ({
+        phoneNumber: r.phoneNumber,
+        success: true,
+        employeeName: r.employeeName,
+        sent: true,
+        shiftCount: r.shiftCount
+      })))
+
+      alert(`✅ נפתחו ${recipients.length} חלונות WhatsApp עם כל המשמרות של השבוע הבא!\n\nפשוט לחץ "שלח" בכל חלון.`)
+    } catch (error) {
+      console.error('Error opening WhatsApp links:', error)
+      alert('שגיאה בפתיחת קישורי WhatsApp: ' + error.message)
+    } finally {
+      setSending(false)
+    }
+  }
+
+  async function sendTasksOnly() {
+    if (!db || !user) return
+
+    if (tasks.length === 0) {
+      alert('אין משימות היום')
+      return
+    }
+
+    setSendingTasks(true)
+
+    try {
+      // Get all employees with shifts today
+      const employeesWithShifts = new Set()
+      todayShifts.forEach(shift => {
+        employeesWithShifts.add(shift.employeeId)
+      })
+
+      if (employeesWithShifts.size === 0) {
+        alert('אין עובדים עם משמרות היום')
+        setSendingTasks(false)
+        return
+      }
+
+      const recipients = Array.from(employeesWithShifts)
+        .map(employeeId => {
+          const employee = employees.find(emp => emp.id === employeeId)
+          if (!employee || !employee.phoneNumber) {
+            return null
+          }
+
+          const message = formatTasksMessage(tasks)
+          const whatsappLink = createWhatsAppLink(employee.phoneNumber, message)
+
+          return {
+            phoneNumber: employee.phoneNumber,
+            message: message,
+            employeeName: employee.fullName,
+            link: whatsappLink
+          }
+        })
+        .filter(r => r !== null)
+
+      if (recipients.length === 0) {
+        alert('אין עובדים עם מספרי טלפון')
+        setSendingTasks(false)
+        return
+      }
+
+      // Open WhatsApp Web links
+      recipients.forEach((recipient, index) => {
+        setTimeout(() => {
+          window.open(recipient.link, '_blank', 'noopener,noreferrer')
+        }, index * 500)
+      })
+
+      alert(`✅ נפתחו ${recipients.length} חלונות WhatsApp עם משימות היום!\n\nפשוט לחץ "שלח" בכל חלון.`)
+    } catch (error) {
+      console.error('Error opening WhatsApp links:', error)
+      alert('שגיאה בפתיחת קישורי WhatsApp: ' + error.message)
+    } finally {
+      setSendingTasks(false)
+    }
+  }
+
   return (
     <div className="min-h-screen p-2 sm:p-4 md:p-8">
       <div className="max-w-6xl mx-auto">
@@ -369,11 +589,39 @@ export default function Notifications() {
           </div>
         </div>
 
-        {/* Send All Button */}
+        {/* Weekly Shifts Button - Send all next week shifts */}
+        <div className="mb-6 glass-effect rounded-2xl shadow-glow p-4 sm:p-6 border-2 border-green-300 bg-green-50">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div>
+              <h2 className="text-xl font-bold text-green-700 mb-1 flex items-center gap-2">
+                <Calendar className="w-6 h-6" />
+                שלח כל המשמרות של השבוע הבא
+              </h2>
+              <p className="text-sm text-gray-600 font-medium">
+                {nextWeekShifts.length > 0 
+                  ? `${nextWeekShifts.length} משמרות בשבוע הבא` 
+                  : 'אין משמרות לשבוע הבא'}
+              </p>
+              <p className="text-xs text-green-700 font-semibold mt-1">
+                💡 מומלץ לשלוח במוצאי שבת - כל עובד יקבל את כל המשמרות שלו לשבוע הבא
+              </p>
+            </div>
+            <button
+              onClick={sendWeeklyShifts}
+              disabled={sending || nextWeekShifts.length === 0}
+              className="w-full sm:w-auto bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-bold py-3 px-8 rounded-xl transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg disabled:transform-none flex items-center justify-center gap-2 touch-manipulation active:scale-95"
+            >
+              <Send className="w-5 h-5" />
+              <span>{sending ? 'פותח חלונות...' : 'שלח כל המשמרות'}</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Send All Button - Today's shifts */}
         <div className="mb-6 glass-effect rounded-2xl shadow-glow p-4 sm:p-6">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
-              <h2 className="text-xl font-bold text-green-700 mb-1">שלח הודעות לכל העובדים</h2>
+              <h2 className="text-xl font-bold text-green-700 mb-1">שלח הודעות לכל העובדים - משמרות היום</h2>
               <p className="text-sm text-gray-600 font-medium">
                 {todayShifts.length > 0 
                   ? `${todayShifts.length} משמרות היום` 
@@ -497,10 +745,28 @@ export default function Notifications() {
           </div>
         )}
 
-        {/* Today's Tasks */}
+        {/* Today's Tasks - Separate section for sending */}
         {tasks.length > 0 && (
-          <div className="glass-effect rounded-2xl shadow-glow p-4 sm:p-6">
-            <h2 className="text-xl font-bold text-green-700 mb-4">משימות היום</h2>
+          <div className="glass-effect rounded-2xl shadow-glow p-4 sm:p-6 border-2 border-green-300 bg-green-50">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4">
+              <div>
+                <h2 className="text-xl font-bold text-green-700 mb-1 flex items-center gap-2">
+                  <ListChecks className="w-6 h-6" />
+                  משימות היום
+                </h2>
+                <p className="text-sm text-gray-600 font-medium">
+                  {tasks.length} משימות היום
+                </p>
+              </div>
+              <button
+                onClick={sendTasksOnly}
+                disabled={sendingTasks || tasks.length === 0}
+                className="w-full sm:w-auto bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-bold py-3 px-8 rounded-xl transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg disabled:transform-none flex items-center justify-center gap-2 touch-manipulation active:scale-95"
+              >
+                <Send className="w-5 h-5" />
+                <span>{sendingTasks ? 'פותח חלונות...' : 'שלח משימות בלבד'}</span>
+              </button>
+            </div>
             <div className="space-y-2">
               {tasks.map((task) => (
                 <div key={task.id} className="border-2 border-gray-200 rounded-lg p-3 bg-white">
