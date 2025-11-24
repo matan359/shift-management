@@ -671,7 +671,7 @@ export default function Notifications() {
             <p className="text-gray-500 text-center py-8">אין משמרות היום</p>
           ) : (
             <div className="space-y-3">
-              {todayShifts.map((shift) => {
+              {todayShifts.map((shift, index) => {
                 const employee = employees.find(emp => emp.id === shift.employeeId)
                 const isSelected = selectedEmployees.has(shift.employeeId)
                 
