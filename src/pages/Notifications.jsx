@@ -338,31 +338,31 @@ export default function Notifications() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black p-2 sm:p-4 md:p-8">
+    <div className="min-h-screen p-2 sm:p-4 md:p-8">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <div className="mb-6 bg-gray-800 rounded-2xl shadow-xl p-4 sm:p-6 border border-gray-700">
-          <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2 flex items-center gap-3">
-            <Bell className="w-8 h-8 text-green-500" />
+        <div className="mb-6 glass-effect rounded-2xl shadow-glow p-4 sm:p-6">
+          <h1 className="text-2xl sm:text-3xl font-bold text-green-700 mb-2 flex items-center gap-3">
+            <Bell className="w-8 h-8 text-green-600" />
             שליחת התראות WhatsApp
           </h1>
-          <p className="text-gray-300 text-sm sm:text-base">
+          <p className="text-gray-600 text-sm sm:text-base font-medium">
             שלח הודעות דרך WhatsApp Web - חינם לחלוטין, בלי שום הגדרה!
           </p>
         </div>
 
         {/* Info Box */}
-        <div className="mb-6 bg-gradient-to-r from-green-900 to-green-800 border-2 border-green-500 rounded-xl p-4 sm:p-6">
+        <div className="mb-6 glass-effect rounded-2xl shadow-glow p-4 sm:p-6 border-2 border-green-300 bg-green-50">
           <div className="flex items-start gap-3">
-            <CheckCircle className="w-8 h-8 text-green-400 flex-shrink-0 mt-1" />
+            <CheckCircle className="w-8 h-8 text-green-600 flex-shrink-0 mt-1" />
             <div className="flex-1">
-              <h2 className="text-xl font-bold text-green-300 mb-2 flex items-center gap-2">
+              <h2 className="text-xl font-bold text-green-700 mb-2 flex items-center gap-2">
                 <span>✅ מערכת חינמית ופשוטה!</span>
               </h2>
-              <p className="text-sm text-green-200 mb-2">
+              <p className="text-sm text-gray-700 mb-2 font-medium">
                 המערכת פותחת חלונות WhatsApp Web עם ההודעות מוכנות. פשוט לחץ "שלח" בכל חלון.
               </p>
-              <p className="text-xs text-green-300 font-semibold">
+              <p className="text-xs text-green-700 font-semibold">
                 💰 חינם לחלוטין • 🚀 לא צריך שום הגדרה • ⚡ פשוט וקל!
               </p>
             </div>
@@ -370,11 +370,11 @@ export default function Notifications() {
         </div>
 
         {/* Send All Button */}
-        <div className="mb-6 bg-gray-800 rounded-2xl shadow-xl p-4 sm:p-6 border border-gray-700">
+        <div className="mb-6 glass-effect rounded-2xl shadow-glow p-4 sm:p-6">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
-              <h2 className="text-xl font-bold text-white mb-1">שלח הודעות לכל העובדים</h2>
-              <p className="text-sm text-gray-300">
+              <h2 className="text-xl font-bold text-green-700 mb-1">שלח הודעות לכל העובדים</h2>
+              <p className="text-sm text-gray-600 font-medium">
                 {todayShifts.length > 0 
                   ? `${todayShifts.length} משמרות היום` 
                   : 'אין משמרות היום'}
@@ -383,7 +383,7 @@ export default function Notifications() {
             <button
               onClick={sendAllNotifications}
               disabled={sending || todayShifts.length === 0}
-              className="w-full sm:w-auto bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold py-3 px-8 rounded-xl transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg disabled:transform-none flex items-center justify-center gap-2 touch-manipulation active:scale-95"
+              className="w-full sm:w-auto bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-bold py-3 px-8 rounded-xl transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg disabled:transform-none flex items-center justify-center gap-2 touch-manipulation active:scale-95"
             >
               <Send className="w-5 h-5" />
               <span>{sending ? 'פותח חלונות...' : 'פתח הכל ב-WhatsApp'}</span>
@@ -392,10 +392,10 @@ export default function Notifications() {
         </div>
 
         {/* Today's Shifts with Selection */}
-        <div className="mb-6 bg-gray-800 rounded-2xl shadow-xl p-4 sm:p-6 border border-gray-700">
+        <div className="mb-6 glass-effect rounded-2xl shadow-glow p-4 sm:p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold text-white flex items-center gap-2">
-              <Clock className="w-6 h-6 text-green-500" />
+            <h2 className="text-xl font-bold text-green-700 flex items-center gap-2">
+              <Clock className="w-6 h-6 text-green-600" />
               משמרות היום ({format(new Date(), 'dd/MM/yyyy', { locale: he })})
             </h2>
             {todayShifts.length > 0 && (
@@ -420,7 +420,7 @@ export default function Notifications() {
           </div>
           
           {todayShifts.length === 0 ? (
-            <p className="text-gray-400 text-center py-8">אין משמרות היום</p>
+            <p className="text-gray-500 text-center py-8">אין משמרות היום</p>
           ) : (
             <div className="space-y-3">
               {todayShifts.map((shift) => {
@@ -432,8 +432,8 @@ export default function Notifications() {
                     key={shift.id} 
                     className={`border-2 rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 transition-all ${
                       isSelected 
-                        ? 'border-green-500 bg-gray-700' 
-                        : 'border-gray-600 bg-gray-800'
+                        ? 'border-green-500 bg-green-50' 
+                        : 'border-gray-200 bg-white'
                     }`}
                   >
                     <div className="flex items-center gap-3 flex-1">
@@ -449,15 +449,15 @@ export default function Notifications() {
                           }
                           setSelectedEmployees(newSet)
                         }}
-                        className="w-5 h-5 text-green-500 border-gray-500 rounded focus:ring-green-500 cursor-pointer bg-gray-700"
+                        className="w-5 h-5 text-green-600 border-gray-300 rounded focus:ring-green-500 cursor-pointer"
                       />
                       <div className="flex-1">
-                        <p className="font-bold text-white text-lg">{getEmployeeName(shift.employeeId)}</p>
-                        <p className="text-sm text-gray-300">
+                        <p className="font-bold text-gray-800 text-lg">{getEmployeeName(shift.employeeId)}</p>
+                        <p className="text-sm text-gray-600">
                           {shift.shiftType} - {shift.startTime} עד {shift.endTime}
                         </p>
                         {employee && !employee.phoneNumber && (
-                          <p className="text-xs text-red-400 mt-1">⚠ אין מספר טלפון</p>
+                          <p className="text-xs text-red-600 mt-1">⚠ אין מספר טלפון</p>
                         )}
                       </div>
                     </div>
@@ -478,17 +478,17 @@ export default function Notifications() {
 
         {/* Results */}
         {results.length > 0 && (
-          <div className="mb-6 bg-gray-800 rounded-2xl shadow-xl p-4 sm:p-6 border border-gray-700">
-            <h2 className="text-xl font-bold text-white mb-4">תוצאות שליחה</h2>
+          <div className="mb-6 glass-effect rounded-2xl shadow-glow p-4 sm:p-6">
+            <h2 className="text-xl font-bold text-green-700 mb-4">תוצאות שליחה</h2>
             <div className="space-y-2">
               {results.map((result, index) => (
-                <div key={index} className="flex items-center gap-3 p-3 bg-gray-700 rounded-lg">
+                <div key={index} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
                   {result.success ? (
-                    <CheckCircle className="w-6 h-6 text-green-500 flex-shrink-0" />
+                    <CheckCircle className="w-6 h-6 text-green-600 flex-shrink-0" />
                   ) : (
-                    <XCircle className="w-6 h-6 text-red-500 flex-shrink-0" />
+                    <XCircle className="w-6 h-6 text-red-600 flex-shrink-0" />
                   )}
-                  <span className={`text-sm font-medium ${result.success ? 'text-green-400' : 'text-red-400'}`}>
+                  <span className={`text-sm font-medium ${result.success ? 'text-green-700' : 'text-red-700'}`}>
                     {result.employeeName || 'עובד'}: {result.success ? 'נשלח בהצלחה ✅' : `נכשל ❌ ${result.error || ''}`}
                   </span>
                 </div>
@@ -499,14 +499,14 @@ export default function Notifications() {
 
         {/* Today's Tasks */}
         {tasks.length > 0 && (
-          <div className="bg-gray-800 rounded-2xl shadow-xl p-4 sm:p-6 border border-gray-700">
-            <h2 className="text-xl font-bold text-white mb-4">משימות היום</h2>
+          <div className="glass-effect rounded-2xl shadow-glow p-4 sm:p-6">
+            <h2 className="text-xl font-bold text-green-700 mb-4">משימות היום</h2>
             <div className="space-y-2">
               {tasks.map((task) => (
-                <div key={task.id} className="border-2 border-gray-600 rounded-lg p-3 bg-gray-700">
-                  <p className="font-semibold text-white">{task.title}</p>
+                <div key={task.id} className="border-2 border-gray-200 rounded-lg p-3 bg-white">
+                  <p className="font-semibold text-gray-800">{task.title}</p>
                   {task.description && (
-                    <p className="text-sm text-gray-300">{task.description}</p>
+                    <p className="text-sm text-gray-600">{task.description}</p>
                   )}
                 </div>
               ))}
