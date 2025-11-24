@@ -17,14 +17,15 @@ import ShiftNotes from './pages/ShiftNotes'
 import AdvancedDashboard from './pages/AdvancedDashboard'
 import AttendanceTracking from './pages/AttendanceTracking'
 import Layout from './components/Layout'
+import LoadingSpinner from './components/LoadingSpinner'
 
 function PrivateRoute({ children, requiredRole }) {
   const { user, loading } = useAuth()
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-xl">טוען...</div>
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-green-50 via-green-50 to-white">
+        <LoadingSpinner size="lg" text="טוען..." />
       </div>
     )
   }
@@ -46,10 +47,9 @@ function AppRoutes() {
   // Show loading only for a short time, then show login if no user
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-50">
-        <div className="text-center">
-          <div className="text-xl mb-2">טוען...</div>
-          <div className="text-sm text-gray-500">מתחבר ל-Firebase</div>
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-green-50 via-green-50 to-white">
+        <div className="glass-effect rounded-2xl shadow-glow p-8 flex flex-col items-center gap-4">
+          <LoadingSpinner size="xl" text="מתחבר ל-Firebase..." />
         </div>
       </div>
     )
