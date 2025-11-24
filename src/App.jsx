@@ -189,6 +189,14 @@ function AppRoutes() {
           </Layout>
         </PrivateRoute>
       } />
+
+      <Route path="/calendar" element={
+        <PrivateRoute>
+          <Layout>
+            <CalendarView />
+          </Layout>
+        </PrivateRoute>
+      } />
     </Routes>
   )
 }

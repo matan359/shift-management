@@ -35,6 +35,8 @@ export default function Layout({ children }) {
 
             {/* Desktop Menu */}
             <div className="hidden md:flex items-center space-x-6 space-x-reverse">
+              <GlobalSearch />
+              <DarkModeToggle />
               {isManager && (
                 <>
                   <Link to="/advanced-dashboard" className="text-white hover:text-green-200 transition font-semibold drop-shadow-md">
