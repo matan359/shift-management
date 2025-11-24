@@ -112,7 +112,7 @@ export default function ManageTasks() {
         </div>
         <button
           onClick={openAddModal}
-          className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg transition flex items-center space-x-2 space-x-reverse"
+          className="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-6 rounded-lg transition flex items-center space-x-2 space-x-reverse"
         >
           <Plus className="w-5 h-5" />
           <span>הוסף משימה</span>
@@ -127,7 +127,7 @@ export default function ManageTasks() {
               <div className="flex space-x-2 space-x-reverse">
                 <button
                   onClick={() => openEditModal(task)}
-                  className="text-blue-600 hover:text-blue-900"
+                  className="text-green-600 hover:text-green-900"
                 >
                   <Edit className="w-4 h-4" />
                 </button>
@@ -208,7 +208,7 @@ export default function ManageTasks() {
               <div className="flex space-x-4 space-x-reverse">
                 <button
                   type="submit"
-                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition"
+                  className="flex-1 bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg transition"
                 >
                   <Save className="w-4 h-4 inline ml-2" />
                   שמור

@@ -179,7 +179,7 @@ export default function ManageEmployees() {
         </div>
         <button
           onClick={openAddModal}
-          className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg transition flex items-center space-x-2 space-x-reverse"
+          className="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-6 rounded-lg transition flex items-center space-x-2 space-x-reverse"
         >
           <Plus className="w-5 h-5" />
           <span>הוסף עובד</span>
@@ -209,7 +209,7 @@ export default function ManageEmployees() {
                 <td className="px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm text-gray-600">{employee.phoneNumber || '-'}</td>
                 <td className="px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm text-gray-600">
                   <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
-                    employee.role === 'manager' ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'
+                    employee.role === 'manager' ? 'bg-green-100 text-green-800' : 'bg-green-100 text-green-800'
                   }`}>
                     {employee.role === 'manager' ? 'מנהל' : 'עובד'}
                   </span>
@@ -228,7 +228,7 @@ export default function ManageEmployees() {
                   <div className="flex items-center space-x-2 space-x-reverse">
                     <button
                       onClick={() => openEditModal(employee)}
-                      className="text-blue-600 hover:text-blue-900 touch-manipulation p-1 active:scale-95"
+                      className="text-green-600 hover:text-green-900 touch-manipulation p-1 active:scale-95"
                     >
                       <Edit className="w-4 h-4 sm:w-5 sm:h-5" />
                     </button>
@@ -380,7 +380,7 @@ export default function ManageEmployees() {
               <div className="flex space-x-4 space-x-reverse">
                 <button
                   type="submit"
-                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition"
+                  className="flex-1 bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg transition"
                 >
                   <Save className="w-4 h-4 inline ml-2" />
                   שמור

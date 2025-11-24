@@ -385,12 +385,12 @@ export default function Notifications() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-2 sm:p-4 md:p-8">
+    <div className="min-h-screen bg-gradient-to-br from-green-50 via-green-50 to-white p-2 sm:p-4 md:p-8">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="mb-6 bg-white rounded-2xl shadow-xl p-4 sm:p-6">
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-2 flex items-center gap-3">
-            <Bell className="w-8 h-8 text-blue-600" />
+            <Bell className="w-8 h-8 text-green-600" />
             שליחת התראות WhatsApp
           </h1>
           <p className="text-gray-600 text-sm sm:text-base">
@@ -400,19 +400,19 @@ export default function Notifications() {
 
         {/* Saved Links from Auto-Send */}
         {showSavedLinks && savedLinks.length > 0 && (
-          <div className="mb-6 bg-gradient-to-r from-purple-50 to-pink-50 border-2 border-purple-300 rounded-xl p-4 sm:p-6">
+          <div className="mb-6 bg-gradient-to-r from-green-50 to-green-50 border-2 border-green-300 rounded-xl p-4 sm:p-6">
             <div className="flex items-start gap-3">
-              <Bell className="w-8 h-8 text-purple-600 flex-shrink-0 mt-1" />
+              <Bell className="w-8 h-8 text-green-600 flex-shrink-0 mt-1" />
               <div className="flex-1">
-                <h2 className="text-xl font-bold text-purple-800 mb-2 flex items-center gap-2">
+                <h2 className="text-xl font-bold text-green-800 mb-2 flex items-center gap-2">
                   <span>📱 קישורי WhatsApp מוכנים משליחה אוטומטית!</span>
                 </h2>
-                <p className="text-sm text-purple-700 mb-4">
+                <p className="text-sm text-green-700 mb-4">
                   נשמרו {savedLinks.length} קישורי WhatsApp משליחה אוטומטית היום. לחץ על הכפתור למטה כדי לפתוח אותם.
                 </p>
                 <button
                   onClick={openSavedLinks}
-                  className="w-full sm:w-auto bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white font-bold py-3 px-8 rounded-xl transition-all duration-200 transform hover:scale-105 shadow-lg flex items-center justify-center gap-2 touch-manipulation active:scale-95"
+                  className="w-full sm:w-auto bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-bold py-3 px-8 rounded-xl transition-all duration-200 transform hover:scale-105 shadow-lg flex items-center justify-center gap-2 touch-manipulation active:scale-95"
                 >
                   <Send className="w-5 h-5" />
                   <span>פתח {savedLinks.length} חלונות WhatsApp</span>
@@ -432,7 +432,7 @@ export default function Notifications() {
             <button
               onClick={checkWhatsAppStatus}
               disabled={checkingStatus}
-              className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 text-sm"
+              className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 text-sm"
             >
               {checkingStatus ? (
                 <>
@@ -523,7 +523,7 @@ export default function Notifications() {
         <div className="mb-6 bg-white rounded-2xl shadow-xl p-4 sm:p-6">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-              <Clock className="w-6 h-6 text-blue-600" />
+              <Clock className="w-6 h-6 text-green-600" />
               משמרות היום ({format(new Date(), 'dd/MM/yyyy', { locale: he })})
             </h2>
             {todayShifts.length > 0 && (
@@ -533,7 +533,7 @@ export default function Notifications() {
                     const allIds = new Set(todayShifts.map(s => s.employeeId))
                     setSelectedEmployees(allIds)
                   }}
-                  className="text-xs px-3 py-1 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-lg transition"
+                  className="text-xs px-3 py-1 bg-green-100 hover:bg-green-200 text-green-700 rounded-lg transition"
                 >
                   בחר הכל
                 </button>
@@ -592,7 +592,7 @@ export default function Notifications() {
                     <button
                       onClick={() => sendToEmployee(shift)}
                       disabled={sending || !employee?.phoneNumber}
-                      className="w-full sm:w-auto bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white text-sm py-2 px-6 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 touch-manipulation active:scale-95 shadow-md"
+                      className="w-full sm:w-auto bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white text-sm py-2 px-6 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 touch-manipulation active:scale-95 shadow-md"
                     >
                       <Send className="w-4 h-4" />
                       <span>{sending ? 'פותח...' : 'שלח הודעה'}</span>
